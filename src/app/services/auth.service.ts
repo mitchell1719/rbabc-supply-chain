@@ -48,6 +48,10 @@ function describeAuthError(error: unknown): string {
       return 'Too many attempts. Please wait a moment and try again.';
     case 'auth/network-request-failed':
       return 'Network error. Check your connection and try again.';
+    case 'auth/operation-not-allowed':
+      return 'Email/password sign-in is not enabled for this project. In the Firebase Console, go to Authentication → Sign-in method and enable the Email/Password provider.';
+    case 'auth/configuration-not-found':
+      return 'Firebase Authentication has not been set up for this project yet. In the Firebase Console, open Authentication, click Get Started, then enable the Email/Password sign-in provider.';
     default:
       return error instanceof Error ? error.message : 'Authentication failed. Please try again.';
   }
