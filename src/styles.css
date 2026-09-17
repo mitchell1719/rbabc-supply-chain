@@ -195,6 +195,18 @@ body {
   color: var(--text-muted) !important;
 }
 
+:root[data-theme='dark'] .message.success {
+  background: var(--success-soft) !important;
+  color: var(--success) !important;
+  border-color: var(--success) !important;
+}
+
+:root[data-theme='dark'] .message.error {
+  background: var(--danger-soft) !important;
+  color: var(--danger) !important;
+  border-color: var(--danger) !important;
+}
+
 :root[data-theme='dark'] .refresh-button,
 :root[data-theme='dark'] .view {
   background: var(--surface-alt) !important;

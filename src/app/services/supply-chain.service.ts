@@ -51,10 +51,19 @@ function toRecord<T>(document: { id: string; data: () => Record<string, unknown>
   return { id: document.id, ...document.data() } as T;
 }
 
+/** How long the branches cache stays fresh; branches are admin-managed reference data that rarely changes. */
+const BRANCHES_TTL_MS = 60_000;
+
 @Injectable({
   providedIn: 'root',
 })
 export class SupplyChainService {
+  private branchesCache: Branch[] | null = null;
+
+  private branchesCachedAt = 0;
+
+  private branchesPromise: Promise<Branch[]> | null = null;
+
   /* =====================================
      CONTROL NUMBER
   ===================================== */
@@ -77,8 +86,27 @@ export class SupplyChainService {
      BRANCHES
   ===================================== */
 
-  async getBranches(): Promise<Branch[]> {
-    return withErrorHandling('Load branches', async () => {
+  /**
+   * Loads branches, reusing a short-lived in-memory cache instead of hitting
+   * Firestore on every visit to a page that needs the branch list (the New
+   * Purchase Request form and the Branches page both load on every
+   * navigation). Concurrent callers share one in-flight fetch. Pass
+   * `forceRefresh: true` (the Branches page's Refresh button does this) to
+   * bypass the cache and confirm the very latest data.
+   */
+  async getBranches(forceRefresh = false): Promise<Branch[]> {
+    const isFresh =
+      this.branchesCache !== null && Date.now() - this.branchesCachedAt < BRANCHES_TTL_MS;
+
+    if (!forceRefresh && isFresh) {
+      return this.branchesCache!;
+    }
+
+    if (!forceRefresh && this.branchesPromise) {
+      return this.branchesPromise;
+    }
+
+    this.branchesPromise = withErrorHandling('Load branches', async () => {
       const snapshot = await getDocs(collection(db, 'branches'));
 
       const branches: Branch[] = snapshot.docs.map((documentSnapshot) => {
@@ -116,6 +144,17 @@ export class SupplyChainService {
 
       return branches;
     });
+
+    try {
+      const branches = await this.branchesPromise;
+
+      this.branchesCache = branches;
+      this.branchesCachedAt = Date.now();
+
+      return branches;
+    } finally {
+      this.branchesPromise = null;
+    }
   }
 
   async getBranch(id: string): Promise<Branch | null> {
@@ -155,6 +194,8 @@ export class SupplyChainService {
 
         updatedAt: serverTimestamp(),
       });
+
+      this.branchesCache = null;
 
       return reference.id;
     });

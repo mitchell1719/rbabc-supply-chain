@@ -2,98 +2,20 @@ import {
   Routes
 } from '@angular/router';
 
-import {
-  Dashboard
-} from './pages/dashboard/dashboard';
-
-import {
-  PurchaseRequests
-} from './pages/purchase-requests/purchase-requests';
-
-import {
-  NewPurchaseRequest
-} from './pages/new-purchase-request/new-purchase-request';
-
-import {
-  RequestDetails
-} from './pages/request-details/request-details';
-
-import {
-  DmApprovals
-} from './pages/dm-approvals/dm-approvals';
-
-import {
-  HqConsolidation
-} from './pages/hq-consolidation/hq-consolidation';
-
-import {
-  Prs
-} from './pages/prs/prs';
-
-import {
-  Procurement
-} from './pages/procurement/procurement';
-
-import {
-  PurchaseOrders
-} from './pages/purchase-orders/purchase-orders';
-
-import {
-  Deliveries
-} from './pages/deliveries/deliveries';
-
-import {
-  Receiving
-} from './pages/receiving/receiving';
-
-import {
-  Discrepancies
-} from './pages/discrepancies/discrepancies';
-
-import {
-  Inventory
-} from './pages/inventory/inventory';
-
-import {
-  Suppliers
-} from './pages/suppliers/suppliers';
-
-import {
-  Branches
-} from './pages/branches/branches';
-
-import {
-  Soa
-} from './pages/soa/soa';
-
-import {
-  Reports
-} from './pages/reports/reports';
-
-import {
-  Settings
-} from './pages/settings/settings';
-
-import {
-  Login
-} from './pages/login/login';
-
 import { authGuard, guestGuard } from './guards/auth.guard';
 
-import {
-  Help
-} from './rb-help/rb-help';
-
-import {
-  NotFound
-} from './pages/not-found/not-found';
-
-
+/**
+ * Every page is lazy-loaded: the initial bundle only ships the app shell
+ * (sidebar, header, auth) instead of all eighteen pages' code up front.
+ * Angular preloads the rest in the background after first paint (see
+ * withPreloading in app.config.ts), so first load is fast and in-app
+ * navigation still feels instant.
+ */
 export const routes: Routes = [
 
   {
     path: 'login',
-    component: Login,
+    loadComponent: () => import('./pages/login/login').then((m) => m.Login),
     canActivate: [guestGuard]
   },
 
@@ -105,120 +27,128 @@ export const routes: Routes = [
 
   {
     path: 'dashboard',
-    component: Dashboard,
+    loadComponent: () => import('./pages/dashboard/dashboard').then((m) => m.Dashboard),
     canActivate: [authGuard]
   },
 
   {
     path: 'purchase-requests',
-    component: PurchaseRequests,
+    loadComponent: () =>
+      import('./pages/purchase-requests/purchase-requests').then((m) => m.PurchaseRequests),
     canActivate: [authGuard]
   },
 
   {
     path: 'purchase-requests/new',
-    component: NewPurchaseRequest,
+    loadComponent: () =>
+      import('./pages/new-purchase-request/new-purchase-request').then(
+        (m) => m.NewPurchaseRequest,
+      ),
     canActivate: [authGuard]
   },
 
   {
     path: 'purchase-requests/:id',
-    component: RequestDetails,
+    loadComponent: () =>
+      import('./pages/request-details/request-details').then((m) => m.RequestDetails),
     canActivate: [authGuard]
   },
 
   {
     path: 'dm-approvals',
-    component: DmApprovals,
+    loadComponent: () => import('./pages/dm-approvals/dm-approvals').then((m) => m.DmApprovals),
     canActivate: [authGuard]
   },
 
   {
     path: 'hq-consolidation',
-    component: HqConsolidation,
+    loadComponent: () =>
+      import('./pages/hq-consolidation/hq-consolidation').then((m) => m.HqConsolidation),
     canActivate: [authGuard]
   },
 
   {
     path: 'prs',
-    component: Prs,
+    loadComponent: () => import('./pages/prs/prs').then((m) => m.Prs),
     canActivate: [authGuard]
   },
 
   {
     path: 'procurement',
-    component: Procurement,
+    loadComponent: () => import('./pages/procurement/procurement').then((m) => m.Procurement),
     canActivate: [authGuard]
   },
 
   {
     path: 'purchase-orders',
-    component: PurchaseOrders,
+    loadComponent: () =>
+      import('./pages/purchase-orders/purchase-orders').then((m) => m.PurchaseOrders),
     canActivate: [authGuard]
   },
 
   {
     path: 'deliveries',
-    component: Deliveries,
+    loadComponent: () => import('./pages/deliveries/deliveries').then((m) => m.Deliveries),
     canActivate: [authGuard]
   },
 
   {
     path: 'receiving',
-    component: Receiving,
+    loadComponent: () => import('./pages/receiving/receiving').then((m) => m.Receiving),
     canActivate: [authGuard]
   },
 
   {
     path: 'discrepancies',
-    component: Discrepancies,
+    loadComponent: () =>
+      import('./pages/discrepancies/discrepancies').then((m) => m.Discrepancies),
     canActivate: [authGuard]
   },
 
   {
     path: 'inventory',
-    component: Inventory,
+    loadComponent: () => import('./pages/inventory/inventory').then((m) => m.Inventory),
     canActivate: [authGuard]
   },
 
   {
     path: 'suppliers',
-    component: Suppliers,
+    loadComponent: () => import('./pages/suppliers/suppliers').then((m) => m.Suppliers),
     canActivate: [authGuard]
   },
 
   {
     path: 'branches',
-    component: Branches,
+    loadComponent: () => import('./pages/branches/branches').then((m) => m.Branches),
     canActivate: [authGuard]
   },
 
   {
     path: 'soa',
-    component: Soa,
+    loadComponent: () => import('./pages/soa/soa').then((m) => m.Soa),
     canActivate: [authGuard]
   },
 
   {
     path: 'reports',
-    component: Reports,
+    loadComponent: () => import('./pages/reports/reports').then((m) => m.Reports),
     canActivate: [authGuard]
   },
 
   {
     path: 'settings',
-    component: Settings,
+    loadComponent: () => import('./pages/settings/settings').then((m) => m.Settings),
     canActivate: [authGuard]
   },
 
   {
     path: 'help',
-    component: Help
+    loadComponent: () => import('./rb-help/rb-help').then((m) => m.Help)
   },
 
   {
     path: '**',
-    component: NotFound
+    loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFound)
   }
 
 ];

@@ -142,30 +142,35 @@
 
 .user-info strong {
   font-size: 11px;
+  color: var(--text, #172033);
 }
 
 .user-info span {
   font-size: 9px;
-  color: #8a94a3;
+  color: var(--text-muted, #8a94a3);
 }
 
 .logout-btn {
   width: 38px;
   height: 38px;
 
-  border: 1px solid #e1e6ec;
+  border: 1px solid var(--border, #e1e6ec);
   border-radius: 9px;
 
-  background: #ffffff;
-  color: #c6252d;
+  background: var(--surface, #ffffff);
+  color: var(--danger, #c6252d);
 
   font-size: 14px;
   cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .logout-btn:hover {
-  background: #fff0f0;
-  border-color: #f1c4c6;
+  background: var(--danger-soft, #fff0f0);
+  transform: translateY(-1px);
 }
 
 @media(max-width: 700px) {

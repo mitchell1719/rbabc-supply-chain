@@ -41,13 +41,13 @@
 .field-error {
   margin: 6px 0 0;
   font-size: 9px;
-  color: #c6252d;
+  color: var(--danger, #c6252d);
 }
 
 .retry-link {
   border: 0;
   background: transparent;
-  color: #0a62aa;
+  color: var(--primary, #0a62aa);
   padding: 0;
   margin-left: 6px;
   font-size: 9px;

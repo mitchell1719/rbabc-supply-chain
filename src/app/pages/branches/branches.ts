@@ -148,7 +148,9 @@ implements OnInit {
    * LOAD DATABASE
    * =========================================
    */
-  async loadBranches():
+  async loadBranches(
+    forceRefresh = false
+  ):
   Promise<void> {
 
     this.loading = true;
@@ -160,7 +162,7 @@ implements OnInit {
 
       this.branches =
         await this.service
-          .getBranches();
+          .getBranches(forceRefresh);
 
     } catch (error) {
 

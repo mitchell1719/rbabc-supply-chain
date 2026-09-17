@@ -1,10 +1,12 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
+    // Routes are lazy-loaded for a small initial bundle, then preloaded in
+    // the background after first paint so in-app navigation stays instant.
+    provideRouter(routes, withPreloading(PreloadAllModules))
   ]
 };
