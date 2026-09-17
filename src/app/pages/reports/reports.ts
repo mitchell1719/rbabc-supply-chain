@@ -1,6 +1,8 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  computed,
+  signal
 } from '@angular/core';
 
 import {
@@ -31,13 +33,21 @@ import {
 export class Reports
 implements OnInit {
 
-  requests: PurchaseRequest[] = [];
-  inventory: Inventory[] = [];
-  deliveries: DeliveryNote[] = [];
+  readonly requests = signal<PurchaseRequest[]>([]);
+  readonly inventory = signal<Inventory[]>([]);
+  readonly deliveries = signal<DeliveryNote[]>([]);
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
+
+  readonly completed = computed(
+    () => this.requests().filter(x => x.status === 'COMPLETED').length
+  );
+
+  readonly lowStock = computed(
+    () => this.inventory().filter(x => Number(x.quantity) <= Number(x.reorderLevel)).length
+  );
 
   constructor(
     private service:
@@ -50,9 +60,9 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
@@ -62,42 +72,23 @@ implements OnInit {
         this.service.getDeliveries(),
       ]);
 
-      this.requests = requests;
-      this.inventory = inventory;
-      this.deliveries = deliveries;
+      this.requests.set(requests);
+      this.inventory.set(inventory);
+      this.deliveries.set(deliveries);
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load report data.';
+          : 'Unable to load report data.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
-
-  }
-
-  get completed() {
-
-    return this.requests.filter(
-      x =>
-        x.status ===
-        'COMPLETED'
-    ).length;
-
-  }
-
-  get lowStock() {
-
-    return this.inventory.filter(
-      x =>
-        Number(x.quantity) <=
-        Number(x.reorderLevel)
-    ).length;
 
   }
 

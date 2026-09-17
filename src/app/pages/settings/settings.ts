@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
@@ -21,19 +21,19 @@ import { DataState } from '../../components/data-state/data-state';
 })
 export class Settings implements OnInit {
 
-  companyName = 'RB ABC Holding OPC';
+  readonly companyName = signal('RB ABC Holding OPC');
 
-  department = 'Supply Chain Office';
+  readonly department = signal('Supply Chain Office');
 
-  systemName = 'Supply Chain Management System';
+  readonly systemName = signal('Supply Chain Management System');
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  saving = false;
+  readonly saving = signal(false);
 
-  successMessage = '';
+  readonly successMessage = signal('');
 
   currentPassword = '';
   newPassword = '';
@@ -43,10 +43,10 @@ export class Settings implements OnInit {
   showNewPassword = false;
   showConfirmPassword = false;
 
-  passwordMessage = '';
-  passwordError = '';
+  readonly passwordMessage = signal('');
+  readonly passwordError = signal('');
 
-  changingPassword = false;
+  readonly changingPassword = signal(false);
 
   constructor(
     private service: SupplyChainService,
@@ -63,64 +63,65 @@ export class Settings implements OnInit {
   }
 
   async load() {
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
       const settings = await this.service.getSystemSettings();
 
       if (settings) {
-        this.companyName = settings.companyName;
+        this.companyName.set(settings.companyName);
 
-        this.department = settings.department;
+        this.department.set(settings.department);
 
-        this.systemName = settings.systemName;
+        this.systemName.set(settings.systemName);
       }
     } catch (error) {
-      this.errorMessage =
-        error instanceof Error ? error.message : 'Unable to load settings.';
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'Unable to load settings.',
+      );
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
   async save() {
-    this.successMessage = '';
+    this.successMessage.set('');
 
-    this.saving = true;
+    this.saving.set(true);
 
     try {
       await this.service.saveSystemSettings({
-        companyName: this.companyName,
-        department: this.department,
-        systemName: this.systemName,
+        companyName: this.companyName(),
+        department: this.department(),
+        systemName: this.systemName(),
       });
 
-      this.successMessage = 'Settings saved successfully.';
+      this.successMessage.set('Settings saved successfully.');
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Unable to save settings.');
     } finally {
-      this.saving = false;
+      this.saving.set(false);
     }
   }
 
   async updatePassword() {
-    this.passwordMessage = '';
-    this.passwordError = '';
+    this.passwordMessage.set('');
+    this.passwordError.set('');
 
     if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
-      this.passwordError = 'Please fill in all password fields.';
+      this.passwordError.set('Please fill in all password fields.');
       return;
     }
 
     if (this.newPassword.length < 8) {
-      this.passwordError = 'New password must be at least 8 characters.';
+      this.passwordError.set('New password must be at least 8 characters.');
       return;
     }
 
     if (this.newPassword !== this.confirmPassword) {
-      this.passwordError = 'New password and confirmation do not match.';
+      this.passwordError.set('New password and confirmation do not match.');
       return;
     }
 
@@ -135,20 +136,21 @@ export class Settings implements OnInit {
       return;
     }
 
-    this.changingPassword = true;
+    this.changingPassword.set(true);
 
     try {
       await this.auth.changePassword(this.currentPassword, this.newPassword);
 
-      this.passwordMessage = 'Password updated successfully.';
+      this.passwordMessage.set('Password updated successfully.');
       this.currentPassword = '';
       this.newPassword = '';
       this.confirmPassword = '';
     } catch (error) {
-      this.passwordError =
-        error instanceof Error ? error.message : 'Unable to change password.';
+      this.passwordError.set(
+        error instanceof Error ? error.message : 'Unable to change password.',
+      );
     } finally {
-      this.changingPassword = false;
+      this.changingPassword.set(false);
     }
   }
 

@@ -20,9 +20,9 @@
 
 <div
   class="message success"
-  *ngIf="successMessage">
+  *ngIf="successMessage()">
 
-  {{ successMessage }}
+  {{ successMessage() }}
 
 </div>
 
@@ -31,9 +31,9 @@
 
 <div
   class="message error"
-  *ngIf="errorMessage">
+  *ngIf="errorMessage()">
 
-  {{ errorMessage }}
+  {{ errorMessage() }}
 
 </div>
 
@@ -227,14 +227,14 @@
     <button
       type="button"
       class="save-button"
-      [disabled]="saving"
+      [disabled]="saving()"
       (click)="save()">
 
-      <span *ngIf="!saving">
+      <span *ngIf="!saving()">
         Save Branch
       </span>
 
-      <span *ngIf="saving">
+      <span *ngIf="saving()">
         Saving...
       </span>
 
@@ -258,7 +258,7 @@
         </h3>
 
         <p>
-          {{ branches.length }}
+          {{ branches().length }}
           branch record(s)
         </p>
 
@@ -268,7 +268,7 @@
       <button
         type="button"
         class="refresh-button"
-        [disabled]="loading"
+        [disabled]="loading()"
         (click)="loadBranches(true)">
 
         Refresh
@@ -279,9 +279,9 @@
 
 
     <app-data-state
-      [loading]="loading"
-      [error]="errorMessage"
-      [isEmpty]="branches.length === 0"
+      [loading]="loading()"
+      [error]="errorMessage()"
+      [isEmpty]="branches().length === 0"
       loadingMessage="Loading branches..."
       emptyMessage="No branches have been saved yet."
       (retry)="loadBranches()">
@@ -335,7 +335,7 @@
           <tr
             *ngFor="
               let branch
-              of branches
+              of branches()
             ">
 
             <td>

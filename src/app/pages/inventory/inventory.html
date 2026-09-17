@@ -22,8 +22,8 @@
 <div class="table-card">
 
   <app-data-state
-    [loading]="loading"
-    [error]="errorMessage"
+    [loading]="loading()"
+    [error]="errorMessage()"
     [isEmpty]="filtered.length === 0"
     loadingMessage="Loading inventory..."
     [emptyMessage]="emptyMessage"

@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -41,13 +42,13 @@ import { AuthService } from '../../services/auth.service';
 export class Procurement
 implements OnInit {
 
-  records: PurchaseRequest[] = [];
+  readonly records = signal<PurchaseRequest[]>([]);
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  processingId: string | null = null;
+  readonly processingId = signal<string | null>(null);
 
   constructor(
     private service:
@@ -65,31 +66,33 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
-      this.records =
+      this.records.set(
         await this.service
           .getRequestsByStatuses([
             'PRS_CREATED',
             'WAREHOUSE_CHECK',
             'FOR_PROCUREMENT',
             'PROCUREMENT_COMPLETED'
-          ]);
+          ])
+      );
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load procurement records.';
+          : 'Unable to load procurement records.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -114,7 +117,7 @@ implements OnInit {
       return;
     }
 
-    this.processingId = request.id;
+    this.processingId.set(request.id);
 
     try {
 
@@ -136,7 +139,7 @@ implements OnInit {
 
     } finally {
 
-      this.processingId = null;
+      this.processingId.set(null);
 
     }
 
@@ -161,7 +164,7 @@ implements OnInit {
       return;
     }
 
-    this.processingId = request.id;
+    this.processingId.set(request.id);
 
     try {
 
@@ -183,7 +186,7 @@ implements OnInit {
 
     } finally {
 
-      this.processingId = null;
+      this.processingId.set(null);
 
     }
 

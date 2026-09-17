@@ -12,9 +12,9 @@
 <div class="card">
 
   <app-data-state
-    [loading]="loading"
-    [error]="errorMessage"
-    [isEmpty]="deliveries.length === 0"
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="deliveries().length === 0"
     loadingMessage="Loading deliveries..."
     emptyMessage="No deliveries recorded yet."
     (retry)="load()">
@@ -39,7 +39,7 @@
     <tbody>
 
       <tr
-        *ngFor="let delivery of deliveries">
+        *ngFor="let delivery of deliveries()">
 
         <td>
           {{ delivery.deliveryNumber }}
@@ -77,10 +77,10 @@
               delivery.status ===
               'PREPARING'
             "
-            [disabled]="dispatchingId === delivery.id"
+            [disabled]="dispatchingId() === delivery.id"
             (click)="dispatch(delivery)">
 
-            {{ dispatchingId === delivery.id ? 'Dispatching...' : 'Dispatch' }}
+            {{ dispatchingId() === delivery.id ? 'Dispatching...' : 'Dispatch' }}
 
           </button>
 

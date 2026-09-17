@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import {
@@ -41,7 +42,7 @@ import {
 export class Receiving
 implements OnInit {
 
-  deliveries: DeliveryNote[] = [];
+  readonly deliveries = signal<DeliveryNote[]>([]);
 
   receiver:
     Record<string,string> = {};
@@ -52,11 +53,11 @@ implements OnInit {
   remarks:
     Record<string,string> = {};
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  submittingId: string | null = null;
+  readonly submittingId = signal<string | null>(null);
 
   constructor(
     private service:
@@ -72,26 +73,28 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
-      this.deliveries =
+      this.deliveries.set(
         await this.service
-          .getDeliveriesForReceiving();
+          .getDeliveriesForReceiving()
+      );
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load deliveries for receiving.';
+          : 'Unable to load deliveries for receiving.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -155,7 +158,7 @@ implements OnInit {
       return;
     }
 
-    this.submittingId = delivery.id;
+    this.submittingId.set(delivery.id);
 
     try {
 
@@ -183,7 +186,7 @@ implements OnInit {
 
     } finally {
 
-      this.submittingId = null;
+      this.submittingId.set(null);
 
     }
 

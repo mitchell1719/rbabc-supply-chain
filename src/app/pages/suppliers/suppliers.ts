@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import {
@@ -42,7 +43,7 @@ import {
 export class Suppliers
 implements OnInit {
 
-  suppliers: Supplier[] = [];
+  readonly suppliers = signal<Supplier[]>([]);
 
   supplier = {
 
@@ -54,11 +55,11 @@ implements OnInit {
 
   };
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  saving = false;
+  readonly saving = signal(false);
 
   constructor(
     private service:
@@ -71,26 +72,28 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
-      this.suppliers =
+      this.suppliers.set(
         await this.service
-          .getSuppliers();
+          .getSuppliers()
+      );
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load suppliers.';
+          : 'Unable to load suppliers.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -109,7 +112,7 @@ implements OnInit {
       return;
     }
 
-    this.saving = true;
+    this.saving.set(true);
 
     try {
 
@@ -138,7 +141,7 @@ implements OnInit {
 
     } finally {
 
-      this.saving = false;
+      this.saving.set(false);
 
     }
 

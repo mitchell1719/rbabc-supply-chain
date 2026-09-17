@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -41,15 +42,15 @@ import { AuthService } from '../../services/auth.service';
 })
 export class Prs implements OnInit {
 
-  pending: PurchaseRequest[] = [];
+  readonly pending = signal<PurchaseRequest[]>([]);
 
-  prsRecords: PRSRecord[] = [];
+  readonly prsRecords = signal<PRSRecord[]>([]);
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  generatingId: string | null = null;
+  readonly generatingId = signal<string | null>(null);
 
   constructor(
     private service:
@@ -67,9 +68,9 @@ export class Prs implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
@@ -78,20 +79,21 @@ export class Prs implements OnInit {
         this.service.getPRS(),
       ]);
 
-      this.pending = pending;
+      this.pending.set(pending);
 
-      this.prsRecords = prsRecords;
+      this.prsRecords.set(prsRecords);
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load PRS data.';
+          : 'Unable to load PRS data.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -116,7 +118,7 @@ export class Prs implements OnInit {
       return;
     }
 
-    this.generatingId = request.id;
+    this.generatingId.set(request.id);
 
     try {
 
@@ -141,7 +143,7 @@ export class Prs implements OnInit {
 
     } finally {
 
-      this.generatingId = null;
+      this.generatingId.set(null);
 
     }
 

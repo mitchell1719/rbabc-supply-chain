@@ -1,6 +1,8 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  computed,
+  signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -51,11 +53,34 @@ import {
 })
 export class Dashboard implements OnInit {
 
-  requests: PurchaseRequest[] = [];
+  // Signals rather than plain properties: a signal write notifies
+  // Angular's change-detection scheduler directly, so the view updates
+  // reliably regardless of which zone the underlying Firestore call
+  // settles in (see SupplyChainService.withErrorHandling for why that
+  // matters with the Firebase SDK).
+  readonly requests = signal<PurchaseRequest[]>([]);
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
+
+  readonly recentRequests = computed(() => this.requests().slice(0, 5));
+
+  readonly pendingDM = computed(
+    () => this.requests().filter(x => x.status === 'PENDING_DM_APPROVAL').length
+  );
+
+  readonly approved = computed(
+    () => this.requests().filter(x => x.status === 'DM_APPROVED').length
+  );
+
+  readonly procurement = computed(
+    () => this.requests().filter(x => x.status === 'FOR_PROCUREMENT').length
+  );
+
+  readonly completed = computed(
+    () => this.requests().filter(x => x.status === 'COMPLETED').length
+  );
 
   constructor(
     private service: SupplyChainService
@@ -66,46 +91,19 @@ export class Dashboard implements OnInit {
   }
 
   async load() {
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
-      this.requests = await this.service.getPurchaseRequests();
+      this.requests.set(await this.service.getPurchaseRequests());
     } catch (error) {
-      this.errorMessage =
-        error instanceof Error ? error.message : 'Unable to load dashboard data.';
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'Unable to load dashboard data.'
+      );
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
-  }
-
-  get recentRequests() {
-    return this.requests.slice(0, 5);
-  }
-
-  get pendingDM() {
-    return this.requests.filter(
-      x => x.status === 'PENDING_DM_APPROVAL'
-    ).length;
-  }
-
-  get approved() {
-    return this.requests.filter(
-      x => x.status === 'DM_APPROVED'
-    ).length;
-  }
-
-  get procurement() {
-    return this.requests.filter(
-      x => x.status === 'FOR_PROCUREMENT'
-    ).length;
-  }
-
-  get completed() {
-    return this.requests.filter(
-      x => x.status === 'COMPLETED'
-    ).length;
   }
 
 }

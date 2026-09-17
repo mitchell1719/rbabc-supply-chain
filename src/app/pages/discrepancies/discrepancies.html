@@ -5,16 +5,16 @@
 </p>
 
 <app-data-state
-  [loading]="loading"
-  [error]="errorMessage"
-  [isEmpty]="records.length === 0"
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [isEmpty]="records().length === 0"
   loadingMessage="Loading discrepancies..."
   emptyMessage="No open discrepancies. Great work!"
   (retry)="load()">
 
   <div
     class="card"
-    *ngFor="let record of records">
+    *ngFor="let record of records()">
 
     <h3>
       {{ record.receivingNumber }}
@@ -42,10 +42,10 @@
     </textarea>
 
     <button
-      [disabled]="resolvingId === record.id"
+      [disabled]="resolvingId() === record.id"
       (click)="resolve(record)">
 
-      {{ resolvingId === record.id ? 'Resolving...' : 'Resolve Discrepancy' }}
+      {{ resolvingId() === record.id ? 'Resolving...' : 'Resolve Discrepancy' }}
 
     </button>
 

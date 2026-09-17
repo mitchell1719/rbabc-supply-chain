@@ -1,12 +1,12 @@
 <app-data-state
-  [loading]="loading"
-  [error]="errorMessage"
-  [isEmpty]="!request"
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [isEmpty]="!request()"
   loadingMessage="Loading purchase request details..."
   emptyMessage="Purchase request not found."
   (retry)="retry()">
 
-<div class="page" *ngIf="request">
+<div class="page" *ngIf="request() as request">
 
   <a routerLink="/purchase-requests" class="back">
 
@@ -161,7 +161,7 @@
 
         <h3>Workflow History</h3>
 
-        <app-workflow-timeline [history]="history">
+        <app-workflow-timeline [history]="history()">
         </app-workflow-timeline>
 
       </div>

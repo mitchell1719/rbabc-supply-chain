@@ -32,21 +32,6 @@ import {
 
 import { REQUEST_TRANSITIONS } from '../config/workflow.config';
 
-/** Wraps a Firestore call so every failure surfaces a consistent, readable error. */
-async function withErrorHandling<T>(action: string, task: () => Promise<T>): Promise<T> {
-  try {
-    return await task();
-  } catch (error) {
-    console.error(`${action} failed:`, error);
-
-    if (error instanceof Error && error.message) {
-      throw new Error(error.message);
-    }
-
-    throw new Error(`Unable to ${action.toLowerCase()}. Please try again.`);
-  }
-}
-
 function toRecord<T>(document: { id: string; data: () => Record<string, unknown> }): T {
   return { id: document.id, ...document.data() } as T;
 }
@@ -63,6 +48,21 @@ export class SupplyChainService {
   private branchesCachedAt = 0;
 
   private branchesPromise: Promise<Branch[]> | null = null;
+
+  /** Wraps a Firestore call so every failure surfaces a consistent, readable error. */
+  private async withErrorHandling<T>(action: string, task: () => Promise<T>): Promise<T> {
+    try {
+      return await task();
+    } catch (error) {
+      console.error(`${action} failed:`, error);
+
+      if (error instanceof Error && error.message) {
+        throw new Error(error.message);
+      }
+
+      throw new Error(`Unable to ${action.toLowerCase()}. Please try again.`);
+    }
+  }
 
   /* =====================================
      CONTROL NUMBER
@@ -106,7 +106,7 @@ export class SupplyChainService {
       return this.branchesPromise;
     }
 
-    this.branchesPromise = withErrorHandling('Load branches', async () => {
+    this.branchesPromise = this.withErrorHandling('Load branches', async () => {
       const snapshot = await getDocs(collection(db, 'branches'));
 
       const branches: Branch[] = snapshot.docs.map((documentSnapshot) => {
@@ -158,7 +158,7 @@ export class SupplyChainService {
   }
 
   async getBranch(id: string): Promise<Branch | null> {
-    return withErrorHandling('Load branch', async () => {
+    return this.withErrorHandling('Load branch', async () => {
       const snapshot = await getDoc(doc(db, 'branches', id));
 
       if (!snapshot.exists()) {
@@ -170,7 +170,7 @@ export class SupplyChainService {
   }
 
   async createBranch(branch: Branch): Promise<string> {
-    return withErrorHandling('Save branch', async () => {
+    return this.withErrorHandling('Save branch', async () => {
       const reference = await addDoc(collection(db, 'branches'), {
         name: branch.name.trim(),
 
@@ -206,7 +206,7 @@ export class SupplyChainService {
   ===================================== */
 
   async createPurchaseRequest(request: PurchaseRequest): Promise<string> {
-    return withErrorHandling('Save purchase request', async () => {
+    return this.withErrorHandling('Save purchase request', async () => {
       const docRef = await addDoc(collection(db, 'purchaseRequests'), {
         controlNumber: request.controlNumber,
         requestDate: request.requestDate,
@@ -231,7 +231,7 @@ export class SupplyChainService {
   }
 
   async getPurchaseRequests(): Promise<PurchaseRequest[]> {
-    return withErrorHandling('Load purchase requests', async () => {
+    return this.withErrorHandling('Load purchase requests', async () => {
       const snapshot = await getDocs(collection(db, 'purchaseRequests'));
 
       return snapshot.docs.map((document) => {
@@ -260,7 +260,7 @@ export class SupplyChainService {
   }
 
   async getPurchaseRequest(id: string): Promise<PurchaseRequest | null> {
-    return withErrorHandling('Load purchase request', async () => {
+    return this.withErrorHandling('Load purchase request', async () => {
       const snapshot = await getDoc(doc(db, 'purchaseRequests', id));
 
       if (!snapshot.exists()) {
@@ -297,7 +297,7 @@ export class SupplyChainService {
 
   /** Requests matching any of the given statuses, fetched in one query. */
   async getRequestsByStatuses(statuses: RequestStatus[]): Promise<PurchaseRequest[]> {
-    return withErrorHandling('Load purchase requests', async () => {
+    return this.withErrorHandling('Load purchase requests', async () => {
       if (statuses.length === 0) {
         return [];
       }
@@ -321,7 +321,7 @@ export class SupplyChainService {
     performedBy: string,
     comments: string = '',
   ): Promise<void> {
-    return withErrorHandling('Update request status', async () => {
+    return this.withErrorHandling('Update request status', async () => {
       const reference = doc(db, 'purchaseRequests', requestId);
 
       const snapshot = await getDoc(reference);
@@ -417,7 +417,7 @@ export class SupplyChainService {
   ===================================== */
 
   async addWorkflowHistory(history: Omit<WorkflowHistory, 'id' | 'performedAt'>) {
-    return withErrorHandling('Save workflow history', async () => {
+    return this.withErrorHandling('Save workflow history', async () => {
       await addDoc(collection(db, 'workflowHistory'), {
         ...history,
         performedAt: serverTimestamp(),
@@ -426,7 +426,7 @@ export class SupplyChainService {
   }
 
   async getWorkflowHistory(requestId: string): Promise<WorkflowHistory[]> {
-    return withErrorHandling('Load workflow history', async () => {
+    return this.withErrorHandling('Load workflow history', async () => {
       const q = query(
         collection(db, 'workflowHistory'),
         where('purchaseRequestId', '==', requestId),
@@ -443,7 +443,7 @@ export class SupplyChainService {
   ===================================== */
 
   async sendForProcurement(requestId: string, user: string) {
-    return withErrorHandling('Send request for procurement', async () => {
+    return this.withErrorHandling('Send request for procurement', async () => {
       const request = await this.getPurchaseRequest(requestId);
 
       if (!request) {
@@ -474,7 +474,7 @@ export class SupplyChainService {
   }
 
   async getPurchaseOrders(): Promise<PurchaseOrder[]> {
-    return withErrorHandling('Load purchase orders', async () => {
+    return this.withErrorHandling('Load purchase orders', async () => {
       const snapshot = await getDocs(collection(db, 'purchaseOrders'));
 
       return snapshot.docs.map((document) => toRecord<PurchaseOrder>(document));
@@ -482,7 +482,7 @@ export class SupplyChainService {
   }
 
   async createPurchaseOrder(data: Omit<PurchaseOrder, 'id' | 'poNumber' | 'status' | 'createdAt'>) {
-    return withErrorHandling('Create purchase order', async () => {
+    return this.withErrorHandling('Create purchase order', async () => {
       return addDoc(collection(db, 'purchaseOrders'), {
         ...data,
         poNumber: this.createTemporaryControlNumber('PO'),
@@ -498,7 +498,7 @@ export class SupplyChainService {
   ===================================== */
 
   async createPRSFromRequest(request: PurchaseRequest, preparedBy: string) {
-    return withErrorHandling('Generate PRS', async () => {
+    return this.withErrorHandling('Generate PRS', async () => {
       if (!request.id) {
         throw new Error('Purchase Request ID is missing.');
       }
@@ -532,7 +532,7 @@ export class SupplyChainService {
   }
 
   async getPRS(): Promise<PRS[]> {
-    return withErrorHandling('Load PRS records', async () => {
+    return this.withErrorHandling('Load PRS records', async () => {
       const snapshot = await getDocs(collection(db, 'prs'));
 
       return snapshot.docs.map((document) => toRecord<PRS>(document));
@@ -544,7 +544,7 @@ export class SupplyChainService {
   ===================================== */
 
   async getInventory(): Promise<Inventory[]> {
-    return withErrorHandling('Load inventory', async () => {
+    return this.withErrorHandling('Load inventory', async () => {
       const snapshot = await getDocs(collection(db, 'inventory'));
 
       return snapshot.docs.map((document) => toRecord<Inventory>(document));
@@ -552,7 +552,7 @@ export class SupplyChainService {
   }
 
   async addInventory(data: Omit<Inventory, 'id' | 'updatedAt'>) {
-    return withErrorHandling('Save inventory record', async () => {
+    return this.withErrorHandling('Save inventory record', async () => {
       return addDoc(collection(db, 'inventory'), {
         ...data,
         updatedAt: serverTimestamp(),
@@ -561,7 +561,7 @@ export class SupplyChainService {
   }
 
   async createInventoryTransaction(data: Record<string, unknown>) {
-    return withErrorHandling('Save inventory transaction', async () => {
+    return this.withErrorHandling('Save inventory transaction', async () => {
       return addDoc(collection(db, 'inventoryTransactions'), {
         ...data,
         createdAt: serverTimestamp(),
@@ -574,7 +574,7 @@ export class SupplyChainService {
   ===================================== */
 
   async getDeliveries(): Promise<DeliveryNote[]> {
-    return withErrorHandling('Load deliveries', async () => {
+    return this.withErrorHandling('Load deliveries', async () => {
       const snapshot = await getDocs(collection(db, 'deliveryNotes'));
 
       return snapshot.docs.map((document) => toRecord<DeliveryNote>(document));
@@ -582,7 +582,7 @@ export class SupplyChainService {
   }
 
   async createDelivery(delivery: Omit<DeliveryNote, 'id' | 'status' | 'createdAt'>) {
-    return withErrorHandling('Create delivery', async () => {
+    return this.withErrorHandling('Create delivery', async () => {
       return addDoc(collection(db, 'deliveryNotes'), {
         ...delivery,
         status: 'PREPARING',
@@ -593,7 +593,7 @@ export class SupplyChainService {
   }
 
   async dispatchDelivery(id: string) {
-    return withErrorHandling('Dispatch delivery', async () => {
+    return this.withErrorHandling('Dispatch delivery', async () => {
       await updateDoc(doc(db, 'deliveryNotes', id), {
         status: 'DISPATCHED',
         dispatchedAt: serverTimestamp(),
@@ -603,7 +603,7 @@ export class SupplyChainService {
   }
 
   async getDeliveriesForReceiving(): Promise<DeliveryNote[]> {
-    return withErrorHandling('Load deliveries for receiving', async () => {
+    return this.withErrorHandling('Load deliveries for receiving', async () => {
       const q = query(collection(db, 'deliveryNotes'), where('status', '==', 'DISPATCHED'));
 
       const snapshot = await getDocs(q);
@@ -617,7 +617,7 @@ export class SupplyChainService {
   ===================================== */
 
   async getReceivingReports(): Promise<ReceivingReport[]> {
-    return withErrorHandling('Load receiving reports', async () => {
+    return this.withErrorHandling('Load receiving reports', async () => {
       const snapshot = await getDocs(collection(db, 'receivingReports'));
 
       return snapshot.docs.map((document) => toRecord<ReceivingReport>(document));
@@ -630,7 +630,7 @@ export class SupplyChainService {
     hasDiscrepancy: boolean,
     remarks: string,
   ) {
-    return withErrorHandling('Submit receiving report', async () => {
+    return this.withErrorHandling('Submit receiving report', async () => {
       if (!delivery.id) {
         throw new Error('Delivery ID is required.');
       }
@@ -669,7 +669,7 @@ export class SupplyChainService {
   ===================================== */
 
   async getDiscrepancies(): Promise<ReceivingReport[]> {
-    return withErrorHandling('Load discrepancies', async () => {
+    return this.withErrorHandling('Load discrepancies', async () => {
       const q = query(collection(db, 'receivingReports'), where('status', '==', 'DISCREPANCY'));
 
       const snapshot = await getDocs(q);
@@ -679,7 +679,7 @@ export class SupplyChainService {
   }
 
   async resolveDiscrepancy(id: string, resolution: string) {
-    return withErrorHandling('Resolve discrepancy', async () => {
+    return this.withErrorHandling('Resolve discrepancy', async () => {
       if (!resolution.trim()) {
         throw new Error('Resolution is required.');
       }
@@ -698,7 +698,7 @@ export class SupplyChainService {
   ===================================== */
 
   async getSuppliers(): Promise<Supplier[]> {
-    return withErrorHandling('Load suppliers', async () => {
+    return this.withErrorHandling('Load suppliers', async () => {
       const snapshot = await getDocs(collection(db, 'suppliers'));
 
       return snapshot.docs.map((document) => toRecord<Supplier>(document));
@@ -706,7 +706,7 @@ export class SupplyChainService {
   }
 
   async createSupplier(supplier: Omit<Supplier, 'id' | 'active' | 'createdAt'>) {
-    return withErrorHandling('Save supplier', async () => {
+    return this.withErrorHandling('Save supplier', async () => {
       return addDoc(collection(db, 'suppliers'), {
         ...supplier,
         active: true,
@@ -721,7 +721,7 @@ export class SupplyChainService {
   ===================================== */
 
   async getSOA(): Promise<StatementOfAccount[]> {
-    return withErrorHandling('Load statements of account', async () => {
+    return this.withErrorHandling('Load statements of account', async () => {
       const snapshot = await getDocs(collection(db, 'statementsOfAccount'));
 
       return snapshot.docs.map((document) => toRecord<StatementOfAccount>(document));
@@ -729,7 +729,7 @@ export class SupplyChainService {
   }
 
   async createSOA(data: Omit<StatementOfAccount, 'id' | 'soaNumber' | 'status' | 'createdAt'>) {
-    return withErrorHandling('Create statement of account', async () => {
+    return this.withErrorHandling('Create statement of account', async () => {
       return addDoc(collection(db, 'statementsOfAccount'), {
         ...data,
         soaNumber: this.createTemporaryControlNumber('SOA'),
@@ -745,7 +745,7 @@ export class SupplyChainService {
   ===================================== */
 
   async getSystemSettings(): Promise<SystemSettings | null> {
-    return withErrorHandling('Load settings', async () => {
+    return this.withErrorHandling('Load settings', async () => {
       const snapshot = await getDoc(doc(db, 'systemSettings', 'general'));
 
       if (!snapshot.exists()) {
@@ -757,7 +757,7 @@ export class SupplyChainService {
   }
 
   async saveSystemSettings(settings: SystemSettings): Promise<void> {
-    return withErrorHandling('Save settings', async () => {
+    return this.withErrorHandling('Save settings', async () => {
       await setDoc(doc(db, 'systemSettings', 'general'), {
         ...settings,
         updatedAt: serverTimestamp(),
@@ -770,7 +770,7 @@ export class SupplyChainService {
   ===================================== */
 
   async submitContactMessage(data: { name: string; email: string; message: string }) {
-    return withErrorHandling('Send contact message', async () => {
+    return this.withErrorHandling('Send contact message', async () => {
       return addDoc(collection(db, 'contactMessages'), {
         ...data,
         status: 'NEW',
@@ -784,7 +784,7 @@ export class SupplyChainService {
   ===================================== */
 
   async subscribeNewsletter(email: string): Promise<void> {
-    return withErrorHandling('Subscribe to updates', async () => {
+    return this.withErrorHandling('Subscribe to updates', async () => {
       const normalized = email.trim().toLowerCase();
 
       if (!normalized) {

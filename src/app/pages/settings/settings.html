@@ -1,8 +1,8 @@
 <h1>Settings</h1>
 
 <app-data-state
-  [loading]="loading"
-  [error]="errorMessage"
+  [loading]="loading()"
+  [error]="errorMessage()"
   [isEmpty]="false"
   loadingMessage="Loading settings..."
   (retry)="load()">
@@ -11,8 +11,8 @@
 
     <h3>System Information</h3>
 
-    <div class="message success" *ngIf="successMessage">
-      {{ successMessage }}
+    <div class="message success" *ngIf="successMessage()">
+      {{ successMessage() }}
     </div>
 
     <label>
@@ -20,27 +20,30 @@
     </label>
 
     <input
-      [(ngModel)]="companyName">
+      [ngModel]="companyName()"
+      (ngModelChange)="companyName.set($event)">
 
     <label>
       Department
     </label>
 
     <input
-      [(ngModel)]="department">
+      [ngModel]="department()"
+      (ngModelChange)="department.set($event)">
 
     <label>
       System Name
     </label>
 
     <input
-      [(ngModel)]="systemName">
+      [ngModel]="systemName()"
+      (ngModelChange)="systemName.set($event)">
 
     <button
-      [disabled]="saving"
+      [disabled]="saving()"
       (click)="save()">
 
-      {{ saving ? 'Saving...' : 'Save Settings' }}
+      {{ saving() ? 'Saving...' : 'Save Settings' }}
 
     </button>
 
@@ -131,11 +134,11 @@
       </button>
     </div>
 
-    <p class="field-message error" *ngIf="passwordError">{{ passwordError }}</p>
-    <p class="field-message success" *ngIf="passwordMessage">{{ passwordMessage }}</p>
+    <p class="field-message error" *ngIf="passwordError()">{{ passwordError() }}</p>
+    <p class="field-message success" *ngIf="passwordMessage()">{{ passwordMessage() }}</p>
 
-    <button [disabled]="changingPassword" (click)="updatePassword()">
-      {{ changingPassword ? 'Changing...' : 'Change Password' }}
+    <button [disabled]="changingPassword()" (click)="updatePassword()">
+      {{ changingPassword() ? 'Changing...' : 'Change Password' }}
     </button>
 
   </div>

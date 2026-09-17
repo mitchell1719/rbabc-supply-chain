@@ -23,28 +23,28 @@
 
     <app-stat-card
       title="Total Requests"
-      [value]="requests.length"
+      [value]="requests().length"
       icon="📋"
       subtitle="All purchase requests">
     </app-stat-card>
 
     <app-stat-card
       title="Pending DM Approval"
-      [value]="pendingDM"
+      [value]="pendingDM()"
       icon="⏳"
       subtitle="Waiting for review">
     </app-stat-card>
 
     <app-stat-card
       title="Approved Requests"
-      [value]="approved"
+      [value]="approved()"
       icon="✓"
       subtitle="Approved by DM">
     </app-stat-card>
 
     <app-stat-card
       title="Completed"
-      [value]="completed"
+      [value]="completed()"
       icon="📦"
       subtitle="Completed requests">
     </app-stat-card>
@@ -67,9 +67,9 @@
     </div>
 
     <app-data-state
-      [loading]="loading"
-      [error]="errorMessage"
-      [isEmpty]="requests.length === 0"
+      [loading]="loading()"
+      [error]="errorMessage()"
+      [isEmpty]="requests().length === 0"
       loadingMessage="Loading recent requests..."
       emptyMessage="No purchase requests yet."
       (retry)="load()">
@@ -91,7 +91,7 @@
         <tbody>
 
           <tr
-            *ngFor="let request of recentRequests">
+            *ngFor="let request of recentRequests()">
 
             <td>
               {{ request.controlNumber }}

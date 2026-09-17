@@ -2,46 +2,54 @@
 
 <app-scroll-progress *ngIf="showShell"></app-scroll-progress>
 
-<ng-container *ngIf="showShell; else bare">
+<div class="application" [class.no-shell]="!showShell">
 
-  <div class="application">
-
-    <app-sidebar
-      [mobileOpen]="mobileMenuOpen"
-      (collapseChange)="sidebarChanged($event)"
-      (mobileOpenChange)="setMobileMenu($event)">
-    </app-sidebar>
-
-
-    <main
-      class="main-content"
-      [class.collapsed]="sidebarCollapsed">
-
-      <app-header (menuToggle)="toggleMobileMenu()"></app-header>
+  <app-sidebar
+    *ngIf="showShell"
+    [mobileOpen]="mobileMenuOpen"
+    (collapseChange)="sidebarChanged($event)"
+    (mobileOpenChange)="setMobileMenu($event)">
+  </app-sidebar>
 
 
-      <div
-        class="router-content"
-        id="main-content"
-        tabindex="-1">
+  <main
+    class="main-content"
+    [class.no-shell]="!showShell"
+    [class.collapsed]="sidebarCollapsed">
 
-        <router-outlet>
-        </router-outlet>
+    <app-header *ngIf="showShell" (menuToggle)="toggleMobileMenu()"></app-header>
 
-      </div>
 
-    </main>
+    <div
+      class="router-content"
+      [class.no-shell]="!showShell"
+      id="main-content"
+      tabindex="-1">
 
-  </div>
+      <!--
+        A single router-outlet lives here permanently. It must never be
+        torn down by an *ngIf keyed off showShell: while an async guard
+        (authGuard) is still resolving, showShell can still reflect the
+        PREVIOUS route for a tick after the Router has already activated
+        the new one into whatever outlet currently exists. Toggling the
+        outlet itself in that window destroys the freshly-activated
+        component and the Router creates a second, brand new instance in
+        its place - which never receives the data the first instance
+        already started loading. Only the chrome (sidebar/header) toggles.
+      -->
+      <router-outlet>
+      </router-outlet>
 
+    </div>
+
+  </main>
+
+</div>
+
+<ng-container *ngIf="showShell">
   <app-back-to-top></app-back-to-top>
   <app-contact-fab></app-contact-fab>
   <app-cookie-banner></app-cookie-banner>
   <app-confirm-dialog></app-confirm-dialog>
   <app-search-overlay></app-search-overlay>
-
 </ng-container>
-
-<ng-template #bare>
-  <router-outlet></router-outlet>
-</ng-template>

@@ -46,8 +46,8 @@
       Register a new account to get started.
     </p>
 
-    <div class="message error" *ngIf="errorMessage">
-      {{ errorMessage }}
+    <div class="message error" *ngIf="errorMessage()">
+      {{ errorMessage() }}
     </div>
 
     <form (ngSubmit)="submit()">
@@ -99,11 +99,11 @@
       <button
         type="submit"
         class="submit-button"
-        [disabled]="submitting">
+        [disabled]="submitting()">
 
-        <span *ngIf="!submitting && mode === 'signIn'">Sign In</span>
-        <span *ngIf="!submitting && mode === 'signUp'">Create Account</span>
-        <span *ngIf="submitting">Please wait...</span>
+        <span *ngIf="!submitting() && mode === 'signIn'">Sign In</span>
+        <span *ngIf="!submitting() && mode === 'signUp'">Create Account</span>
+        <span *ngIf="submitting()">Please wait...</span>
 
       </button>
 

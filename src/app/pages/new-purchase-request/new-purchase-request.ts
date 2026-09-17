@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
@@ -26,7 +26,7 @@ import { ConfirmService } from '../../services/confirm.service';
   styleUrl: './new-purchase-request.css',
 })
 export class NewPurchaseRequest implements OnInit {
-  branches: Branch[] = [];
+  readonly branches = signal<Branch[]>([]);
 
   selectedBranchId = '';
 
@@ -42,11 +42,11 @@ export class NewPurchaseRequest implements OnInit {
 
   items: PurchaseRequestItem[] = [];
 
-  loadingBranches = false;
+  readonly loadingBranches = signal(false);
 
-  loadError = '';
+  readonly loadError = signal('');
 
-  submitting = false;
+  readonly submitting = signal(false);
 
   constructor(
     private service: SupplyChainService,
@@ -71,16 +71,18 @@ export class NewPurchaseRequest implements OnInit {
   }
 
   async loadBranches() {
-    this.loadingBranches = true;
+    this.loadingBranches.set(true);
 
-    this.loadError = '';
+    this.loadError.set('');
 
     try {
-      this.branches = await this.service.getBranches();
+      this.branches.set(await this.service.getBranches());
     } catch (error) {
-      this.loadError = error instanceof Error ? error.message : 'Unable to load branches.';
+      this.loadError.set(
+        error instanceof Error ? error.message : 'Unable to load branches.'
+      );
     } finally {
-      this.loadingBranches = false;
+      this.loadingBranches.set(false);
     }
   }
 
@@ -123,7 +125,7 @@ export class NewPurchaseRequest implements OnInit {
   }
 
   async submit() {
-    if (this.submitting) {
+    if (this.submitting()) {
       return;
     }
 
@@ -145,7 +147,7 @@ export class NewPurchaseRequest implements OnInit {
       return;
     }
 
-    const branch = this.branches.find((b) => b.id === this.selectedBranchId);
+    const branch = this.branches().find((b) => b.id === this.selectedBranchId);
 
     if (!branch) {
       alert('Invalid branch.');
@@ -173,7 +175,7 @@ export class NewPurchaseRequest implements OnInit {
       return;
     }
 
-    this.submitting = true;
+    this.submitting.set(true);
 
     try {
       const request: PurchaseRequest = {
@@ -216,7 +218,7 @@ export class NewPurchaseRequest implements OnInit {
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Unable to submit the Purchase Request.');
     } finally {
-      this.submitting = false;
+      this.submitting.set(false);
     }
   }
 

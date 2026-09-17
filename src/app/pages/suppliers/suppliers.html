@@ -28,10 +28,10 @@
     </textarea>
 
     <button
-      [disabled]="saving"
+      [disabled]="saving()"
       (click)="save()">
 
-      {{ saving ? 'Saving...' : 'Save Supplier' }}
+      {{ saving() ? 'Saving...' : 'Save Supplier' }}
 
     </button>
 
@@ -42,9 +42,9 @@
     <h3>Supplier Directory</h3>
 
     <app-data-state
-      [loading]="loading"
-      [error]="errorMessage"
-      [isEmpty]="suppliers.length === 0"
+      [loading]="loading()"
+      [error]="errorMessage()"
+      [isEmpty]="suppliers().length === 0"
       loadingMessage="Loading suppliers..."
       emptyMessage="No suppliers have been added yet."
       (retry)="load()">
@@ -64,7 +64,7 @@
       <tbody>
 
         <tr
-          *ngFor="let supplier of suppliers">
+          *ngFor="let supplier of suppliers()">
 
           <td>
             {{ supplier.name }}

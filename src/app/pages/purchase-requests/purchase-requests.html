@@ -26,9 +26,9 @@
 <div class="table-card">
 
   <app-data-state
-    [loading]="loading"
-    [error]="errorMessage"
-    [isEmpty]="requests.length === 0"
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="requests().length === 0"
     loadingMessage="Loading purchase requests..."
     emptyMessage="No purchase requests found."
     (retry)="loadRequests()">
@@ -56,7 +56,7 @@
 
     <tbody>
 
-      <tr *ngFor="let request of requests">
+      <tr *ngFor="let request of requests()">
 
         <td>
           <strong>

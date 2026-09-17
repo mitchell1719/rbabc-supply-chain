@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import {
@@ -41,13 +42,13 @@ import {
 })
 export class Inventory implements OnInit {
 
-  inventory: InventoryRecord[] = [];
+  readonly inventory = signal<InventoryRecord[]>([]);
 
   search = '';
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
   constructor(
     private service:
@@ -60,26 +61,28 @@ export class Inventory implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
-      this.inventory =
+      this.inventory.set(
         await this.service
-          .getInventory();
+          .getInventory()
+      );
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load inventory.';
+          : 'Unable to load inventory.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -92,11 +95,13 @@ export class Inventory implements OnInit {
         .trim()
         .toLowerCase();
 
+    const inventory = this.inventory();
+
     if (!keyword) {
-      return this.inventory;
+      return inventory;
     }
 
-    return this.inventory.filter(
+    return inventory.filter(
       item =>
         item.productName
           ?.toLowerCase()

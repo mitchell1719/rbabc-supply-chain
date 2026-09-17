@@ -74,14 +74,14 @@
 
         <select
           [(ngModel)]="selectedBranchId"
-          [disabled]="loadingBranches">
+          [disabled]="loadingBranches()">
 
           <option value="">
-            {{ loadingBranches ? 'Loading branches...' : 'Select Branch' }}
+            {{ loadingBranches() ? 'Loading branches...' : 'Select Branch' }}
           </option>
 
           <option
-            *ngFor="let branch of branches"
+            *ngFor="let branch of branches()"
             [value]="branch.id">
 
             {{ branch.name }}
@@ -90,8 +90,8 @@
 
         </select>
 
-        <p class="field-error" *ngIf="loadError">
-          {{ loadError }}
+        <p class="field-error" *ngIf="loadError()">
+          {{ loadError() }}
           <button type="button" class="retry-link" (click)="loadBranches()">Retry</button>
         </p>
 
@@ -348,10 +348,10 @@
 
       <button
         class="submit"
-        [disabled]="submitting"
+        [disabled]="submitting()"
         (click)="submit()">
 
-        {{ submitting ? 'Submitting...' : 'Submit for DM Approval' }}
+        {{ submitting() ? 'Submitting...' : 'Submit for DM Approval' }}
 
       </button>
 

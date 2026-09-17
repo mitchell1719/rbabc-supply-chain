@@ -11,16 +11,16 @@
 </div>
 
 <app-data-state
-  [loading]="loading"
-  [error]="errorMessage"
-  [isEmpty]="requests.length === 0"
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [isEmpty]="requests().length === 0"
   loadingMessage="Loading pending approvals..."
   emptyMessage="No purchase requests are currently pending DM approval."
   (retry)="load()">
 
 <div
   class="approval-card"
-  *ngFor="let request of requests">
+  *ngFor="let request of requests()">
 
   <div class="approval-header">
 
@@ -134,7 +134,7 @@
 
     <button
       class="return"
-      [disabled]="processingId === request.id"
+      [disabled]="processingId() === request.id"
       (click)="returnRequest(request)">
 
       Return for Revision
@@ -143,10 +143,10 @@
 
     <button
       class="approve"
-      [disabled]="processingId === request.id"
+      [disabled]="processingId() === request.id"
       (click)="approve(request)">
 
-      {{ processingId === request.id ? 'Processing...' : '✓ Approve Request' }}
+      {{ processingId() === request.id ? 'Processing...' : '✓ Approve Request' }}
 
     </button>
 

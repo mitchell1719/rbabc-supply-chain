@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import {
@@ -41,13 +42,13 @@ import {
 export class Deliveries
 implements OnInit {
 
-  deliveries: DeliveryNote[] = [];
+  readonly deliveries = signal<DeliveryNote[]>([]);
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  dispatchingId: string | null = null;
+  readonly dispatchingId = signal<string | null>(null);
 
   constructor(
     private service:
@@ -63,26 +64,28 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
-      this.deliveries =
+      this.deliveries.set(
         await this.service
-          .getDeliveries();
+          .getDeliveries()
+      );
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load deliveries.';
+          : 'Unable to load deliveries.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -107,7 +110,7 @@ implements OnInit {
       return;
     }
 
-    this.dispatchingId = delivery.id;
+    this.dispatchingId.set(delivery.id);
 
     try {
 
@@ -128,7 +131,7 @@ implements OnInit {
 
     } finally {
 
-      this.dispatchingId = null;
+      this.dispatchingId.set(null);
 
     }
 

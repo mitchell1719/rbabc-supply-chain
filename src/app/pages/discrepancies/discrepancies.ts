@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import {
@@ -51,16 +52,16 @@ import {
 export class Discrepancies
 implements OnInit {
 
-  records: ReceivingReport[] = [];
+  readonly records = signal<ReceivingReport[]>([]);
 
   resolution:
     Record<string,string> = {};
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  resolvingId: string | null = null;
+  readonly resolvingId = signal<string | null>(null);
 
   constructor(
     private service:
@@ -76,26 +77,28 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
-      this.records =
+      this.records.set(
         await this.service
-          .getDiscrepancies();
+          .getDiscrepancies()
+      );
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load discrepancies.';
+          : 'Unable to load discrepancies.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -134,7 +137,7 @@ implements OnInit {
       return;
     }
 
-    this.resolvingId = record.id;
+    this.resolvingId.set(record.id);
 
     try {
 
@@ -156,7 +159,7 @@ implements OnInit {
 
     } finally {
 
-      this.resolvingId = null;
+      this.resolvingId.set(null);
 
     }
 

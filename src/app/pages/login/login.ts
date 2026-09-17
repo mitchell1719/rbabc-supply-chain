@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
@@ -32,9 +32,9 @@ export class Login {
 
   confirmPassword = '';
 
-  submitting = false;
+  readonly submitting = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
   constructor(
     private auth: AuthService,
@@ -47,7 +47,7 @@ export class Login {
   setMode(mode: AuthMode) {
     this.mode = mode;
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
   }
 
   private validate(): string {
@@ -77,17 +77,17 @@ export class Login {
   }
 
   async submit() {
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     const validationError = this.validate();
 
     if (validationError) {
-      this.errorMessage = validationError;
+      this.errorMessage.set(validationError);
 
       return;
     }
 
-    this.submitting = true;
+    this.submitting.set(true);
 
     try {
       if (this.mode === 'signIn') {
@@ -100,10 +100,11 @@ export class Login {
 
       this.router.navigateByUrl(returnUrl);
     } catch (error) {
-      this.errorMessage =
-        error instanceof Error ? error.message : 'Unable to complete the request.';
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'Unable to complete the request.',
+      );
     } finally {
-      this.submitting = false;
+      this.submitting.set(false);
     }
   }
 }

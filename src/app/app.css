@@ -23,8 +23,18 @@
   width: calc(100% - 80px);
 }
 
+.main-content.no-shell,
+.main-content.no-shell.collapsed {
+  margin-left: 0;
+  width: 100%;
+}
+
 .router-content {
   padding: 28px;
+}
+
+.router-content.no-shell {
+  padding: 0;
 }
 
 @media(max-width: 700px) {

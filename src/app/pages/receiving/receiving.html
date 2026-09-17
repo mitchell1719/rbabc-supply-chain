@@ -11,16 +11,16 @@
 </div>
 
 <app-data-state
-  [loading]="loading"
-  [error]="errorMessage"
-  [isEmpty]="deliveries.length === 0"
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [isEmpty]="deliveries().length === 0"
   loadingMessage="Loading deliveries..."
   emptyMessage="No dispatched deliveries awaiting receiving confirmation."
   (retry)="load()">
 
 <div
   class="delivery-card"
-  *ngFor="let delivery of deliveries">
+  *ngFor="let delivery of deliveries()">
 
   <h3>
     {{ delivery.deliveryNumber }}
@@ -99,10 +99,10 @@
   </div>
 
   <button
-    [disabled]="submittingId === delivery.id"
+    [disabled]="submittingId() === delivery.id"
     (click)="receive(delivery)">
 
-    {{ submittingId === delivery.id ? 'Submitting...' : 'Submit Receiving Report' }}
+    {{ submittingId() === delivery.id ? 'Submitting...' : 'Submit Receiving Report' }}
 
   </button>
 

@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -52,15 +53,15 @@ import { AuthService } from '../../services/auth.service';
 })
 export class DmApprovals implements OnInit {
 
-  requests: PurchaseRequest[] = [];
+  readonly requests = signal<PurchaseRequest[]>([]);
 
   comments: Record<string,string> = {};
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  processingId: string | null = null;
+  readonly processingId = signal<string | null>(null);
 
   constructor(
     private service: SupplyChainService,
@@ -76,27 +77,29 @@ export class DmApprovals implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
-      this.requests =
+      this.requests.set(
         await this.service.getRequestsByStatus(
           'PENDING_DM_APPROVAL'
-        );
+        )
+      );
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load pending approvals.';
+          : 'Unable to load pending approvals.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -121,7 +124,7 @@ export class DmApprovals implements OnInit {
       return;
     }
 
-    this.processingId = request.id;
+    this.processingId.set(request.id);
 
     try {
 
@@ -142,7 +145,7 @@ export class DmApprovals implements OnInit {
 
     } finally {
 
-      this.processingId = null;
+      this.processingId.set(null);
 
     }
 
@@ -180,7 +183,7 @@ export class DmApprovals implements OnInit {
       return;
     }
 
-    this.processingId = request.id;
+    this.processingId.set(request.id);
 
     try {
 
@@ -201,7 +204,7 @@ export class DmApprovals implements OnInit {
 
     } finally {
 
-      this.processingId = null;
+      this.processingId.set(null);
 
     }
 

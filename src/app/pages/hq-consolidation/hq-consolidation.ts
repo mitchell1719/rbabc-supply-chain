@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -41,16 +42,16 @@ import { AuthService } from '../../services/auth.service';
 export class HqConsolidation
 implements OnInit {
 
-  requests: PurchaseRequest[] = [];
+  readonly requests = signal<PurchaseRequest[]>([]);
 
   selected =
     new Set<string>();
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  consolidating = false;
+  readonly consolidating = signal(false);
 
   async ngOnInit() {
     await this.load();
@@ -68,28 +69,30 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
 
-      this.requests =
+      this.requests.set(
         await this.service
           .getRequestsByStatus(
             'DM_APPROVED'
-          );
+          )
+      );
 
     } catch (error) {
 
-      this.errorMessage =
+      this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Unable to load DM-approved requests.';
+          : 'Unable to load DM-approved requests.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -135,7 +138,7 @@ implements OnInit {
     }
 
     const selectedRequests =
-      this.requests.filter(
+      this.requests().filter(
         r =>
           r.id &&
           this.selected.has(r.id)
@@ -168,7 +171,7 @@ implements OnInit {
       return;
     }
 
-    this.consolidating = true;
+    this.consolidating.set(true);
 
     try {
 
@@ -205,7 +208,7 @@ implements OnInit {
 
     } finally {
 
-      this.consolidating = false;
+      this.consolidating.set(false);
 
     }
 

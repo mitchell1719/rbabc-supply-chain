@@ -5,8 +5,8 @@
 </p>
 
 <app-data-state
-  [loading]="loading"
-  [error]="errorMessage"
+  [loading]="loading()"
+  [error]="errorMessage()"
   [isEmpty]="false"
   loadingMessage="Loading report data..."
   (retry)="load()">
@@ -16,35 +16,35 @@
     <div class="report">
       <span>Total Purchase Requests</span>
       <strong>
-        {{ requests.length }}
+        {{ requests().length }}
       </strong>
     </div>
 
     <div class="report">
       <span>Completed Requests</span>
       <strong>
-        {{ completed }}
+        {{ completed() }}
       </strong>
     </div>
 
     <div class="report">
       <span>Inventory Records</span>
       <strong>
-        {{ inventory.length }}
+        {{ inventory().length }}
       </strong>
     </div>
 
     <div class="report">
       <span>Low Stock Records</span>
       <strong>
-        {{ lowStock }}
+        {{ lowStock() }}
       </strong>
     </div>
 
     <div class="report">
       <span>Deliveries</span>
       <strong>
-        {{ deliveries.length }}
+        {{ deliveries().length }}
       </strong>
     </div>
 

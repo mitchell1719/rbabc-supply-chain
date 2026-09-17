@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
@@ -36,13 +36,13 @@ import { CopyButton } from '../../components/copy-button/copy-button';
   styleUrl: './request-details.css',
 })
 export class RequestDetails implements OnInit {
-  request: PurchaseRequest | null = null;
+  readonly request = signal<PurchaseRequest | null>(null);
 
-  history: WorkflowHistory[] = [];
+  readonly history = signal<WorkflowHistory[]>([]);
 
-  loading = true;
+  readonly loading = signal(true);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
   constructor(
     private route: ActivatedRoute,
@@ -54,9 +54,9 @@ export class RequestDetails implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
 
     if (!id) {
-      this.errorMessage = 'No purchase request was specified.';
+      this.errorMessage.set('No purchase request was specified.');
 
-      this.loading = false;
+      this.loading.set(false);
 
       return;
     }
@@ -65,25 +65,28 @@ export class RequestDetails implements OnInit {
   }
 
   async load(id: string) {
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
-      this.request = await this.service.getPurchaseRequest(id);
+      const request = await this.service.getPurchaseRequest(id);
 
-      if (!this.request) {
-        this.errorMessage = 'Purchase request not found.';
+      this.request.set(request);
+
+      if (!request) {
+        this.errorMessage.set('Purchase request not found.');
 
         return;
       }
 
-      this.history = await this.service.getWorkflowHistory(id);
+      this.history.set(await this.service.getWorkflowHistory(id));
     } catch (error) {
-      this.errorMessage =
-        error instanceof Error ? error.message : 'Unable to load purchase request details.';
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'Unable to load purchase request details.',
+      );
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 

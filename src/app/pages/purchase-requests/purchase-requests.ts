@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
@@ -24,11 +24,11 @@ import { CopyButton } from '../../components/copy-button/copy-button';
   styleUrl: './purchase-requests.css',
 })
 export class PurchaseRequests implements OnInit {
-  requests: PurchaseRequest[] = [];
+  readonly requests = signal<PurchaseRequest[]>([]);
 
-  loading = false;
+  readonly loading = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
   constructor(private service: SupplyChainService) {}
 
@@ -37,17 +37,18 @@ export class PurchaseRequests implements OnInit {
   }
 
   async loadRequests() {
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     try {
-      this.requests = await this.service.getPurchaseRequests();
+      this.requests.set(await this.service.getPurchaseRequests());
     } catch (error) {
-      this.errorMessage =
-        error instanceof Error ? error.message : 'Unable to load purchase requests.';
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'Unable to load purchase requests.'
+      );
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 }

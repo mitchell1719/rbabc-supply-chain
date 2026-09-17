@@ -11,10 +11,10 @@
 
   <button
     class="primary"
-    [disabled]="consolidating"
+    [disabled]="consolidating()"
     (click)="consolidate()">
 
-    {{ consolidating ? 'Consolidating...' : 'Consolidate Selected' }}
+    {{ consolidating() ? 'Consolidating...' : 'Consolidate Selected' }}
 
   </button>
 
@@ -23,9 +23,9 @@
 <div class="table-card">
 
   <app-data-state
-    [loading]="loading"
-    [error]="errorMessage"
-    [isEmpty]="requests.length === 0"
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="requests().length === 0"
     loadingMessage="Loading DM-approved requests..."
     emptyMessage="No DM-approved requests waiting for HQ consolidation."
     (retry)="load()">
@@ -49,7 +49,7 @@
     <tbody>
 
       <tr
-        *ngFor="let request of requests">
+        *ngFor="let request of requests()">
 
         <td>
 
