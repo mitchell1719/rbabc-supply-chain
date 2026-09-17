@@ -1,0 +1,33 @@
+<div class="timeline">
+
+  <div
+    class="timeline-item"
+    *ngFor="let item of history">
+
+    <div class="timeline-marker"></div>
+
+    <div class="timeline-content">
+
+      <strong>
+        {{ item.action }}
+      </strong>
+
+      <p>
+        {{ item.fromStatus || 'START' }}
+        →
+        {{ item.toStatus }}
+      </p>
+
+      <p *ngIf="item.comments">
+        {{ item.comments }}
+      </p>
+
+      <small>
+        By {{ item.performedBy }}
+      </small>
+
+    </div>
+
+  </div>
+
+</div>

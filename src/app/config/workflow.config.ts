@@ -1,0 +1,82 @@
+import {
+  RequestStatus
+} from '../models/supply-chain.model';
+
+
+export const REQUEST_TRANSITIONS:
+Record<RequestStatus, RequestStatus[]> = {
+
+  DRAFT: [
+    'PENDING_DM_APPROVAL',
+    'CANCELLED'
+  ],
+
+  PENDING_DM_APPROVAL: [
+    'DM_APPROVED',
+    'RETURNED_FOR_REVISION'
+  ],
+
+  RETURNED_FOR_REVISION: [
+    'PENDING_DM_APPROVAL',
+    'CANCELLED'
+  ],
+
+  DM_APPROVED: [
+    'RECEIVED_BY_HQ'
+  ],
+
+  RECEIVED_BY_HQ: [
+    'HQ_CONSOLIDATED'
+  ],
+
+  HQ_CONSOLIDATED: [
+    'PRS_CREATED'
+  ],
+
+  PRS_CREATED: [
+    'WAREHOUSE_CHECK'
+  ],
+
+  WAREHOUSE_CHECK: [
+    'FOR_PROCUREMENT',
+    'FOR_DELIVERY'
+  ],
+
+  FOR_PROCUREMENT: [
+    'PROCUREMENT_COMPLETED'
+  ],
+
+  PROCUREMENT_COMPLETED: [
+    'FOR_DELIVERY'
+  ],
+
+  FOR_DELIVERY: [
+    'IN_TRANSIT'
+  ],
+
+  IN_TRANSIT: [
+    'DELIVERED'
+  ],
+
+  DELIVERED: [
+    'RECEIVING_VERIFICATION'
+  ],
+
+  RECEIVING_VERIFICATION: [
+    'RECEIVED',
+    'DISCREPANCY'
+  ],
+
+  DISCREPANCY: [
+    'RECEIVING_VERIFICATION'
+  ],
+
+  RECEIVED: [
+    'COMPLETED'
+  ],
+
+  COMPLETED: [],
+
+  CANCELLED: []
+
+};

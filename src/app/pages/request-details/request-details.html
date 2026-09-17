@@ -1,0 +1,176 @@
+<div *ngIf="loading">
+  Loading...
+
+  <p>
+    Loading status:
+    {{loading}}
+  </p>
+
+  <p>
+    Request:
+    {{request | json}}
+  </p>
+</div>
+
+<div class="page" *ngIf="!loading && request">
+
+  <a routerLink="/purchase-requests" class="back">
+
+    ← Purchase Requests
+
+  </a>
+
+  <div class="request-header">
+
+    <div>
+
+      <h1>
+        {{ request.controlNumber }}
+      </h1>
+
+      <p>
+        {{ request.branchName }}
+        •
+        {{ request.requestDate }}
+      </p>
+
+    </div>
+
+    <app-status-badge [status]="request.status">
+    </app-status-badge>
+
+  </div>
+
+  <div class="layout">
+
+    <div class="main">
+
+      <div class="card">
+
+        <h3>Request Information</h3>
+
+        <div class="info-grid">
+
+          <div>
+            <label>Branch</label>
+            <strong>
+              {{ request.branchName }}
+            </strong>
+          </div>
+
+          <div>
+            <label>Department</label>
+            <strong>
+              {{ request.department }}
+            </strong>
+          </div>
+
+          <div>
+            <label>Assigned HQ</label>
+            <strong>
+              {{ request.headquartersName }}
+            </strong>
+          </div>
+
+          <div>
+            <label>District Manager</label>
+            <strong>
+              {{ request.districtManagerName }}
+            </strong>
+          </div>
+
+          <div>
+            <label>Prepared By</label>
+            <strong>
+              {{ request.preparedBy }}
+            </strong>
+          </div>
+
+          <div>
+            <label>Total Amount</label>
+            <strong>
+              ₱{{ request.totalAmount | number:'1.2-2' }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h3>Requested Items</h3>
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th>Description</th>
+                <th>Current Stock</th>
+                <th>Consumption</th>
+                <th>Justification</th>
+                <th>Unit Cost</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr *ngFor="let item of request.items">
+
+                <td>{{ item.quantity }}</td>
+
+                <td>{{ item.unit }}</td>
+
+                <td>{{ item.description }}</td>
+
+                <td>{{ item.currentStock }}</td>
+
+                <td>
+                  {{ item.expectedConsumption }}
+                </td>
+
+                <td>
+                  {{ item.justification }}
+                </td>
+
+                <td>
+                  ₱{{ item.unitCost | number:'1.2-2' }}
+                </td>
+
+                <td>
+                  ₱{{ item.totalCost | number:'1.2-2' }}
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="side">
+
+      <div class="card">
+
+        <h3>Workflow History</h3>
+
+        <app-workflow-timeline [history]="history">
+        </app-workflow-timeline>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

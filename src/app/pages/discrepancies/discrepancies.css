@@ -1,0 +1,62 @@
+h1 {
+  margin-bottom: 3px;
+}
+
+.subtitle {
+  color: #8792a2;
+  font-size: 10px;
+}
+
+.card {
+  background: white;
+
+  border: 1px solid #e1e6ec;
+  border-radius: 8px;
+
+  padding: 20px;
+
+  margin-top: 15px;
+}
+
+.card p {
+  font-size: 10px;
+}
+
+.issue {
+  padding: 12px;
+
+  background: #fff1f1;
+
+  border-radius: 6px;
+
+  color: #b62028;
+
+  margin: 10px 0;
+
+  font-size: 10px;
+}
+
+textarea {
+  width: 100%;
+
+  border: 1px solid #dce2e8;
+  border-radius: 6px;
+
+  padding: 10px;
+
+  min-height: 80px;
+
+  margin-bottom: 10px;
+}
+
+button {
+  background: #0a5a9c;
+  color: white;
+
+  border: 0;
+  border-radius: 6px;
+
+  padding: 10px 14px;
+
+  cursor: pointer;
+}

@@ -1,0 +1,151 @@
+<div class="page-header">
+
+  <div>
+    <h1>DM Approvals</h1>
+    <p>
+      Review purchase requests submitted
+      by assigned branches.
+    </p>
+  </div>
+
+</div>
+
+<div
+  class="empty"
+  *ngIf="requests.length === 0">
+
+  No purchase requests are currently
+  pending DM approval.
+
+</div>
+
+<div
+  class="approval-card"
+  *ngFor="let request of requests">
+
+  <div class="approval-header">
+
+    <div>
+
+      <h3>
+        {{ request.controlNumber }}
+      </h3>
+
+      <p>
+        {{ request.branchName }}
+        •
+        {{ request.requestDate }}
+      </p>
+
+    </div>
+
+    <app-status-badge
+      [status]="request.status">
+    </app-status-badge>
+
+  </div>
+
+  <div class="request-info">
+
+    <div>
+      <span>Assigned DM</span>
+      <strong>
+        {{ request.districtManagerName }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Assigned HQ</span>
+      <strong>
+        {{ request.headquartersName }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Prepared By</span>
+      <strong>
+        {{ request.preparedBy }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Total</span>
+      <strong>
+        ₱{{ request.totalAmount | number:'1.2-2' }}
+      </strong>
+    </div>
+
+  </div>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>Quantity</th>
+        <th>Unit</th>
+        <th>Description</th>
+        <th>Current Stock</th>
+        <th>Expected Consumption</th>
+        <th>Justification</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr
+        *ngFor="let item of request.items">
+
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.unit }}</td>
+        <td>{{ item.description }}</td>
+        <td>{{ item.currentStock }}</td>
+
+        <td>
+          {{ item.expectedConsumption }}
+        </td>
+
+        <td>
+          {{ item.justification }}
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+  <div class="comments">
+
+    <label>
+      Review Comments
+    </label>
+
+    <textarea
+      [(ngModel)]="comments[request.id!]"
+      rows="3"
+      placeholder="Optional for approval; required when returning">
+    </textarea>
+
+  </div>
+
+  <div class="actions">
+
+    <button
+      class="return"
+      (click)="returnRequest(request)">
+
+      Return for Revision
+
+    </button>
+
+    <button
+      class="approve"
+      (click)="approve(request)">
+
+      ✓ Approve Request
+
+    </button>
+
+  </div>
+
+</div>

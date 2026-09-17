@@ -1,0 +1,132 @@
+<div class="page-header">
+
+  <div>
+
+    <h1>
+      Purchase Requests
+    </h1>
+
+    <p>
+      Branch purchase request monitoring
+      and approval workflow.
+    </p>
+
+  </div>
+
+
+  <a routerLink="/purchase-requests/new" class="primary">
+
+    + New Purchase Request
+
+  </a>
+
+</div>
+
+
+<div class="table-card">
+
+  <div *ngIf="loading" class="empty">
+
+    Loading purchase requests...
+
+  </div>
+
+
+  <div *ngIf="
+      !loading &&
+      requests.length === 0
+    " class="empty">
+
+    No purchase requests found.
+
+  </div>
+
+
+  <table *ngIf="
+      !loading &&
+      requests.length > 0
+    ">
+
+    <thead>
+
+      <tr>
+
+        <th>PR No.</th>
+        <th>Date</th>
+        <th>Branch</th>
+        <th>Assigned HQ</th>
+        <th>District Manager</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th></th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody>
+
+      <tr *ngFor="let request of requests">
+
+        <td>
+          <strong>
+            {{ request.controlNumber }}
+          </strong>
+        </td>
+
+        <td>
+          {{ request.requestDate }}
+        </td>
+
+        <td>
+          {{ request.branchName }}
+        </td>
+
+        <td>
+          {{ request.headquartersName }}
+        </td>
+
+        <td>
+          {{ request.districtManagerName }}
+        </td>
+
+        <td>
+          ₱{{
+          request.totalAmount
+          | number:'1.2-2'
+          }}
+        </td>
+
+        <td>
+
+          <span class="status">
+
+            {{
+            request.status?.replaceAll('_',' ')
+            }}
+
+          </span>
+
+        </td>
+
+        <td>
+
+          <a [routerLink]="[
+              '/purchase-requests',
+              request.id
+            ]">
+
+            View
+
+          </a>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>

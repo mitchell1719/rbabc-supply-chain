@@ -1,0 +1,80 @@
+<div class="page-header">
+
+  <div>
+    <h1>Deliveries</h1>
+    <p>
+      Vaccine and supply dispatch monitoring.
+    </p>
+  </div>
+
+</div>
+
+<div class="card">
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Delivery No.</th>
+        <th>PRS No.</th>
+        <th>Destination</th>
+        <th>Date</th>
+        <th>Prepared By</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr
+        *ngFor="let delivery of deliveries">
+
+        <td>
+          {{ delivery.deliveryNumber }}
+        </td>
+
+        <td>
+          {{ delivery.prsNumber }}
+        </td>
+
+        <td>
+          {{ delivery.branchName }}
+        </td>
+
+        <td>
+          {{ delivery.deliveryDate }}
+        </td>
+
+        <td>
+          {{ delivery.preparedBy }}
+        </td>
+
+        <td>
+          {{ delivery.status }}
+        </td>
+
+        <td>
+
+          <button
+            *ngIf="
+              delivery.status ===
+              'PREPARING'
+            "
+            (click)="dispatch(delivery)">
+
+            Dispatch
+
+          </button>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>

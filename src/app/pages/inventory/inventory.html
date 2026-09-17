@@ -1,0 +1,97 @@
+<div class="page-header">
+
+  <div>
+    <h1>Inventory</h1>
+
+    <p>
+      Monitor branch, HQ and Central
+      Warehouse inventory.
+    </p>
+  </div>
+
+</div>
+
+<div class="toolbar">
+
+  <input
+    [(ngModel)]="search"
+    placeholder="Search product, branch, batch...">
+
+</div>
+
+<div class="table-card">
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Product</th>
+        <th>Location</th>
+        <th>Type</th>
+        <th>Batch</th>
+        <th>Expiry</th>
+        <th>Quantity</th>
+        <th>Reorder Level</th>
+        <th>Status</th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr
+        *ngFor="let item of filtered">
+
+        <td>
+          {{ item.productName }}
+        </td>
+
+        <td>
+          {{ item.locationName }}
+        </td>
+
+        <td>
+          {{ item.locationType }}
+        </td>
+
+        <td>
+          {{ item.batchNumber }}
+        </td>
+
+        <td>
+          {{ item.expiryDate }}
+        </td>
+
+        <td>
+          {{ item.quantity }}
+        </td>
+
+        <td>
+          {{ item.reorderLevel }}
+        </td>
+
+        <td>
+
+          <span
+            class="stock"
+            [class.low]="
+              getStatus(item) === 'Low Stock'
+            "
+            [class.critical]="
+              getStatus(item) === 'Critical'
+            ">
+
+            {{ getStatus(item) }}
+
+          </span>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>

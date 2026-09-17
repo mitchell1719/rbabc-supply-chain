@@ -1,0 +1,70 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 23px;
+}
+
+.page-header p {
+  color: #8792a2;
+  font-size: 10px;
+}
+
+.primary {
+  border: 0;
+
+  background: #0a5a9c;
+  color: white;
+
+  padding: 11px 15px;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+}
+
+.table-card {
+  background: white;
+
+  border: 1px solid #e1e6ec;
+  border-radius: 9px;
+
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #f7f9fb;
+
+  padding: 12px;
+
+  text-align: left;
+
+  font-size: 8px;
+}
+
+td {
+  padding: 12px;
+
+  border-top: 1px solid #edf0f3;
+
+  font-size: 9px;
+}
+
+.empty {
+  padding: 30px;
+  text-align: center;
+
+  color: #8792a2;
+  font-size: 10px;
+}

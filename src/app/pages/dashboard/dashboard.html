@@ -1,0 +1,123 @@
+<div class="dashboard">
+
+  <div class="page-title">
+
+    <div>
+      <h1>Dashboard</h1>
+      <p>
+        RB ABC Supply Chain Office overview.
+      </p>
+    </div>
+
+    <a
+      routerLink="/purchase-requests/new"
+      class="new-request">
+
+      + New Purchase Request
+
+    </a>
+
+  </div>
+
+  <div class="stats">
+
+    <app-stat-card
+      title="Total Requests"
+      [value]="requests.length"
+      icon="📋"
+      subtitle="All purchase requests">
+    </app-stat-card>
+
+    <app-stat-card
+      title="Pending DM Approval"
+      [value]="pendingDM"
+      icon="⏳"
+      subtitle="Waiting for review">
+    </app-stat-card>
+
+    <app-stat-card
+      title="Approved Requests"
+      [value]="approved"
+      icon="✓"
+      subtitle="Approved by DM">
+    </app-stat-card>
+
+    <app-stat-card
+      title="Completed"
+      [value]="completed"
+      icon="📦"
+      subtitle="Completed requests">
+    </app-stat-card>
+
+  </div>
+
+  <div class="panel">
+
+    <div class="panel-header">
+
+      <div>
+        <h3>Recent Purchase Requests</h3>
+        <p>Latest branch requests</p>
+      </div>
+
+      <a routerLink="/purchase-requests">
+        View All
+      </a>
+
+    </div>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>PR Number</th>
+          <th>Branch</th>
+          <th>HQ</th>
+          <th>District Manager</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr
+          *ngFor="let request of requests.slice(0,5)">
+
+          <td>
+            {{ request.controlNumber }}
+          </td>
+
+          <td>
+            {{ request.branchName }}
+          </td>
+
+          <td>
+            {{ request.headquartersName }}
+          </td>
+
+          <td>
+            {{ request.districtManagerName }}
+          </td>
+
+          <td>
+            ₱{{ request.totalAmount | number:'1.2-2' }}
+          </td>
+
+          <td>
+
+            <app-status-badge
+              [status]="request.status">
+            </app-status-badge>
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

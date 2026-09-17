@@ -1,0 +1,420 @@
+<div class="page-header">
+
+  <div>
+
+    <h1>
+      Branch Management
+    </h1>
+
+    <p>
+      Manage RB ABC branches and
+      supply-chain routing assignments.
+    </p>
+
+  </div>
+
+</div>
+
+
+<!-- SUCCESS -->
+
+<div
+  class="message success"
+  *ngIf="successMessage">
+
+  {{ successMessage }}
+
+</div>
+
+
+<!-- ERROR -->
+
+<div
+  class="message error"
+  *ngIf="errorMessage">
+
+  {{ errorMessage }}
+
+</div>
+
+
+<div class="branch-layout">
+
+
+  <!-- ============================= -->
+  <!-- ADD BRANCH -->
+  <!-- ============================= -->
+
+  <div class="card form-card">
+
+    <h3>
+      Add New Branch
+    </h3>
+
+
+    <!-- Branch Name -->
+
+    <div class="form-group">
+
+      <label>
+        Branch Name *
+      </label>
+
+      <input
+        type="text"
+        [(ngModel)]="form.name"
+        placeholder="Example: RB ABC Cebu Inc.">
+
+    </div>
+
+
+    <!-- Region -->
+
+    <div class="form-group">
+
+      <label>
+        Region *
+      </label>
+
+      <select
+        [(ngModel)]="form.region">
+
+        <option value="LUZON">
+          Luzon
+        </option>
+
+        <option value="VISAYAS">
+          Visayas
+        </option>
+
+        <option value="MINDANAO">
+          Mindanao
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- Headquarters -->
+
+    <div class="form-group">
+
+      <label>
+        Assigned Headquarters *
+      </label>
+
+      <input
+        type="text"
+        [(ngModel)]="
+          form.headquartersName
+        "
+        placeholder="Example: Cebu City HQ">
+
+    </div>
+
+
+    <!-- Headquarters ID -->
+
+    <div class="form-group">
+
+      <label>
+        Headquarters ID
+      </label>
+
+      <input
+        type="text"
+        [(ngModel)]="
+          form.headquartersId
+        "
+        placeholder="Optional - automatically generated">
+
+    </div>
+
+
+    <!-- District Manager -->
+
+    <div class="form-group">
+
+      <label>
+        District Manager *
+      </label>
+
+      <input
+        type="text"
+        [(ngModel)]="
+          form.districtManagerName
+        "
+        placeholder="District Manager">
+
+    </div>
+
+
+    <!-- District Manager ID -->
+
+    <div class="form-group">
+
+      <label>
+        District Manager ID
+      </label>
+
+      <input
+        type="text"
+        [(ngModel)]="
+          form.districtManagerId
+        "
+        placeholder="Optional - automatically generated">
+
+    </div>
+
+
+    <!-- RNS -->
+
+    <div class="form-group">
+
+      <label>
+        Regional Nurse Supervisor
+      </label>
+
+      <input
+        type="text"
+        [(ngModel)]="
+          form.rnsName
+        "
+        placeholder="Regional Nurse Supervisor">
+
+    </div>
+
+
+    <!-- RNS ID -->
+
+    <div class="form-group">
+
+      <label>
+        RNS ID
+      </label>
+
+      <input
+        type="text"
+        [(ngModel)]="
+          form.rnsId
+        "
+        placeholder="Optional - automatically generated">
+
+    </div>
+
+
+    <!-- Active -->
+
+    <div class="checkbox-row">
+
+      <input
+        id="active"
+        type="checkbox"
+        [(ngModel)]="
+          form.active
+        ">
+
+      <label for="active">
+        Active Branch
+      </label>
+
+    </div>
+
+
+    <!-- Save -->
+
+    <button
+      type="button"
+      class="save-button"
+      [disabled]="saving"
+      (click)="save()">
+
+      <span *ngIf="!saving">
+        Save Branch
+      </span>
+
+      <span *ngIf="saving">
+        Saving...
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- DATABASE LIST -->
+  <!-- ============================= -->
+
+  <div class="card list-card">
+
+    <div class="table-header">
+
+      <div>
+
+        <h3>
+          Branch Master List
+        </h3>
+
+        <p>
+          {{ branches.length }}
+          branch record(s)
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="refresh-button"
+        [disabled]="loading"
+        (click)="loadBranches()">
+
+        Refresh
+
+      </button>
+
+    </div>
+
+
+    <!-- Loading -->
+
+    <div
+      class="loading"
+      *ngIf="loading">
+
+      Loading branches...
+
+    </div>
+
+
+    <!-- Empty -->
+
+    <div
+      class="empty"
+      *ngIf="
+        !loading &&
+        branches.length === 0
+      ">
+
+      No branches have been saved yet.
+
+    </div>
+
+
+    <!-- Table -->
+
+    <div
+      class="table-wrapper"
+      *ngIf="
+        !loading &&
+        branches.length > 0
+      ">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Branch
+            </th>
+
+            <th>
+              Region
+            </th>
+
+            <th>
+              Headquarters
+            </th>
+
+            <th>
+              District Manager
+            </th>
+
+            <th>
+              RNS
+            </th>
+
+            <th>
+              Status
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let branch
+              of branches
+            ">
+
+            <td>
+
+              <strong>
+                {{ branch.name }}
+              </strong>
+
+            </td>
+
+
+            <td>
+              {{ branch.region }}
+            </td>
+
+
+            <td>
+              {{ branch.headquartersName }}
+            </td>
+
+
+            <td>
+              {{ branch.districtManagerName }}
+            </td>
+
+
+            <td>
+
+              {{
+                branch.rnsName
+                || '-'
+              }}
+
+            </td>
+
+
+            <td>
+
+              <span
+                class="status"
+                [class.inactive]="
+                  !branch.active
+                ">
+
+                {{
+                  branch.active
+                    ? 'Active'
+                    : 'Inactive'
+                }}
+
+              </span>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

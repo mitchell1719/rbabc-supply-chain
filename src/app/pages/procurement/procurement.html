@@ -1,0 +1,82 @@
+<h1>Procurement</h1>
+
+<p class="subtitle">
+  Manage PRS items requiring supplier procurement.
+</p>
+
+<div class="card">
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>PR No.</th>
+        <th>Branch</th>
+        <th>HQ</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr
+        *ngFor="let request of records">
+
+        <td>
+          {{ request.controlNumber }}
+        </td>
+
+        <td>
+          {{ request.branchName }}
+        </td>
+
+        <td>
+          {{ request.headquartersName }}
+        </td>
+
+        <td>
+          ₱{{ request.totalAmount | number:'1.2-2' }}
+        </td>
+
+        <td>
+          {{ request.status }}
+        </td>
+
+        <td>
+
+          <button
+            *ngIf="
+              request.status ===
+              'PRS_CREATED'
+              ||
+              request.status ===
+              'WAREHOUSE_CHECK'
+            "
+            (click)="procure(request)">
+
+            Send for Procurement
+
+          </button>
+
+          <button
+            *ngIf="
+              request.status ===
+              'FOR_PROCUREMENT'
+            "
+            (click)="complete(request)">
+
+            Complete Procurement
+
+          </button>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>

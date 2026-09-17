@@ -1,0 +1,40 @@
+<h1>Discrepancies</h1>
+
+<p class="subtitle">
+  Receiving reports requiring resolution.
+</p>
+
+<div
+  class="card"
+  *ngFor="let record of records">
+
+  <h3>
+    {{ record.receivingNumber }}
+  </h3>
+
+  <p>
+    Branch:
+    <strong>
+      {{ record.branchName }}
+    </strong>
+  </p>
+
+  <div class="issue">
+
+    {{ record.discrepancyRemarks }}
+
+  </div>
+
+  <textarea
+    [(ngModel)]="resolution[record.id]"
+    placeholder="Enter corrective action / resolution">
+  </textarea>
+
+  <button
+    (click)="resolve(record)">
+
+    Resolve Discrepancy
+
+  </button>
+
+</div>

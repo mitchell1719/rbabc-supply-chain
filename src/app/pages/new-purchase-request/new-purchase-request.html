@@ -1,0 +1,355 @@
+<div class="page">
+
+  <div class="page-header">
+
+    <div>
+
+      <button
+        class="back"
+        (click)="cancel()">
+
+        ← Purchase Requests
+
+      </button>
+
+      <h1>
+        New Purchase Request
+      </h1>
+
+      <p>
+        Submit branch requirements for
+        District Manager approval.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div class="form-card">
+
+    <div class="card-title">
+
+      <h3>
+        Purchase Request Information
+      </h3>
+
+    </div>
+
+
+    <div class="form-grid">
+
+
+      <div class="form-group">
+
+        <label>
+          Control Number
+        </label>
+
+        <input
+          [(ngModel)]="controlNumber"
+          readonly>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Date
+        </label>
+
+        <input
+          type="date"
+          [(ngModel)]="requestDate">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Branch *
+        </label>
+
+        <select
+          [(ngModel)]="selectedBranchId">
+
+          <option value="">
+            Select Branch
+          </option>
+
+          <option
+            *ngFor="let branch of branches"
+            [value]="branch.id">
+
+            {{ branch.name }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Department *
+        </label>
+
+        <input
+          [(ngModel)]="department"
+          placeholder="Branch Operations">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Prepared By *
+        </label>
+
+        <input
+          [(ngModel)]="preparedBy"
+          placeholder="Personnel-in-Charge">
+
+      </div>
+
+    </div>
+
+
+    <div class="request-heading">
+
+      <div>
+
+        <h3>
+          Branch / Department Request
+        </h3>
+
+        <p>
+          Enter requested supplies.
+        </p>
+
+      </div>
+
+
+      <button
+        class="add"
+        (click)="addItem()">
+
+        + Add Item
+
+      </button>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>#</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Description</th>
+            <th>Current Stock</th>
+            <th>Expected Consumption</th>
+            <th>Justification</th>
+            <th>Unit Cost</th>
+            <th>Total Cost</th>
+            <th></th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let item of items;
+              let i = index
+            ">
+
+            <td>
+              {{ i + 1 }}
+            </td>
+
+
+            <td>
+
+              <input
+                type="number"
+                [(ngModel)]="item.quantity"
+                (input)="calculate(item)">
+
+            </td>
+
+
+            <td>
+
+              <select
+                [(ngModel)]="item.unit">
+
+                <option>Vial</option>
+                <option>Box</option>
+                <option>Piece</option>
+                <option>Pack</option>
+                <option>Bottle</option>
+                <option>Unit</option>
+
+              </select>
+
+            </td>
+
+
+            <td>
+
+              <input
+                [(ngModel)]="item.description"
+                placeholder="Description">
+
+            </td>
+
+
+            <td>
+
+              <input
+                type="number"
+                [(ngModel)]="item.currentStock">
+
+            </td>
+
+
+            <td>
+
+              <input
+                type="number"
+                [(ngModel)]="item.expectedConsumption">
+
+            </td>
+
+
+            <td>
+
+              <input
+                [(ngModel)]="item.justification"
+                placeholder="Reason">
+
+            </td>
+
+
+            <td>
+
+              <input
+                type="number"
+                [(ngModel)]="item.unitCost"
+                (input)="calculate(item)">
+
+            </td>
+
+
+            <td class="money">
+
+              ₱{{
+                item.totalCost
+                | number:'1.2-2'
+              }}
+
+            </td>
+
+
+            <td>
+
+              <button
+                class="remove"
+                (click)="removeItem(i)">
+
+                ×
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+
+        <tfoot>
+
+          <tr>
+
+            <td
+              colspan="8">
+
+              GRAND TOTAL
+
+            </td>
+
+            <td class="grand-total">
+
+              ₱{{
+                grandTotal
+                | number:'1.2-2'
+              }}
+
+            </td>
+
+            <td></td>
+
+          </tr>
+
+        </tfoot>
+
+      </table>
+
+    </div>
+
+
+    <div class="remarks">
+
+      <label>
+        Remarks
+      </label>
+
+      <textarea
+        [(ngModel)]="remarks"
+        rows="4"
+        placeholder="Additional instructions or remarks">
+      </textarea>
+
+    </div>
+
+
+    <div class="actions">
+
+      <button
+        class="cancel"
+        (click)="cancel()">
+
+        Cancel
+
+      </button>
+
+
+      <button
+        class="submit"
+        (click)="submit()">
+
+        Submit for DM Approval
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

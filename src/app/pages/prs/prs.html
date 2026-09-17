@@ -1,0 +1,116 @@
+<div class="page-header">
+
+  <div>
+    <h1>Purchase Requisition Slips</h1>
+    <p>
+      Generate and monitor official PRS records.
+    </p>
+  </div>
+
+</div>
+
+<div class="card">
+
+  <h3>Ready for PRS Generation</h3>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>PR Number</th>
+        <th>Branch</th>
+        <th>HQ</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let request of pending">
+
+        <td>
+          {{ request.controlNumber }}
+        </td>
+
+        <td>
+          {{ request.branchName }}
+        </td>
+
+        <td>
+          {{ request.headquartersName }}
+        </td>
+
+        <td>
+          ₱{{ request.totalAmount | number:'1.2-2' }}
+        </td>
+
+        <td>
+
+          <button (click)="generate(request)">
+
+            Generate PRS
+
+          </button>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
+
+<div class="card">
+
+  <h3>PRS Records</h3>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>PRS Number</th>
+        <th>Date</th>
+        <th>HQ</th>
+        <th>Total</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="
+let request of pending
+">
+
+        <td>
+          {{request.controlNumber}}
+        </td>
+
+        <td>
+          {{request.branchName}}
+        </td>
+
+        <td>
+          {{request.status}}
+        </td>
+
+        <td>
+
+          <button (click)="generate(request)">
+
+            Generate PRS
+
+          </button>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>

@@ -1,0 +1,37 @@
+.badge {
+  display: inline-block;
+
+  padding: 5px 9px;
+
+  border-radius: 20px;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+.success {
+  background: #e4f7eb;
+  color: #168345;
+}
+
+.warning {
+  background: #fff2d7;
+  color: #a96c00;
+}
+
+.danger {
+  background: #ffe4e4;
+  color: #d6222b;
+}
+
+.returned {
+  background: #fff0e2;
+  color: #bd5b00;
+}
+
+.info {
+  background: #e6f1fb;
+  color: #1264a3;
+}

@@ -1,0 +1,88 @@
+<div class="page-header">
+
+  <div>
+    <h1>HQ Consolidation</h1>
+
+    <p>
+      Consolidate DM-approved requests
+      according to assigned headquarters.
+    </p>
+  </div>
+
+  <button
+    class="primary"
+    (click)="consolidate()">
+
+    Consolidate Selected
+
+  </button>
+
+</div>
+
+<div class="table-card">
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th></th>
+        <th>PR No.</th>
+        <th>Branch</th>
+        <th>HQ</th>
+        <th>District Manager</th>
+        <th>Total</th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr
+        *ngFor="let request of requests">
+
+        <td>
+
+          <input
+            type="checkbox"
+            [checked]="selected.has(request.id!)"
+            (change)="toggle(request)">
+
+        </td>
+
+        <td>
+          {{ request.controlNumber }}
+        </td>
+
+        <td>
+          {{ request.branchName }}
+        </td>
+
+        <td>
+          {{ request.headquartersName }}
+        </td>
+
+        <td>
+          {{ request.districtManagerName }}
+        </td>
+
+        <td>
+          ₱{{ request.totalAmount | number:'1.2-2' }}
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+  <div
+    class="empty"
+    *ngIf="requests.length === 0">
+
+    No DM-approved requests waiting for
+    HQ consolidation.
+
+  </div>
+
+</div>

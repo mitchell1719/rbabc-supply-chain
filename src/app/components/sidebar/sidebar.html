@@ -1,0 +1,233 @@
+<aside
+  class="sidebar"
+  [class.collapsed]="collapsed">
+
+
+  <div class="brand">
+
+    <div class="logo">
+      RB
+    </div>
+
+    <div class="brand-name">
+
+      <strong>
+        RB ABC
+      </strong>
+
+      <span>
+        Supply Chain Office
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <button
+    class="collapse-btn"
+    (click)="toggleSidebar()">
+
+    {{ collapsed ? '›' : '‹' }}
+
+  </button>
+
+
+  <nav>
+
+    <p class="menu-title">
+      MAIN MENU
+    </p>
+
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="active">
+
+      <span>▦</span>
+      <label>Dashboard</label>
+
+    </a>
+
+
+    <p class="menu-title">
+      REQUESTS
+    </p>
+
+
+    <a
+      routerLink="/purchase-requests"
+      routerLinkActive="active">
+
+      <span>📋</span>
+      <label>Purchase Requests</label>
+
+    </a>
+
+
+    <a
+      routerLink="/dm-approvals"
+      routerLinkActive="active">
+
+      <span>✓</span>
+      <label>DM Approvals</label>
+
+    </a>
+
+
+    <a
+      routerLink="/hq-consolidation"
+      routerLinkActive="active">
+
+      <span>🏢</span>
+      <label>HQ Consolidation</label>
+
+    </a>
+
+
+    <a
+      routerLink="/prs"
+      routerLinkActive="active">
+
+      <span>📄</span>
+      <label>PRS</label>
+
+    </a>
+
+
+    <p class="menu-title">
+      PROCUREMENT
+    </p>
+
+
+    <a
+      routerLink="/procurement"
+      routerLinkActive="active">
+
+      <span>🛒</span>
+      <label>Procurement</label>
+
+    </a>
+
+
+    <a
+      routerLink="/purchase-orders"
+      routerLinkActive="active">
+
+      <span>📑</span>
+      <label>Purchase Orders</label>
+
+    </a>
+
+
+    <a
+      routerLink="/suppliers"
+      routerLinkActive="active">
+
+      <span>🏭</span>
+      <label>Suppliers</label>
+
+    </a>
+
+
+    <p class="menu-title">
+      LOGISTICS
+    </p>
+
+
+    <a
+      routerLink="/deliveries"
+      routerLinkActive="active">
+
+      <span>🚚</span>
+      <label>Deliveries</label>
+
+    </a>
+
+
+    <a
+      routerLink="/receiving"
+      routerLinkActive="active">
+
+      <span>📥</span>
+      <label>Receiving Reports</label>
+
+    </a>
+
+
+    <a
+      routerLink="/discrepancies"
+      routerLinkActive="active">
+
+      <span>⚠</span>
+      <label>Discrepancies</label>
+
+    </a>
+
+
+    <p class="menu-title">
+      INVENTORY
+    </p>
+
+
+    <a
+      routerLink="/inventory"
+      routerLinkActive="active">
+
+      <span>📦</span>
+      <label>Inventory</label>
+
+    </a>
+
+
+    <p class="menu-title">
+      FINANCE
+    </p>
+
+
+    <a
+      routerLink="/soa"
+      routerLinkActive="active">
+
+      <span>💳</span>
+      <label>SOA</label>
+
+    </a>
+
+
+    <p class="menu-title">
+      MANAGEMENT
+    </p>
+
+
+    <a
+      routerLink="/branches"
+      routerLinkActive="active">
+
+      <span>🏥</span>
+      <label>Branches</label>
+
+    </a>
+
+
+    <a
+      routerLink="/reports"
+      routerLinkActive="active">
+
+      <span>📊</span>
+      <label>Reports</label>
+
+    </a>
+
+
+    <a
+      routerLink="/settings"
+      routerLinkActive="active">
+
+      <span>⚙</span>
+      <label>Settings</label>
+
+    </a>
+
+  </nav>
+
+</aside>

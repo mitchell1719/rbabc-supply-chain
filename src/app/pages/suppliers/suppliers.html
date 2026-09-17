@@ -1,0 +1,83 @@
+<h1>Suppliers</h1>
+
+<div class="layout">
+
+  <div class="card">
+
+    <h3>New Supplier</h3>
+
+    <input
+      [(ngModel)]="supplier.name"
+      placeholder="Supplier Name">
+
+    <input
+      [(ngModel)]="supplier.contactPerson"
+      placeholder="Contact Person">
+
+    <input
+      [(ngModel)]="supplier.phone"
+      placeholder="Phone">
+
+    <input
+      [(ngModel)]="supplier.email"
+      placeholder="Email">
+
+    <textarea
+      [(ngModel)]="supplier.address"
+      placeholder="Address">
+    </textarea>
+
+    <button
+      (click)="save()">
+
+      Save Supplier
+
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Supplier Directory</h3>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Supplier</th>
+          <th>Contact Person</th>
+          <th>Phone</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr
+          *ngFor="let supplier of suppliers">
+
+          <td>
+            {{ supplier.name }}
+          </td>
+
+          <td>
+            {{ supplier.contactPerson }}
+          </td>
+
+          <td>
+            {{ supplier.phone }}
+          </td>
+
+          <td>
+            {{ supplier.email }}
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

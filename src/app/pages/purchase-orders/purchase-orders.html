@@ -1,0 +1,81 @@
+<h1>Purchase Orders</h1>
+
+<div class="layout">
+
+  <div class="card">
+
+    <h3>Create Purchase Order</h3>
+
+    <input
+      [(ngModel)]="form.supplierName"
+      placeholder="Supplier">
+
+    <input
+      [(ngModel)]="form.reference"
+      placeholder="Reference / Supplier DR">
+
+    <input
+      type="number"
+      [(ngModel)]="form.amount"
+      placeholder="Amount">
+
+    <textarea
+      [(ngModel)]="form.remarks"
+      placeholder="Remarks">
+    </textarea>
+
+    <button
+      (click)="save()">
+
+      Create PO
+
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Purchase Orders</h3>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>PO No.</th>
+          <th>Supplier</th>
+          <th>Reference</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr
+          *ngFor="let po of orders">
+
+          <td>{{ po.poNumber }}</td>
+
+          <td>
+            {{ po.supplierName }}
+          </td>
+
+          <td>
+            {{ po.reference }}
+          </td>
+
+          <td>
+            ₱{{ po.amount | number:'1.2-2' }}
+          </td>
+
+          <td>{{ po.status }}</td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

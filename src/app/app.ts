@@ -1,12 +1,51 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {
+  Component
+} from '@angular/core';
+
+import {
+  RouterOutlet
+} from '@angular/router';
+
+import {
+  Sidebar
+} from './components/sidebar/sidebar';
+
+import {
+  Header
+} from './components/header/header';
+
 
 @Component({
-  imports: [RouterOutlet],
+
   selector: 'app-root',
-  styleUrl: './app.css',
-  templateUrl: './app.html',
+
+  standalone: true,
+
+  imports: [
+    RouterOutlet,
+    Sidebar,
+    Header
+  ],
+
+  templateUrl:
+    './app.html',
+
+  styleUrl:
+    './app.css'
+
 })
 export class App {
-  protected readonly title = signal('rbabc-supply-chain');
+
+  sidebarCollapsed = false;
+
+
+  sidebarChanged(
+    collapsed: boolean
+  ) {
+
+    this.sidebarCollapsed =
+      collapsed;
+
+  }
+
 }

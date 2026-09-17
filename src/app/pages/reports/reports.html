@@ -1,0 +1,44 @@
+<h1>Supply Chain Reports</h1>
+
+<p class="subtitle">
+  Current system-level operational summary.
+</p>
+
+<div class="report-grid">
+
+  <div class="report">
+    <span>Total Purchase Requests</span>
+    <strong>
+      {{ requests.length }}
+    </strong>
+  </div>
+
+  <div class="report">
+    <span>Completed Requests</span>
+    <strong>
+      {{ completed }}
+    </strong>
+  </div>
+
+  <div class="report">
+    <span>Inventory Records</span>
+    <strong>
+      {{ inventory.length }}
+    </strong>
+  </div>
+
+  <div class="report">
+    <span>Low Stock Records</span>
+    <strong>
+      {{ lowStock }}
+    </strong>
+  </div>
+
+  <div class="report">
+    <span>Deliveries</span>
+    <strong>
+      {{ deliveries.length }}
+    </strong>
+  </div>
+
+</div>

@@ -1,0 +1,138 @@
+.page-header h1 {
+  margin: 0;
+  font-size: 23px;
+}
+
+.page-header p {
+  color: #8993a1;
+  font-size: 10px;
+}
+
+.empty,
+.approval-card {
+  background: white;
+
+  border: 1px solid #e1e6ec;
+  border-radius: 9px;
+
+  padding: 20px;
+
+  margin-top: 20px;
+}
+
+.empty {
+  color: #8792a2;
+  text-align: center;
+}
+
+.approval-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.approval-header h3 {
+  margin: 0;
+}
+
+.approval-header p {
+  font-size: 9px;
+  color: #8792a2;
+}
+
+.request-info {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+
+  gap: 15px;
+
+  padding: 15px;
+
+  background: #f8fafc;
+
+  border-radius: 7px;
+
+  margin: 15px 0;
+}
+
+.request-info div {
+  display: flex;
+  flex-direction: column;
+}
+
+.request-info span {
+  color: #8792a2;
+  font-size: 8px;
+}
+
+.request-info strong {
+  margin-top: 4px;
+  font-size: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #f7f9fb;
+  padding: 10px;
+  text-align: left;
+  font-size: 8px;
+}
+
+td {
+  border-top: 1px solid #edf0f3;
+  padding: 10px;
+  font-size: 9px;
+}
+
+.comments {
+  margin-top: 15px;
+}
+
+.comments label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.comments textarea {
+  width: 100%;
+
+  border: 1px solid #d9e0e7;
+  border-radius: 6px;
+
+  padding: 10px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 15px;
+}
+
+.return,
+.approve {
+  border: 0;
+  border-radius: 6px;
+
+  padding: 10px 15px;
+
+  cursor: pointer;
+}
+
+.return {
+  background: #fff0e6;
+  color: #b74d00;
+}
+
+.approve {
+  background: #0a5a9c;
+  color: white;
+}

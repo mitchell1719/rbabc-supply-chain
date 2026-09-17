@@ -1,0 +1,93 @@
+<h1>Statement of Account</h1>
+
+<div class="layout">
+
+  <div class="card">
+
+    <h3>Create SOA</h3>
+
+    <input
+      [(ngModel)]="form.districtManagerName"
+      placeholder="District Manager">
+
+    <input
+      [(ngModel)]="form.branchName"
+      placeholder="Branch">
+
+    <input
+      [(ngModel)]="form.reference"
+      placeholder="PRS / Delivery Reference">
+
+    <input
+      type="number"
+      [(ngModel)]="form.totalAmount"
+      placeholder="Amount">
+
+    <input
+      [(ngModel)]="form.preparedBy"
+      placeholder="Prepared By">
+
+    <button
+      (click)="create()">
+
+      Create SOA
+
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>SOA Records</h3>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>SOA No.</th>
+          <th>District Manager</th>
+          <th>Branch</th>
+          <th>Reference</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr
+          *ngFor="let soa of records">
+
+          <td>
+            {{ soa.soaNumber }}
+          </td>
+
+          <td>
+            {{ soa.districtManagerName }}
+          </td>
+
+          <td>
+            {{ soa.branchName }}
+          </td>
+
+          <td>
+            {{ soa.reference }}
+          </td>
+
+          <td>
+            ₱{{ soa.totalAmount | number:'1.2-2' }}
+          </td>
+
+          <td>
+            {{ soa.status }}
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

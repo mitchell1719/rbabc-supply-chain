@@ -1,0 +1,100 @@
+<div class="page-header">
+
+  <h1>
+    Receiving Reports
+  </h1>
+
+  <p>
+    Verify supplies received by the branch.
+  </p>
+
+</div>
+
+<div
+  class="delivery-card"
+  *ngFor="let delivery of deliveries">
+
+  <h3>
+    {{ delivery.deliveryNumber }}
+  </h3>
+
+  <p>
+    {{ delivery.branchName }}
+    •
+    {{ delivery.prsNumber }}
+  </p>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>Quantity</th>
+        <th>Unit</th>
+        <th>Description</th>
+        <th>Batch</th>
+        <th>Expiry</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr
+        *ngFor="let item of delivery.items">
+
+        <td>
+          {{ item.quantity }}
+        </td>
+
+        <td>
+          {{ item.unit }}
+        </td>
+
+        <td>
+          {{ item.description }}
+        </td>
+
+        <td>
+          {{ item.batchNumber }}
+        </td>
+
+        <td>
+          {{ item.expiryDate }}
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+  <div class="form">
+
+    <input
+      [(ngModel)]="receiver[delivery.id]"
+      placeholder="Received By">
+
+    <label>
+
+      <input
+        type="checkbox"
+        [(ngModel)]="discrepancy[delivery.id]">
+
+      There is a discrepancy
+
+    </label>
+
+    <textarea
+      [(ngModel)]="remarks[delivery.id]"
+      placeholder="Discrepancy details / remarks">
+    </textarea>
+
+  </div>
+
+  <button
+    (click)="receive(delivery)">
+
+    Submit Receiving Report
+
+  </button>
+
+</div>
