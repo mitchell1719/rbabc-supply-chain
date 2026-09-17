@@ -2,7 +2,15 @@ import {
   Routes
 } from '@angular/router';
 
-import { authGuard, guestGuard } from './guards/auth.guard';
+import { authGuard, guestGuard, roleGuard } from './guards/auth.guard';
+
+import {
+  APPROVAL_ROLES,
+  PROCUREMENT_ROLES,
+  REFERENCE_DATA_ROLES,
+  RNS_REVIEW_ROLES,
+  USER_MANAGEMENT_ROLES,
+} from './config/roles.config';
 
 /**
  * Every page is lazy-loaded: the initial bundle only ships the app shell
@@ -48,6 +56,15 @@ export const routes: Routes = [
   },
 
   {
+    path: 'purchase-requests/:id/edit',
+    loadComponent: () =>
+      import('./pages/new-purchase-request/new-purchase-request').then(
+        (m) => m.NewPurchaseRequest,
+      ),
+    canActivate: [authGuard]
+  },
+
+  {
     path: 'purchase-requests/:id',
     loadComponent: () =>
       import('./pages/request-details/request-details').then((m) => m.RequestDetails),
@@ -55,35 +72,41 @@ export const routes: Routes = [
   },
 
   {
+    path: 'rns-review',
+    loadComponent: () => import('./pages/rns-review/rns-review').then((m) => m.RnsReview),
+    canActivate: [authGuard, roleGuard(RNS_REVIEW_ROLES)]
+  },
+
+  {
     path: 'dm-approvals',
     loadComponent: () => import('./pages/dm-approvals/dm-approvals').then((m) => m.DmApprovals),
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(APPROVAL_ROLES)]
   },
 
   {
     path: 'hq-consolidation',
     loadComponent: () =>
       import('./pages/hq-consolidation/hq-consolidation').then((m) => m.HqConsolidation),
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(PROCUREMENT_ROLES)]
   },
 
   {
     path: 'prs',
     loadComponent: () => import('./pages/prs/prs').then((m) => m.Prs),
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(PROCUREMENT_ROLES)]
   },
 
   {
     path: 'procurement',
     loadComponent: () => import('./pages/procurement/procurement').then((m) => m.Procurement),
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(PROCUREMENT_ROLES)]
   },
 
   {
     path: 'purchase-orders',
     loadComponent: () =>
       import('./pages/purchase-orders/purchase-orders').then((m) => m.PurchaseOrders),
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(PROCUREMENT_ROLES)]
   },
 
   {
@@ -114,13 +137,19 @@ export const routes: Routes = [
   {
     path: 'suppliers',
     loadComponent: () => import('./pages/suppliers/suppliers').then((m) => m.Suppliers),
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(PROCUREMENT_ROLES)]
   },
 
   {
     path: 'branches',
     loadComponent: () => import('./pages/branches/branches').then((m) => m.Branches),
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(REFERENCE_DATA_ROLES)]
+  },
+
+  {
+    path: 'user-access',
+    loadComponent: () => import('./pages/user-access/user-access').then((m) => m.UserAccess),
+    canActivate: [authGuard, roleGuard(USER_MANAGEMENT_ROLES)]
   },
 
   {

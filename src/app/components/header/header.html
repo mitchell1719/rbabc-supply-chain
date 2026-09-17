@@ -51,7 +51,7 @@
 
     <div class="user-info">
       <strong>{{ user?.displayName || user?.email || 'User' }}</strong>
-      <span>{{ user?.email }}</span>
+      <span>{{ roleLabel || user?.email }}</span>
     </div>
 
     <button class="logout-btn" type="button" (click)="logOut()" title="Log out">

@@ -21,6 +21,7 @@ export class StatusBadge {
       case 'VERIFIED':
         return 'success';
 
+      case 'PENDING_RNS_REVIEW':
       case 'PENDING_DM_APPROVAL':
       case 'FOR_PROCUREMENT':
       case 'FOR_DELIVERY':

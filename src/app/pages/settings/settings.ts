@@ -12,6 +12,8 @@ import { AuthService } from '../../services/auth.service';
 
 import { DataState } from '../../components/data-state/data-state';
 
+import { PROCUREMENT_ROLES } from '../../config/roles.config';
+
 @Component({
   selector: 'app-settings',
   standalone: true,
@@ -58,6 +60,11 @@ export class Settings implements OnInit {
     private auth: AuthService,
   ) {}
 
+  /** System-wide company info is Supply Officer/Director territory, not every account. */
+  get canEditCompanyInfo(): boolean {
+    return this.auth.hasAnyRole(PROCUREMENT_ROLES);
+  }
+
   async ngOnInit() {
     await this.load();
   }
@@ -87,6 +94,11 @@ export class Settings implements OnInit {
   }
 
   async save() {
+    if (!this.canEditCompanyInfo) {
+      alert('You do not have permission to change system information.');
+      return;
+    }
+
     this.successMessage.set('');
 
     this.saving.set(true);

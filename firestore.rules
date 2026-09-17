@@ -2,8 +2,56 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isUserManager() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        (myRole() == 'SUPPLY_OFFICER' || myRole() == 'SUPPLY_DIRECTOR');
+    }
+
+    // Role/branch-assignment records, keyed by Firebase Auth uid. Every
+    // signed-in user can read their own profile (needed to resolve their
+    // own access) and self-provision it once on first sign-in. Only a
+    // Supply Officer or Supply Chain Director may read the full roster or
+    // change someone else's role (the User Access page).
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isUserManager());
+      allow list: if isUserManager();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isUserManager());
+      allow delete: if false;
+    }
+
+    // Operational supply-chain data: readable/writable by any signed-in
+    // account. Fine-grained write permission (who may approve, dispatch,
+    // etc.) is enforced in the application UI per role; this keeps the
+    // existing app behavior working for every collection below.
+    match /{collection}/{document=**} {
+      allow read, write: if isSignedIn() &&
+        collection in [
+          'branches',
+          'purchaseRequests',
+          'workflowHistory',
+          'prs',
+          'inventory',
+          'inventoryTransactions',
+          'deliveryNotes',
+          'receivingReports',
+          'suppliers',
+          'statementsOfAccount',
+          'purchaseOrders',
+          'systemSettings',
+          'contactMessages',
+          'newsletterSubscribers'
+        ];
     }
   }
 }

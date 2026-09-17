@@ -76,3 +76,10 @@ button {
 
   cursor: pointer;
 }
+
+.pending-note {
+  margin: 0;
+  color: #8792a2;
+  font-size: 9px;
+  font-style: italic;
+}

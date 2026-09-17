@@ -1,5 +1,6 @@
 export type RequestStatus =
   | 'DRAFT'
+  | 'PENDING_RNS_REVIEW'
   | 'PENDING_DM_APPROVAL'
   | 'RETURNED_FOR_REVISION'
   | 'DM_APPROVED'
@@ -340,6 +341,39 @@ export interface AppUser {
   email: string | null;
 
   displayName: string | null;
+}
+
+/**
+ * The five system roles from the RB ABC Supply Chain user-access matrix.
+ * SUPPLY_DIRECTOR is treated as a super-role with full system access
+ * everywhere in the app (see roles.config.ts's roleCanAccess helper).
+ */
+export type UserRole =
+  | 'NURSE'
+  | 'RNS'
+  | 'DISTRICT_MANAGER'
+  | 'SUPPLY_OFFICER'
+  | 'SUPPLY_DIRECTOR';
+
+/** Role + assignment record stored in the `users` Firestore collection, keyed by Firebase Auth uid. */
+export interface UserProfile {
+  uid: string;
+
+  email: string | null;
+
+  displayName: string | null;
+
+  role: UserRole;
+
+  /** Assigned branch (Nurse role only); the branch this user prepares requests for. */
+  branchId: string;
+  branchName: string;
+
+  active: boolean;
+
+  createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface SystemSettings {

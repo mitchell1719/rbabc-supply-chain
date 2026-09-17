@@ -13,12 +13,15 @@
       </button>
 
       <h1>
-        New Purchase Request
+        {{ editMode() ? 'Edit Purchase Request' : 'New Purchase Request' }}
       </h1>
 
       <p>
-        Submit branch requirements for
-        District Manager approval.
+        {{
+          editMode()
+            ? 'Revise the returned request and resubmit it for RNS review.'
+            : 'Submit branch requirements for Regional Nurse Supervisor review.'
+        }}
       </p>
 
     </div>
@@ -26,7 +29,27 @@
   </div>
 
 
-  <div class="form-card">
+  <div class="form-card" *ngIf="loadingExisting()">
+
+    <p>Loading purchase request...</p>
+
+  </div>
+
+
+  <div class="form-card" *ngIf="!loadingExisting() && loadExistingError()">
+
+    <p class="field-error">
+      {{ loadExistingError() }}
+    </p>
+
+    <button type="button" class="retry-link" (click)="cancel()">
+      ← Back to Purchase Requests
+    </button>
+
+  </div>
+
+
+  <div class="form-card" *ngIf="!loadingExisting() && !loadExistingError()">
 
     <div class="card-title">
 
@@ -351,7 +374,11 @@
         [disabled]="submitting()"
         (click)="submit()">
 
-        {{ submitting() ? 'Submitting...' : 'Submit for DM Approval' }}
+        {{
+          submitting()
+            ? (editMode() ? 'Resubmitting...' : 'Submitting...')
+            : (editMode() ? 'Resubmit for RNS Review' : 'Submit for RNS Review')
+        }}
 
       </button>
 

@@ -36,18 +36,26 @@
 
     </div>
 
-    <textarea
-      [(ngModel)]="resolution[record.id!]"
-      placeholder="Enter corrective action / resolution">
-    </textarea>
+    <ng-container *ngIf="canResolve">
 
-    <button
-      [disabled]="resolvingId() === record.id"
-      (click)="resolve(record)">
+      <textarea
+        [(ngModel)]="resolution[record.id!]"
+        placeholder="Enter corrective action / resolution">
+      </textarea>
 
-      {{ resolvingId() === record.id ? 'Resolving...' : 'Resolve Discrepancy' }}
+      <button
+        [disabled]="resolvingId() === record.id"
+        (click)="resolve(record)">
 
-    </button>
+        {{ resolvingId() === record.id ? 'Resolving...' : 'Resolve Discrepancy' }}
+
+      </button>
+
+    </ng-container>
+
+    <p class="pending-note" *ngIf="!canResolve">
+      Pending resolution by the Supply Office.
+    </p>
 
   </div>
 

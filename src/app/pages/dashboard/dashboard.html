@@ -10,6 +10,7 @@
     </div>
 
     <a
+      *ngIf="canCreate"
       routerLink="/purchase-requests/new"
       class="new-request">
 
@@ -26,6 +27,13 @@
       [value]="requests().length"
       icon="📋"
       subtitle="All purchase requests">
+    </app-stat-card>
+
+    <app-stat-card
+      title="Pending RNS Review"
+      [value]="pendingRNS()"
+      icon="🩺"
+      subtitle="Waiting for RNS">
     </app-stat-card>
 
     <app-stat-card

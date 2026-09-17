@@ -7,8 +7,13 @@ export const REQUEST_TRANSITIONS:
 Record<RequestStatus, RequestStatus[]> = {
 
   DRAFT: [
-    'PENDING_DM_APPROVAL',
+    'PENDING_RNS_REVIEW',
     'CANCELLED'
+  ],
+
+  PENDING_RNS_REVIEW: [
+    'PENDING_DM_APPROVAL',
+    'RETURNED_FOR_REVISION'
   ],
 
   PENDING_DM_APPROVAL: [
@@ -17,7 +22,7 @@ Record<RequestStatus, RequestStatus[]> = {
   ],
 
   RETURNED_FOR_REVISION: [
-    'PENDING_DM_APPROVAL',
+    'PENDING_RNS_REVIEW',
     'CANCELLED'
   ],
 

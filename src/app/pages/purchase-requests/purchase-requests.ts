@@ -12,6 +12,10 @@ import { DataState } from '../../components/data-state/data-state';
 import { LastUpdated } from '../../components/last-updated/last-updated';
 import { CopyButton } from '../../components/copy-button/copy-button';
 
+import { AuthService } from '../../services/auth.service';
+
+import { REQUEST_CREATOR_ROLES } from '../../config/roles.config';
+
 @Component({
   selector: 'app-purchase-requests',
 
@@ -30,7 +34,22 @@ export class PurchaseRequests implements OnInit {
 
   readonly errorMessage = signal('');
 
-  constructor(private service: SupplyChainService) {}
+  constructor(
+    private service: SupplyChainService,
+    private auth: AuthService,
+  ) {}
+
+  /** Whether the signed-in user may edit and resubmit a returned request. */
+  canEditReturned(request: PurchaseRequest): boolean {
+    return (
+      request.status === 'RETURNED_FOR_REVISION' &&
+      this.auth.hasAnyRole(REQUEST_CREATOR_ROLES)
+    );
+  }
+
+  get canCreate(): boolean {
+    return this.auth.hasAnyRole(REQUEST_CREATOR_ROLES);
+  }
 
   async ngOnInit() {
     await this.loadRequests();

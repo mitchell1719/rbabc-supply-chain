@@ -7,6 +7,8 @@ import { ThemeService } from '../../services/theme.service';
 import { SearchUiService } from '../../services/search-ui.service';
 import { AuthService } from '../../services/auth.service';
 
+import { ROLE_LABELS } from '../../config/roles.config';
+
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -30,6 +32,12 @@ export class Header {
 
   get user() {
     return this.auth.user();
+  }
+
+  get roleLabel(): string {
+    const role = this.auth.profile()?.role;
+
+    return role ? ROLE_LABELS[role] : '';
   }
 
   get initials(): string {

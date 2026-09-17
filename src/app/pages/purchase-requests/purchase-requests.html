@@ -14,7 +14,10 @@
   </div>
 
 
-  <a routerLink="/purchase-requests/new" class="primary">
+  <a
+    *ngIf="canCreate"
+    routerLink="/purchase-requests/new"
+    class="primary">
 
     + New Purchase Request
 
@@ -104,7 +107,7 @@
           <app-last-updated [date]="request.updatedAt || request.createdAt"></app-last-updated>
         </td>
 
-        <td>
+        <td class="row-actions">
 
           <a [routerLink]="[
               '/purchase-requests',
@@ -112,6 +115,19 @@
             ]">
 
             View
+
+          </a>
+
+          <a
+            *ngIf="canEditReturned(request)"
+            [routerLink]="[
+              '/purchase-requests',
+              request.id,
+              'edit'
+            ]"
+            class="edit-link">
+
+            Edit &amp; Resubmit
 
           </a>
 

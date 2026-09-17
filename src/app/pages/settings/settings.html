@@ -15,13 +15,18 @@
       {{ successMessage() }}
     </div>
 
+    <p class="field-note" *ngIf="!canEditCompanyInfo">
+      Only a Supply Officer or Supply Chain Director can change system information.
+    </p>
+
     <label>
       Company Name
     </label>
 
     <input
       [ngModel]="companyName()"
-      (ngModelChange)="companyName.set($event)">
+      (ngModelChange)="companyName.set($event)"
+      [disabled]="!canEditCompanyInfo">
 
     <label>
       Department
@@ -29,7 +34,8 @@
 
     <input
       [ngModel]="department()"
-      (ngModelChange)="department.set($event)">
+      (ngModelChange)="department.set($event)"
+      [disabled]="!canEditCompanyInfo">
 
     <label>
       System Name
@@ -37,10 +43,11 @@
 
     <input
       [ngModel]="systemName()"
-      (ngModelChange)="systemName.set($event)">
+      (ngModelChange)="systemName.set($event)"
+      [disabled]="!canEditCompanyInfo">
 
     <button
-      [disabled]="saving()"
+      [disabled]="saving() || !canEditCompanyInfo"
       (click)="save()">
 
       {{ saving() ? 'Saving...' : 'Save Settings' }}

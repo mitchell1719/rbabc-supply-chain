@@ -74,8 +74,8 @@
 
           <button
             *ngIf="
-              delivery.status ===
-              'PREPARING'
+              delivery.status === 'PREPARING' &&
+              canDispatch
             "
             [disabled]="dispatchingId() === delivery.id"
             (click)="dispatch(delivery)">

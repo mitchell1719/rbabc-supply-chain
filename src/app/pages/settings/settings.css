@@ -85,6 +85,15 @@ button:disabled {
   border: 1px solid #bce7ce;
 }
 
+.field-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  background: #f0f3f7;
+  color: #667386;
+  font-size: 9px;
+}
+
 .theme-row {
   display: flex;
   align-items: center;

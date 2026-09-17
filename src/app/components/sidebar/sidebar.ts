@@ -14,6 +14,16 @@ import {
   RouterLinkActive
 } from '@angular/router';
 
+import { AuthService } from '../../services/auth.service';
+
+import {
+  APPROVAL_ROLES,
+  PROCUREMENT_ROLES,
+  REFERENCE_DATA_ROLES,
+  RNS_REVIEW_ROLES,
+  USER_MANAGEMENT_ROLES,
+} from '../../config/roles.config';
+
 
 @Component({
 
@@ -39,6 +49,28 @@ import {
 export class Sidebar {
 
   collapsed = false;
+
+  constructor(private auth: AuthService) {}
+
+  get canReviewAsRns(): boolean {
+    return this.auth.hasAnyRole(RNS_REVIEW_ROLES);
+  }
+
+  get canApprove(): boolean {
+    return this.auth.hasAnyRole(APPROVAL_ROLES);
+  }
+
+  get canManageProcurement(): boolean {
+    return this.auth.hasAnyRole(PROCUREMENT_ROLES);
+  }
+
+  get canManageReferenceData(): boolean {
+    return this.auth.hasAnyRole(REFERENCE_DATA_ROLES);
+  }
+
+  get canManageUsers(): boolean {
+    return this.auth.hasAnyRole(USER_MANAGEMENT_ROLES);
+  }
 
   @Input()
   mobileOpen = false;

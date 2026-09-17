@@ -36,6 +36,10 @@ import {
   PurchaseRequest
 } from '../../models/supply-chain.model';
 
+import { AuthService } from '../../services/auth.service';
+
+import { REQUEST_CREATOR_ROLES } from '../../config/roles.config';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -66,6 +70,10 @@ export class Dashboard implements OnInit {
 
   readonly recentRequests = computed(() => this.requests().slice(0, 5));
 
+  readonly pendingRNS = computed(
+    () => this.requests().filter(x => x.status === 'PENDING_RNS_REVIEW').length
+  );
+
   readonly pendingDM = computed(
     () => this.requests().filter(x => x.status === 'PENDING_DM_APPROVAL').length
   );
@@ -83,8 +91,13 @@ export class Dashboard implements OnInit {
   );
 
   constructor(
-    private service: SupplyChainService
+    private service: SupplyChainService,
+    private auth: AuthService,
   ) {}
+
+  get canCreate(): boolean {
+    return this.auth.hasAnyRole(REQUEST_CREATOR_ROLES);
+  }
 
   async ngOnInit() {
     await this.load();

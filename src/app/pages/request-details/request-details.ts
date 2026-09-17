@@ -16,6 +16,10 @@ import { DataState } from '../../components/data-state/data-state';
 import { LastUpdated } from '../../components/last-updated/last-updated';
 import { CopyButton } from '../../components/copy-button/copy-button';
 
+import { AuthService } from '../../services/auth.service';
+
+import { REQUEST_CREATOR_ROLES } from '../../config/roles.config';
+
 @Component({
   selector: 'app-request-details',
 
@@ -48,7 +52,19 @@ export class RequestDetails implements OnInit {
     private route: ActivatedRoute,
 
     private service: SupplyChainService,
+
+    private auth: AuthService,
   ) {}
+
+  get canEditReturned(): boolean {
+    const request = this.request();
+
+    return (
+      !!request &&
+      request.status === 'RETURNED_FOR_REVISION' &&
+      this.auth.hasAnyRole(REQUEST_CREATOR_ROLES)
+    );
+  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');

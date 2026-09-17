@@ -32,6 +32,10 @@ import {
   CopyButton
 } from '../../components/copy-button/copy-button';
 
+import { AuthService } from '../../services/auth.service';
+
+import { PROCUREMENT_ROLES } from '../../config/roles.config';
+
 @Component({
   selector: 'app-deliveries',
   standalone: true,
@@ -55,8 +59,15 @@ implements OnInit {
       SupplyChainService,
 
     private confirmService:
-      ConfirmService
+      ConfirmService,
+
+    private auth: AuthService,
   ) {}
+
+  /** Only a Supply Officer dispatches deliveries (they "Manage" Delivery Tracking). */
+  get canDispatch(): boolean {
+    return this.auth.hasAnyRole(PROCUREMENT_ROLES);
+  }
 
   async ngOnInit() {
     await this.load();

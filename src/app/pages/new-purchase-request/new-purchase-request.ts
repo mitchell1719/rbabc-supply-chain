@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
 
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { SupplyChainService } from '../../services/supply-chain.service';
 
@@ -48,6 +48,15 @@ export class NewPurchaseRequest implements OnInit {
 
   readonly submitting = signal(false);
 
+  /** Set when editing a request that was returned for revision (route: /purchase-requests/:id/edit). */
+  readonly editMode = signal(false);
+
+  readonly editId = signal<string | null>(null);
+
+  readonly loadingExisting = signal(false);
+
+  readonly loadExistingError = signal('');
+
   constructor(
     private service: SupplyChainService,
 
@@ -55,19 +64,80 @@ export class NewPurchaseRequest implements OnInit {
 
     private router: Router,
 
+    private route: ActivatedRoute,
+
     private confirmService: ConfirmService,
   ) {}
 
   async ngOnInit() {
-    this.controlNumber = this.service.createTemporaryControlNumber('PR');
-
     this.preparedBy = this.auth.displayName();
 
-    for (let i = 0; i < 3; i++) {
-      this.addItem();
-    }
-
     await this.loadBranches();
+
+    const id = this.route.snapshot.paramMap.get('id');
+
+    if (id) {
+      this.editMode.set(true);
+      this.editId.set(id);
+
+      await this.loadExisting(id);
+    } else {
+      this.controlNumber = this.service.createTemporaryControlNumber('PR');
+
+      for (let i = 0; i < 3; i++) {
+        this.addItem();
+      }
+
+      this.applyDefaultBranch();
+    }
+  }
+
+  /** Nurses (branch users) get their assigned branch preselected. */
+  private applyDefaultBranch() {
+    const profile = this.auth.profile();
+
+    if (profile?.role === 'NURSE' && profile.branchId) {
+      this.selectedBranchId = profile.branchId;
+    }
+  }
+
+  async loadExisting(id: string) {
+    this.loadingExisting.set(true);
+
+    this.loadExistingError.set('');
+
+    try {
+      const request = await this.service.getPurchaseRequest(id);
+
+      if (!request) {
+        throw new Error('Purchase request not found.');
+      }
+
+      if (request.status !== 'RETURNED_FOR_REVISION') {
+        throw new Error('Only requests returned for revision can be edited.');
+      }
+
+      this.controlNumber = request.controlNumber;
+      this.requestDate = request.requestDate;
+      this.selectedBranchId = request.branchId;
+      this.department = request.department;
+      this.preparedBy = request.preparedBy;
+      this.remarks = request.remarks;
+
+      this.items = request.items.length
+        ? request.items.map((item) => ({ ...item }))
+        : [];
+
+      if (this.items.length === 0) {
+        this.addItem();
+      }
+    } catch (error) {
+      this.loadExistingError.set(
+        error instanceof Error ? error.message : 'Unable to load the purchase request.',
+      );
+    } finally {
+      this.loadingExisting.set(false);
+    }
   }
 
   async loadBranches() {
@@ -165,10 +235,14 @@ export class NewPurchaseRequest implements OnInit {
       return;
     }
 
+    const isEdit = this.editMode();
+
     const confirmed = await this.confirmService.confirm({
-      title: 'Submit Purchase Request',
-      message: `Submit ${this.controlNumber} for District Manager approval? You won't be able to edit it once submitted.`,
-      confirmLabel: 'Submit Request',
+      title: isEdit ? 'Resubmit Purchase Request' : 'Submit Purchase Request',
+      message: isEdit
+        ? `Resubmit ${this.controlNumber} for Regional Nurse Supervisor review?`
+        : `Submit ${this.controlNumber} for Regional Nurse Supervisor review? You won't be able to edit it once submitted.`,
+      confirmLabel: isEdit ? 'Resubmit Request' : 'Submit Request',
     });
 
     if (!confirmed) {
@@ -178,43 +252,68 @@ export class NewPurchaseRequest implements OnInit {
     this.submitting.set(true);
 
     try {
-      const request: PurchaseRequest = {
-        controlNumber: this.controlNumber,
+      if (isEdit) {
+        const id = this.editId()!;
 
-        requestDate: this.requestDate,
+        await this.service.updatePurchaseRequest(id, {
+          requestDate: this.requestDate,
+          branchId: branch.id!,
+          branchName: branch.name,
+          headquartersId: branch.headquartersId,
+          headquartersName: branch.headquartersName,
+          districtManagerId: branch.districtManagerId,
+          districtManagerName: branch.districtManagerName,
+          department: this.department,
+          preparedBy: this.preparedBy,
+          items: validItems,
+          totalAmount: this.grandTotal,
+          remarks: this.remarks,
+        });
 
-        branchId: branch.id!,
+        await this.service.resubmitPurchaseRequest(id, this.preparedBy);
 
-        branchName: branch.name,
+        alert(`${this.controlNumber} resubmitted successfully for RNS review.`);
 
-        headquartersId: branch.headquartersId,
+        this.router.navigate(['/purchase-requests', id]);
+      } else {
+        const request: PurchaseRequest = {
+          controlNumber: this.controlNumber,
 
-        headquartersName: branch.headquartersName,
+          requestDate: this.requestDate,
 
-        districtManagerId: branch.districtManagerId,
+          branchId: branch.id!,
 
-        districtManagerName: branch.districtManagerName,
+          branchName: branch.name,
 
-        department: this.department,
+          headquartersId: branch.headquartersId,
 
-        preparedBy: this.preparedBy,
+          headquartersName: branch.headquartersName,
 
-        items: validItems,
+          districtManagerId: branch.districtManagerId,
 
-        totalAmount: this.grandTotal,
+          districtManagerName: branch.districtManagerName,
 
-        remarks: this.remarks,
+          department: this.department,
 
-        status: 'DRAFT',
-      };
+          preparedBy: this.preparedBy,
 
-      const id = await this.service.createPurchaseRequest(request);
+          items: validItems,
 
-      await this.service.submitPurchaseRequest(id, this.preparedBy);
+          totalAmount: this.grandTotal,
 
-      alert(`${this.controlNumber} submitted successfully for DM approval.`);
+          remarks: this.remarks,
 
-      this.router.navigate(['/purchase-requests']);
+          status: 'DRAFT',
+        };
+
+        const id = await this.service.createPurchaseRequest(request);
+
+        await this.service.submitPurchaseRequest(id, this.preparedBy);
+
+        alert(`${this.controlNumber} submitted successfully for RNS review.`);
+
+        this.router.navigate(['/purchase-requests']);
+      }
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Unable to submit the Purchase Request.');
     } finally {
@@ -223,6 +322,10 @@ export class NewPurchaseRequest implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/purchase-requests']);
+    if (this.editMode() && this.editId()) {
+      this.router.navigate(['/purchase-requests', this.editId()]);
+    } else {
+      this.router.navigate(['/purchase-requests']);
+    }
   }
 }

@@ -33,8 +33,21 @@
 
     </div>
 
-    <app-status-badge [status]="request.status">
-    </app-status-badge>
+    <div class="header-actions">
+
+      <app-status-badge [status]="request.status">
+      </app-status-badge>
+
+      <a
+        *ngIf="canEditReturned"
+        [routerLink]="['/purchase-requests', request.id, 'edit']"
+        class="edit-button">
+
+        Edit &amp; Resubmit
+
+      </a>
+
+    </div>
 
   </div>
 

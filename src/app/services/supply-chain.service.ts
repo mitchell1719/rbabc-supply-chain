@@ -363,9 +363,76 @@ export class SupplyChainService {
   async submitPurchaseRequest(requestId: string, user: string) {
     await this.changeStatus(
       requestId,
-      'PENDING_DM_APPROVAL',
-      'Submitted for District Manager Approval',
+      'PENDING_RNS_REVIEW',
+      'Submitted for Regional Nurse Supervisor Review',
       user,
+    );
+  }
+
+  /**
+   * Applies edits to a request that was returned for revision. Only
+   * touches the fields the branch can revise; status stays
+   * RETURNED_FOR_REVISION until resubmitPurchaseRequest() advances it.
+   */
+  async updatePurchaseRequest(
+    id: string,
+    updates: Pick<
+      PurchaseRequest,
+      | 'requestDate'
+      | 'branchId'
+      | 'branchName'
+      | 'headquartersId'
+      | 'headquartersName'
+      | 'districtManagerId'
+      | 'districtManagerName'
+      | 'department'
+      | 'preparedBy'
+      | 'items'
+      | 'totalAmount'
+      | 'remarks'
+    >,
+  ): Promise<void> {
+    return this.withErrorHandling('Update purchase request', async () => {
+      const reference = doc(db, 'purchaseRequests', id);
+
+      const snapshot = await getDoc(reference);
+
+      if (!snapshot.exists()) {
+        throw new Error('Purchase Request not found.');
+      }
+
+      if (snapshot.data()['status'] !== 'RETURNED_FOR_REVISION') {
+        throw new Error('Only requests returned for revision can be edited.');
+      }
+
+      await updateDoc(reference, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      });
+    });
+  }
+
+  /** Resubmits an edited, previously-returned request back into the RNS review queue. */
+  async resubmitPurchaseRequest(requestId: string, user: string) {
+    await this.changeStatus(
+      requestId,
+      'PENDING_RNS_REVIEW',
+      'Resubmitted After Revision',
+      user,
+    );
+  }
+
+  /* =====================================
+     RNS REVIEW
+  ===================================== */
+
+  async endorseByRNS(requestId: string, rns: string, comments = '') {
+    await this.changeStatus(
+      requestId,
+      'PENDING_DM_APPROVAL',
+      'Endorsed by Regional Nurse Supervisor',
+      rns,
+      comments,
     );
   }
 
@@ -377,12 +444,13 @@ export class SupplyChainService {
     await this.changeStatus(requestId, 'DM_APPROVED', 'Approved by District Manager', dm, comments);
   }
 
-  async returnForRevision(requestId: string, dm: string, comments: string) {
+  /** Returns a request to the branch for revision; usable from the RNS review or DM approval stage. */
+  async returnForRevision(requestId: string, actor: string, comments: string) {
     if (!comments.trim()) {
       throw new Error('Reason for return is required.');
     }
 
-    await this.changeStatus(requestId, 'RETURNED_FOR_REVISION', 'Returned for Revision', dm, comments);
+    await this.changeStatus(requestId, 'RETURNED_FOR_REVISION', 'Returned for Revision', actor, comments);
   }
 
   /* =====================================

@@ -36,6 +36,10 @@ import {
   CopyButton
 } from '../../components/copy-button/copy-button';
 
+import { AuthService } from '../../services/auth.service';
+
+import { PROCUREMENT_ROLES } from '../../config/roles.config';
+
 @Component({
   selector: 'app-discrepancies',
   standalone: true,
@@ -68,8 +72,15 @@ implements OnInit {
       SupplyChainService,
 
     private confirmService:
-      ConfirmService
+      ConfirmService,
+
+    private auth: AuthService,
   ) {}
+
+  /** Only a Supply Officer resolves discrepancies (per the RB ABC receiving workflow). */
+  get canResolve(): boolean {
+    return this.auth.hasAnyRole(PROCUREMENT_ROLES);
+  }
 
   async ngOnInit() {
     await this.load();
