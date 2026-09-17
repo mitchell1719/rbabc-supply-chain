@@ -1,0 +1,63 @@
+<button
+  type="button"
+  class="fab-trigger"
+  [class.active]="open()"
+  aria-label="Contact support"
+  title="Contact support"
+  (click)="toggle()">
+
+  <span *ngIf="!open()">💬</span>
+  <span *ngIf="open()">✕</span>
+
+</button>
+
+<div class="fab-panel" *ngIf="open()">
+
+  <div class="fab-header">
+    <strong>Need help?</strong>
+    <p>Message the Supply Chain Office and we'll get back to you.</p>
+  </div>
+
+  <div class="fab-body" *ngIf="!sent()">
+
+    <div class="field">
+      <label>Your Name *</label>
+      <input [(ngModel)]="name" placeholder="Juan Dela Cruz" [disabled]="sending()">
+    </div>
+
+    <div class="field">
+      <label>Email (optional)</label>
+      <input [(ngModel)]="email" placeholder="you@rbabc-holding.ph" [disabled]="sending()">
+    </div>
+
+    <div class="field">
+      <label>Message *</label>
+      <textarea
+        [(ngModel)]="message"
+        rows="3"
+        placeholder="How can we help?"
+        [disabled]="sending()">
+      </textarea>
+    </div>
+
+    <p class="fab-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+
+    <button type="button" class="fab-send" [disabled]="sending()" (click)="send()">
+      {{ sending() ? 'Sending…' : 'Send Message' }}
+    </button>
+
+    <div class="fab-direct">
+      <span>Or reach us directly:</span>
+      <a href="mailto:supplychain@rbabc-holding.ph">supplychain&#64;rbabc-holding.ph</a>
+    </div>
+
+  </div>
+
+  <div class="fab-success" *ngIf="sent()">
+    <div class="success-icon">✓</div>
+    <strong>Message sent!</strong>
+    <p>Thanks for reaching out — the Supply Chain Office will follow up shortly.</p>
+    <button type="button" class="fab-send" (click)="reset()">Close</button>
+  </div>
+
+</div>

@@ -10,6 +10,12 @@
 
 </div>
 
+<app-loading-skeleton *ngIf="loading" [rows]="3" label="Loading deliveries for receiving…"></app-loading-skeleton>
+
+<p class="empty" *ngIf="!loading && deliveries.length === 0">
+  No dispatched deliveries awaiting receiving confirmation.
+</p>
+
 <div
   class="delivery-card"
   *ngFor="let delivery of deliveries">

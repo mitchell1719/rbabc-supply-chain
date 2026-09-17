@@ -11,10 +11,26 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-deliveries',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoadingSkeleton, LastUpdated, CopyButton],
   templateUrl: './deliveries.html',
   styleUrl: './deliveries.css'
 })
@@ -23,9 +39,13 @@ implements OnInit {
 
   deliveries: any[] = [];
 
+  loading = true;
+
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+    private confirmService:
+      ConfirmService
   ) {}
 
   async ngOnInit() {
@@ -34,9 +54,19 @@ implements OnInit {
 
   async load() {
 
-    this.deliveries =
-      await this.service
-        .getDeliveries();
+    this.loading = true;
+
+    try {
+
+      this.deliveries =
+        await this.service
+          .getDeliveries();
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -49,9 +79,11 @@ implements OnInit {
     }
 
     const confirmed =
-      confirm(
-        `Dispatch ${delivery.deliveryNumber}?`
-      );
+      await this.confirmService.confirm({
+        title: 'Dispatch Delivery',
+        message: `Dispatch ${delivery.deliveryNumber} to ${delivery.branchName}? This cannot be undone.`,
+        confirmLabel: 'Dispatch',
+      });
 
     if (!confirmed) {
       return;

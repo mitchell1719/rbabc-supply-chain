@@ -59,3 +59,10 @@ button {
 
   cursor: pointer;
 }
+
+.empty {
+  padding: 25px;
+  text-align: center;
+  color: var(--text-muted, #8792a2);
+  font-size: 10px;
+}

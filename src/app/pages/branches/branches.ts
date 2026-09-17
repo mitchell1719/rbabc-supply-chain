@@ -19,6 +19,18 @@ import type {
   Branch
 } from '../../models/supply-chain.model';
 
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 
 @Component({
 
@@ -28,7 +40,10 @@ import type {
 
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    LoadingSkeleton,
+    LastUpdated,
+    CopyButton
   ],
 
   templateUrl:

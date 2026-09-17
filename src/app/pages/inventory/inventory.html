@@ -21,7 +21,9 @@
 
 <div class="table-card">
 
-  <table>
+  <app-loading-skeleton *ngIf="loading" [rows]="6" label="Loading inventory…"></app-loading-skeleton>
+
+  <table *ngIf="!loading">
 
     <thead>
 
@@ -34,6 +36,7 @@
         <th>Quantity</th>
         <th>Reorder Level</th>
         <th>Status</th>
+        <th>Last Updated</th>
       </tr>
 
     </thead>
@@ -88,10 +91,18 @@
 
         </td>
 
+        <td>
+          <app-last-updated [date]="item.updatedAt"></app-last-updated>
+        </td>
+
       </tr>
 
     </tbody>
 
   </table>
+
+  <p class="empty-note" *ngIf="!loading && filtered.length === 0">
+    No inventory records match your search.
+  </p>
 
 </div>

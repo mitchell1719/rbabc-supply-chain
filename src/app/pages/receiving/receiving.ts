@@ -15,12 +15,21 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
 @Component({
   selector: 'app-receiving',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    LoadingSkeleton
   ],
   templateUrl: './receiving.html',
   styleUrl: './receiving.css'
@@ -29,6 +38,8 @@ export class Receiving
 implements OnInit {
 
   deliveries: any[] = [];
+
+  loading = true;
 
   receiver:
     Record<string,string> = {};
@@ -41,7 +52,9 @@ implements OnInit {
 
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+    private confirmService:
+      ConfirmService
   ) {}
 
   async ngOnInit() {
@@ -50,9 +63,19 @@ implements OnInit {
 
   async load() {
 
-    this.deliveries =
-      await this.service
-        .getDeliveriesForReceiving();
+    this.loading = true;
+
+    try {
+
+      this.deliveries =
+        await this.service
+          .getDeliveriesForReceiving();
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -93,6 +116,20 @@ implements OnInit {
         'Describe the discrepancy.'
       );
 
+      return;
+    }
+
+    const confirmed =
+      await this.confirmService.confirm({
+        title: 'Submit Receiving Report',
+        message: hasDiscrepancy
+          ? `Submit this receiving report for ${delivery.deliveryNumber} with a flagged discrepancy? It will require resolution.`
+          : `Submit this receiving report for ${delivery.deliveryNumber} as fully verified? This cannot be undone.`,
+        confirmLabel: 'Submit Report',
+        danger: hasDiscrepancy,
+      });
+
+    if (!confirmed) {
       return;
     }
 

@@ -1,15 +1,10 @@
-<div *ngIf="loading">
-  Loading...
+<div class="details-loading" *ngIf="loading">
+  <app-loading-skeleton [rows]="4" label="Loading request details…"></app-loading-skeleton>
+</div>
 
-  <p>
-    Loading status:
-    {{loading}}
-  </p>
-
-  <p>
-    Request:
-    {{request | json}}
-  </p>
+<div class="details-missing" *ngIf="!loading && !request">
+  <p>This purchase request could not be found.</p>
+  <a routerLink="/purchase-requests">← Back to Purchase Requests</a>
 </div>
 
 <div class="page" *ngIf="!loading && request">
@@ -26,12 +21,15 @@
 
       <h1>
         {{ request.controlNumber }}
+        <app-copy-button [value]="request.controlNumber"></app-copy-button>
       </h1>
 
       <p>
         {{ request.branchName }}
         •
         {{ request.requestDate }}
+        •
+        <app-last-updated [date]="request.updatedAt || request.createdAt"></app-last-updated>
       </p>
 
     </div>

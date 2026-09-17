@@ -1,9 +1,13 @@
+h1 {
+  color: var(--text, #172033);
+}
+
 .card {
   max-width: 600px;
 
-  background: white;
+  background: var(--surface, white);
 
-  border: 1px solid #e1e6ec;
+  border: 1px solid var(--border, #e1e6ec);
   border-radius: 9px;
 
   padding: 25px;
@@ -11,11 +15,17 @@
   margin-top: 20px;
 }
 
+.card h3 {
+  margin: 0 0 4px;
+  color: var(--text, #172033);
+}
+
 label {
   display: block;
 
   font-size: 9px;
   font-weight: 700;
+  color: var(--text-muted, #596578);
 
   margin: 15px 0 5px;
 }
@@ -23,10 +33,20 @@ label {
 input {
   width: 100%;
 
-  border: 1px solid #dce2e8;
+  border: 1px solid var(--border, #dce2e8);
   border-radius: 6px;
 
   padding: 10px;
+
+  background: var(--surface-alt, white);
+  color: var(--text, inherit);
+
+  font-size: 10px;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary, #0a5a9c);
 }
 
 button {
@@ -34,12 +54,124 @@ button {
 
   border: 0;
 
-  background: #ed1c24;
+  background: var(--accent, #ed1c24);
   color: white;
 
   padding: 11px 18px;
 
   border-radius: 6px;
 
+  font-size: 10px;
+  font-weight: 700;
+
   cursor: pointer;
+}
+
+.theme-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 16px;
+}
+
+.theme-row strong {
+  font-size: 11px;
+  color: var(--text, #172033);
+}
+
+.theme-row p {
+  margin: 4px 0 0;
+  font-size: 9.5px;
+  color: var(--text-muted, #8792a2);
+}
+
+.theme-switch {
+  position: relative;
+
+  width: 46px;
+  height: 26px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 20px;
+
+  background: var(--border, #dce2e8);
+
+  cursor: pointer;
+
+  transition: background-color 0.2s ease;
+}
+
+.theme-switch.on {
+  background: var(--primary, #0a5a9c);
+}
+
+.knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+
+  width: 20px;
+  height: 20px;
+
+  border-radius: 50%;
+  background: white;
+
+  transition: transform 0.2s ease;
+}
+
+.theme-switch.on .knob {
+  transform: translateX(20px);
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: 40px;
+}
+
+.visibility-toggle {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+
+  width: 32px;
+  height: 32px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+  color: var(--text-muted, #596578);
+
+  font-size: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.visibility-toggle:hover {
+  background: var(--surface-alt, #f2f6fb);
+}
+
+.field-message {
+  margin: 10px 0 0;
+  font-size: 9.5px;
+}
+
+.field-message.error {
+  color: var(--danger, #d6222b);
+}
+
+.field-message.success {
+  color: var(--success, #168345);
 }

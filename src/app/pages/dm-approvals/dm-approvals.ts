@@ -18,13 +18,32 @@ import {
   StatusBadge
 } from '../../components/status-badge/status-badge';
 
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
+import {
+  ConfirmService
+} from '../../services/confirm.service';
+
 @Component({
   selector: 'app-dm-approvals',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    StatusBadge
+    StatusBadge,
+    LoadingSkeleton,
+    LastUpdated,
+    CopyButton
   ],
   templateUrl: './dm-approvals.html',
   styleUrl: './dm-approvals.css'
@@ -35,8 +54,11 @@ export class DmApprovals implements OnInit {
 
   comments: Record<string,string> = {};
 
+  loading = true;
+
   constructor(
-    private service: SupplyChainService
+    private service: SupplyChainService,
+    private confirmService: ConfirmService,
   ) {}
 
   async ngOnInit() {
@@ -45,15 +67,26 @@ export class DmApprovals implements OnInit {
 
   async load() {
 
-    const all =
-      await this.service.getPurchaseRequests();
+    this.loading = true;
+    this.requests = [];
 
-    this.requests =
-      all.filter(
-        x =>
-          x.status ===
-          'PENDING_DM_APPROVAL'
-      );
+    try {
+
+      const all =
+        await this.service.getPurchaseRequests();
+
+      this.requests =
+        all.filter(
+          x =>
+            x.status ===
+            'PENDING_DM_APPROVAL'
+        );
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -66,9 +99,11 @@ export class DmApprovals implements OnInit {
     }
 
     const confirmed =
-      confirm(
-        `Approve ${request.controlNumber}?`
-      );
+      await this.confirmService.confirm({
+        title: 'Approve Purchase Request',
+        message: `Approve ${request.controlNumber}? This will move it forward to HQ Consolidation.`,
+        confirmLabel: 'Approve',
+      });
 
     if (!confirmed) {
       return;
@@ -112,6 +147,18 @@ export class DmApprovals implements OnInit {
         'Please enter a reason before returning the request.'
       );
 
+      return;
+    }
+
+    const confirmed =
+      await this.confirmService.confirm({
+        title: 'Return for Revision',
+        message: `Return ${request.controlNumber} to the branch for revision? This cannot be undone.`,
+        confirmLabel: 'Return Request',
+        danger: true,
+      });
+
+    if (!confirmed) {
       return;
     }
 

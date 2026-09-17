@@ -15,11 +15,35 @@
 .request-header h1 {
   margin: 0;
   font-size: 24px;
+
+  display: flex;
+  align-items: center;
 }
 
 .request-header p {
   color: #8792a2;
   font-size: 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.details-missing {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.details-missing p {
+  color: var(--text-muted, #8792a2);
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+
+.details-missing a {
+  color: var(--primary, #0a5a9c);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .layout {

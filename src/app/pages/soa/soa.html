@@ -28,9 +28,10 @@
       placeholder="Prepared By">
 
     <button
+      [disabled]="saving"
       (click)="create()">
 
-      Create SOA
+      {{ saving ? 'Creating…' : 'Create SOA' }}
 
     </button>
 
@@ -40,7 +41,9 @@
 
     <h3>SOA Records</h3>
 
-    <table>
+    <app-loading-skeleton *ngIf="loading" [rows]="4" label="Loading SOA records…"></app-loading-skeleton>
+
+    <table *ngIf="!loading">
 
       <thead>
         <tr>
@@ -50,6 +53,7 @@
           <th>Reference</th>
           <th>Total</th>
           <th>Status</th>
+          <th>Last Updated</th>
         </tr>
       </thead>
 
@@ -60,6 +64,7 @@
 
           <td>
             {{ soa.soaNumber }}
+            <app-copy-button [value]="soa.soaNumber"></app-copy-button>
           </td>
 
           <td>
@@ -82,11 +87,19 @@
             {{ soa.status }}
           </td>
 
+          <td>
+            <app-last-updated [date]="soa.updatedAt || soa.createdAt"></app-last-updated>
+          </td>
+
         </tr>
 
       </tbody>
 
     </table>
+
+    <p class="empty" *ngIf="!loading && records.length === 0">
+      No statements of account yet.
+    </p>
 
   </div>
 

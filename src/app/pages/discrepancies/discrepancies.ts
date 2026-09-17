@@ -15,12 +15,31 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-discrepancies',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    LoadingSkeleton,
+    LastUpdated,
+    CopyButton
   ],
   templateUrl: './discrepancies.html',
   styleUrl: './discrepancies.css'
@@ -30,12 +49,16 @@ implements OnInit {
 
   records: any[] = [];
 
+  loading = true;
+
   resolution:
     Record<string,string> = {};
 
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+    private confirmService:
+      ConfirmService
   ) {}
 
   async ngOnInit() {
@@ -44,9 +67,19 @@ implements OnInit {
 
   async load() {
 
-    this.records =
-      await this.service
-        .getDiscrepancies();
+    this.loading = true;
+
+    try {
+
+      this.records =
+        await this.service
+          .getDiscrepancies();
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -65,6 +98,17 @@ implements OnInit {
         'Enter the discrepancy resolution.'
       );
 
+      return;
+    }
+
+    const confirmed =
+      await this.confirmService.confirm({
+        title: 'Resolve Discrepancy',
+        message: `Mark the discrepancy on ${record.receivingNumber} as resolved? This action cannot be undone.`,
+        confirmLabel: 'Resolve',
+      });
+
+    if (!confirmed) {
       return;
     }
 

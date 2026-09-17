@@ -8,12 +8,16 @@ import { PurchaseRequest } from '../../models/supply-chain.model';
 
 import { SupplyChainService } from '../../services/supply-chain.service';
 
+import { LoadingSkeleton } from '../../components/loading-skeleton/loading-skeleton';
+import { LastUpdated } from '../../components/last-updated/last-updated';
+import { CopyButton } from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-purchase-requests',
 
   standalone: true,
 
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LoadingSkeleton, LastUpdated, CopyButton],
 
   templateUrl: './purchase-requests.html',
 

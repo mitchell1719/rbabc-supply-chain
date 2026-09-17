@@ -35,6 +35,9 @@ export interface Branch {
   rnsName: string;
 
   active: boolean;
+
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 export interface Product {

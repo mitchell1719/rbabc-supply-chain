@@ -1,7 +1,13 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<app-scroll-progress></app-scroll-progress>
+
 <div class="application">
 
   <app-sidebar
-    (collapseChange)="sidebarChanged($event)">
+    [mobileOpen]="mobileMenuOpen"
+    (collapseChange)="sidebarChanged($event)"
+    (mobileOpenChange)="setMobileMenu($event)">
   </app-sidebar>
 
 
@@ -9,10 +15,13 @@
     class="main-content"
     [class.collapsed]="sidebarCollapsed">
 
-    <app-header></app-header>
+    <app-header (menuToggle)="toggleMobileMenu()"></app-header>
 
 
-    <div class="router-content">
+    <div
+      class="router-content"
+      id="main-content"
+      tabindex="-1">
 
       <router-outlet>
       </router-outlet>
@@ -22,3 +31,9 @@
   </main>
 
 </div>
+
+<app-back-to-top></app-back-to-top>
+<app-contact-fab></app-contact-fab>
+<app-cookie-banner></app-cookie-banner>
+<app-confirm-dialog></app-confirm-dialog>
+<app-search-overlay></app-search-overlay>

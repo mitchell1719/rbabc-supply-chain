@@ -28,9 +28,10 @@
     </textarea>
 
     <button
+      [disabled]="saving"
       (click)="save()">
 
-      Save Supplier
+      {{ saving ? 'Saving…' : 'Save Supplier' }}
 
     </button>
 
@@ -40,7 +41,9 @@
 
     <h3>Supplier Directory</h3>
 
-    <table>
+    <app-loading-skeleton *ngIf="loading" [rows]="4" label="Loading suppliers…"></app-loading-skeleton>
+
+    <table *ngIf="!loading">
 
       <thead>
         <tr>
@@ -48,6 +51,7 @@
           <th>Contact Person</th>
           <th>Phone</th>
           <th>Email</th>
+          <th>Last Updated</th>
         </tr>
       </thead>
 
@@ -72,11 +76,19 @@
             {{ supplier.email }}
           </td>
 
+          <td>
+            <app-last-updated [date]="supplier.updatedAt || supplier.createdAt"></app-last-updated>
+          </td>
+
         </tr>
 
       </tbody>
 
     </table>
+
+    <p class="empty" *ngIf="!loading && suppliers.length === 0">
+      No suppliers added yet.
+    </p>
 
   </div>
 

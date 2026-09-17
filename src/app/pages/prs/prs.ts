@@ -13,22 +13,43 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-prs',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoadingSkeleton, LastUpdated, CopyButton],
   templateUrl: './prs.html',
   styleUrl: './prs.css'
 })
 export class Prs implements OnInit {
 
+  // Only HQ-consolidated requests are eligible for PRS generation.
   pending: PurchaseRequest[] = [];
 
   prsRecords: any[] = [];
 
+  loading = true;
+
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+    private confirmService:
+      ConfirmService
   ) {}
 
   async ngOnInit() {
@@ -37,13 +58,28 @@ export class Prs implements OnInit {
 
   async load() {
 
-    this.pending =
- await this.service
- .getPurchaseRequests();
+    this.loading = true;
 
-    this.prsRecords =
-      await this.service
-        .getPRS();
+    try {
+
+      const all =
+        await this.service
+          .getPurchaseRequests();
+
+      this.pending =
+        all.filter(
+          x => x.status === 'HQ_CONSOLIDATED'
+        );
+
+      this.prsRecords =
+        await this.service
+          .getPRS();
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -52,9 +88,11 @@ export class Prs implements OnInit {
   ) {
 
     const confirmed =
-      confirm(
-        `Generate PRS for ${request.controlNumber}?`
-      );
+      await this.confirmService.confirm({
+        title: 'Generate PRS',
+        message: `Generate a Purchase Requisition Slip for ${request.controlNumber}?`,
+        confirmLabel: 'Generate PRS',
+      });
 
     if (!confirmed) {
       return;

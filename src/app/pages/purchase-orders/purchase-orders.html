@@ -25,9 +25,10 @@
     </textarea>
 
     <button
+      [disabled]="saving"
       (click)="save()">
 
-      Create PO
+      {{ saving ? 'Creating…' : 'Create PO' }}
 
     </button>
 
@@ -37,7 +38,9 @@
 
     <h3>Purchase Orders</h3>
 
-    <table>
+    <app-loading-skeleton *ngIf="loading" [rows]="4" label="Loading purchase orders…"></app-loading-skeleton>
+
+    <table *ngIf="!loading">
 
       <thead>
         <tr>
@@ -46,6 +49,7 @@
           <th>Reference</th>
           <th>Amount</th>
           <th>Status</th>
+          <th>Last Updated</th>
         </tr>
       </thead>
 
@@ -54,7 +58,10 @@
         <tr
           *ngFor="let po of orders">
 
-          <td>{{ po.poNumber }}</td>
+          <td>
+            {{ po.poNumber }}
+            <app-copy-button [value]="po.poNumber"></app-copy-button>
+          </td>
 
           <td>
             {{ po.supplierName }}
@@ -70,11 +77,19 @@
 
           <td>{{ po.status }}</td>
 
+          <td>
+            <app-last-updated [date]="po.updatedAt || po.createdAt"></app-last-updated>
+          </td>
+
         </tr>
 
       </tbody>
 
     </table>
+
+    <p class="empty" *ngIf="!loading && orders.length === 0">
+      No purchase orders yet.
+    </p>
 
   </div>
 

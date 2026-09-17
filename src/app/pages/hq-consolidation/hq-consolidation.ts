@@ -13,10 +13,26 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-hq-consolidation',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoadingSkeleton, LastUpdated, CopyButton],
   templateUrl: './hq-consolidation.html',
   styleUrl: './hq-consolidation.css'
 })
@@ -28,22 +44,36 @@ implements OnInit {
   selected =
     new Set<string>();
 
+  loading = true;
+
   async ngOnInit() {
     await this.load();
   }
 
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+    private confirmService:
+      ConfirmService
   ) {}
 
   async load() {
 
-    this.requests =
-      await this.service
-        .getRequestsByStatus(
-          'DM_APPROVED'
-        );
+    this.loading = true;
+
+    try {
+
+      this.requests =
+        await this.service
+          .getRequestsByStatus(
+            'DM_APPROVED'
+          );
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -110,9 +140,11 @@ implements OnInit {
     }
 
     const confirmed =
-      confirm(
-        `Consolidate ${selectedRequests.length} request(s)?`
-      );
+      await this.confirmService.confirm({
+        title: 'Consolidate Requests',
+        message: `Consolidate ${selectedRequests.length} request(s) into the HQ batch? This will advance their workflow status.`,
+        confirmLabel: 'Consolidate',
+      });
 
     if (!confirmed) {
       return;

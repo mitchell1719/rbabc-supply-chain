@@ -74,6 +74,14 @@ import {
   Settings
 } from './pages/settings/settings';
 
+import {
+  Help
+} from './pages/help/help';
+
+import {
+  NotFound
+} from './pages/not-found/not-found';
+
 
 export const routes: Routes = [
 
@@ -174,8 +182,13 @@ export const routes: Routes = [
   },
 
   {
+    path: 'help',
+    component: Help
+  },
+
+  {
     path: '**',
-    redirectTo: 'dashboard'
+    component: NotFound
   }
 
 ];

@@ -1,7 +1,7 @@
 .top-header {
   height: 75px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e9ef;
+  background: var(--surface, #ffffff);
+  border-bottom: 1px solid var(--border, #e5e9ef);
 
   display: flex;
   align-items: center;
@@ -11,12 +11,20 @@
 
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 900;
+
+  box-shadow: 0 1px 0 rgba(10, 20, 35, 0.02);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .header-left h2 {
   margin: 0;
-  color: #172033;
+  color: var(--text, #172033);
   font-size: 18px;
 }
 
@@ -26,17 +34,74 @@
   gap: 13px;
 }
 
+.menu-btn {
+  display: none;
+
+  width: 38px;
+  height: 38px;
+
+  border: 1px solid var(--border, #e1e6ec);
+  border-radius: 8px;
+
+  background: var(--surface, #ffffff);
+  color: var(--text, #172033);
+
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+.icon-btn {
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid var(--border, #e1e6ec);
+  border-radius: 9px;
+
+  background: var(--surface, #ffffff);
+  color: var(--text, #172033);
+
+  cursor: pointer;
+
+  font-size: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.icon-btn:hover,
+.menu-btn:hover {
+  transform: translateY(-1px);
+  background: var(--surface-alt, #f2f6fb);
+  border-color: var(--primary, #0a5a9c);
+}
+
 .notification-btn {
   width: 42px;
   height: 42px;
 
-  border: 1px solid #e1e6ec;
+  border: 1px solid var(--border, #e1e6ec);
   border-radius: 9px;
 
-  background: #ffffff;
+  background: var(--surface, #ffffff);
 
   position: relative;
   cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.notification-btn:hover {
+  transform: translateY(-1px);
+  background: var(--surface-alt, #f2f6fb);
 }
 
 .notification-dot {
@@ -85,11 +150,32 @@
 }
 
 @media(max-width: 700px) {
+  .top-header {
+    padding: 0 15px;
+  }
+
+  .menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .header-left h2 {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .user-info {
+    display: none;
+  }
+
+  .search-btn span,
+  .header-right {
+    gap: 8px;
+  }
+}
+
+@media print {
+  .top-header {
     display: none;
   }
 }

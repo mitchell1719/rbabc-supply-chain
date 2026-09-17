@@ -1,0 +1,13 @@
+<div class="cookie-banner" *ngIf="visible()" role="dialog" aria-label="Cookie notice">
+
+  <p>
+    This system uses essential local storage/cookies to keep you signed in and remember your
+    preferences (like dark mode). We don't use tracking or advertising cookies.
+  </p>
+
+  <div class="cookie-actions">
+    <button type="button" class="decline" (click)="decline()">Decline</button>
+    <button type="button" class="accept" (click)="accept()">Accept</button>
+  </div>
+
+</div>

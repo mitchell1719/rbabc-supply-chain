@@ -53,6 +53,18 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.empty {
+  padding: 25px;
+  text-align: center;
+  color: var(--text-muted, #8792a2);
+  font-size: 10px;
+}
+
 .list {
   overflow-x: auto;
 }

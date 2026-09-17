@@ -15,12 +15,22 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
 @Component({
   selector: 'app-suppliers',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    LoadingSkeleton,
+    LastUpdated
   ],
   templateUrl: './suppliers.html',
   styleUrl: './suppliers.css'
@@ -29,6 +39,10 @@ export class Suppliers
 implements OnInit {
 
   suppliers: any[] = [];
+
+  loading = true;
+
+  saving = false;
 
   supplier = {
 
@@ -51,9 +65,19 @@ implements OnInit {
 
   async load() {
 
-    this.suppliers =
-      await this.service
-        .getSuppliers();
+    this.loading = true;
+
+    try {
+
+      this.suppliers =
+        await this.service
+          .getSuppliers();
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -70,20 +94,30 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .createSupplier({
-        ...this.supplier
-      });
+    this.saving = true;
 
-    this.supplier = {
-      name: '',
-      contactPerson: '',
-      phone: '',
-      email: '',
-      address: ''
-    };
+    try {
 
-    await this.load();
+      await this.service
+        .createSupplier({
+          ...this.supplier
+        });
+
+      this.supplier = {
+        name: '',
+        contactPerson: '',
+        phone: '',
+        email: '',
+        address: ''
+      };
+
+      await this.load();
+
+    } finally {
+
+      this.saving = false;
+
+    }
 
   }
 

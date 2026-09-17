@@ -61,6 +61,8 @@ export class SupplyChainService {
         const data = documentSnapshot.data();
 
         return {
+          ...data,
+
           id: documentSnapshot.id,
 
           name: String(data['name'] ?? ''),
@@ -171,6 +173,11 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
 
       return {
 
+        // Spread first so every stored field (including createdAt/updatedAt
+        // and anything added later) survives the round-trip, then apply
+        // defaults for the fields this screen relies on.
+        ...data,
+
         id:
           document.id,   // IMPORTANT
 
@@ -253,6 +260,8 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
     const data = snapshot.data();
 
     return {
+      ...data,
+
       id: snapshot.id,
 
       controlNumber: data['controlNumber'] ?? '',
@@ -451,6 +460,7 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       status: 'DRAFT',
 
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
   }
 
@@ -472,6 +482,7 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       status: 'DRAFT',
 
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
   }
 
@@ -518,6 +529,8 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       const data = doc.data();
 
       return {
+        ...data,
+
         id: doc.id,
 
         controlNumber: data['controlNumber'],
@@ -590,6 +603,7 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       status: 'DRAFT',
 
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
 
     await this.changeStatus(request.id, 'PRS_CREATED', `PRS ${prsNumber} Created`, preparedBy);
@@ -647,6 +661,7 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       status: 'PREPARING',
 
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
   }
 
@@ -655,6 +670,7 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       status: 'DISPATCHED',
 
       dispatchedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
   }
 
@@ -718,6 +734,7 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       status: hasDiscrepancy ? 'DISCREPANCY' : 'VERIFIED',
 
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
 
     await updateDoc(doc(db, 'deliveryNotes', delivery.id), {
@@ -726,6 +743,7 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       receivedBy,
 
       receivedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
 
     return result.id;
@@ -755,6 +773,7 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       resolution,
 
       resolvedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
   }
 
@@ -813,6 +832,47 @@ async getPurchaseRequests(): Promise<PurchaseRequest[]> {
       active: true,
 
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  /* =====================================
+     CONTACT / SUPPORT
+  ===================================== */
+
+  async submitContactMessage(data: { name: string; email: string; message: string }) {
+    return addDoc(collection(db, 'contactMessages'), {
+      ...data,
+
+      status: 'NEW',
+
+      createdAt: serverTimestamp(),
+    });
+  }
+
+  /* =====================================
+     NEWSLETTER / SYSTEM UPDATES
+  ===================================== */
+
+  async subscribeNewsletter(email: string): Promise<void> {
+    const normalized = email.trim().toLowerCase();
+
+    if (!normalized) {
+      throw new Error('Email address is required.');
+    }
+
+    const existing = await getDocs(
+      query(collection(db, 'newsletterSubscribers'), where('email', '==', normalized)),
+    );
+
+    if (!existing.empty) {
+      // Already subscribed - treat as a successful, idempotent signup.
+      return;
+    }
+
+    await addDoc(collection(db, 'newsletterSubscribers'), {
+      email: normalized,
+      subscribedAt: serverTimestamp(),
     });
   }
 }

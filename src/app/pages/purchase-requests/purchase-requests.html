@@ -25,11 +25,7 @@
 
 <div class="table-card">
 
-  <div *ngIf="loading" class="empty">
-
-    Loading purchase requests...
-
-  </div>
+  <app-loading-skeleton *ngIf="loading" [rows]="6" label="Loading purchase requests…"></app-loading-skeleton>
 
 
   <div *ngIf="
@@ -58,6 +54,7 @@
         <th>District Manager</th>
         <th>Total</th>
         <th>Status</th>
+        <th>Last Updated</th>
         <th></th>
 
       </tr>
@@ -73,6 +70,7 @@
           <strong>
             {{ request.controlNumber }}
           </strong>
+          <app-copy-button [value]="request.controlNumber"></app-copy-button>
         </td>
 
         <td>
@@ -108,6 +106,10 @@
 
           </span>
 
+        </td>
+
+        <td>
+          <app-last-updated [date]="request.updatedAt || request.createdAt"></app-last-updated>
         </td>
 
         <td>

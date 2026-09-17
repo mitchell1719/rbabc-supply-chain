@@ -4,12 +4,19 @@
   Receiving reports requiring resolution.
 </p>
 
+<app-loading-skeleton *ngIf="loading" [rows]="3" label="Loading discrepancies…"></app-loading-skeleton>
+
+<p class="empty" *ngIf="!loading && records.length === 0">
+  No open discrepancies. Great work!
+</p>
+
 <div
   class="card"
   *ngFor="let record of records">
 
   <h3>
     {{ record.receivingNumber }}
+    <app-copy-button [value]="record.receivingNumber"></app-copy-button>
   </h3>
 
   <p>
@@ -17,6 +24,8 @@
     <strong>
       {{ record.branchName }}
     </strong>
+    •
+    <app-last-updated [date]="record.updatedAt || record.createdAt"></app-last-updated>
   </p>
 
   <div class="issue">

@@ -280,13 +280,11 @@
 
     <!-- Loading -->
 
-    <div
-      class="loading"
-      *ngIf="loading">
-
-      Loading branches...
-
-    </div>
+    <app-loading-skeleton
+      *ngIf="loading"
+      [rows]="6"
+      label="Loading branches...">
+    </app-loading-skeleton>
 
 
     <!-- Empty -->
@@ -342,6 +340,10 @@
               Status
             </th>
 
+            <th>
+              Last Updated
+            </th>
+
           </tr>
 
         </thead>
@@ -360,6 +362,7 @@
               <strong>
                 {{ branch.name }}
               </strong>
+              <app-copy-button [value]="branch.id || branch.name" label="Copy branch ID"></app-copy-button>
 
             </td>
 
@@ -405,6 +408,10 @@
 
               </span>
 
+            </td>
+
+            <td>
+              <app-last-updated [date]="branch.updatedAt || branch.createdAt"></app-last-updated>
             </td>
 
           </tr>

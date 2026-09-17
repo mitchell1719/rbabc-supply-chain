@@ -14,6 +14,30 @@ import {
   Header
 } from './components/header/header';
 
+import {
+  ScrollProgress
+} from './components/scroll-progress/scroll-progress';
+
+import {
+  BackToTop
+} from './components/back-to-top/back-to-top';
+
+import {
+  CookieBanner
+} from './components/cookie-banner/cookie-banner';
+
+import {
+  ContactFab
+} from './components/contact-fab/contact-fab';
+
+import {
+  ConfirmDialog
+} from './components/confirm-dialog/confirm-dialog';
+
+import {
+  SearchOverlay
+} from './components/search-overlay/search-overlay';
+
 
 @Component({
 
@@ -24,7 +48,13 @@ import {
   imports: [
     RouterOutlet,
     Sidebar,
-    Header
+    Header,
+    ScrollProgress,
+    BackToTop,
+    CookieBanner,
+    ContactFab,
+    ConfirmDialog,
+    SearchOverlay
   ],
 
   templateUrl:
@@ -38,6 +68,8 @@ export class App {
 
   sidebarCollapsed = false;
 
+  mobileMenuOpen = false;
+
 
   sidebarChanged(
     collapsed: boolean
@@ -46,6 +78,14 @@ export class App {
     this.sidebarCollapsed =
       collapsed;
 
+  }
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  setMobileMenu(open: boolean) {
+    this.mobileMenuOpen = open;
   }
 
 }

@@ -4,7 +4,9 @@
   Current system-level operational summary.
 </p>
 
-<div class="report-grid">
+<app-loading-skeleton *ngIf="loading" [rows]="3" label="Loading reports…"></app-loading-skeleton>
+
+<div class="report-grid" *ngIf="!loading">
 
   <div class="report">
     <span>Total Purchase Requests</span>

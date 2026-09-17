@@ -22,6 +22,18 @@ import {
   PurchaseRequest
 } from '../../models/supply-chain.model';
 
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -29,7 +41,10 @@ import {
     CommonModule,
     RouterLink,
     StatCard,
-    StatusBadge
+    StatusBadge,
+    LoadingSkeleton,
+    LastUpdated,
+    CopyButton
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
@@ -38,9 +53,15 @@ export class Dashboard implements OnInit {
 
   requests: PurchaseRequest[] = [];
 
+  loading = true;
+
   async ngOnInit() {
-    this.requests =
-      await this.service.getPurchaseRequests();
+    try {
+      this.requests =
+        await this.service.getPurchaseRequests();
+    } finally {
+      this.loading = false;
+    }
   }
 
   constructor(

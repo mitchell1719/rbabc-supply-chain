@@ -10,12 +10,22 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
 @Component({
   selector: 'app-inventory',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    LoadingSkeleton,
+    LastUpdated
   ],
   templateUrl: './inventory.html',
   styleUrl: './inventory.css'
@@ -23,6 +33,8 @@ import {
 export class Inventory implements OnInit {
 
   inventory: any[] = [];
+
+  loading = true;
 
   search = '';
 
@@ -37,9 +49,19 @@ export class Inventory implements OnInit {
 
   async load() {
 
-    this.inventory =
-      await this.service
-        .getInventory();
+    this.loading = true;
+
+    try {
+
+      this.inventory =
+        await this.service
+          .getInventory();
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 

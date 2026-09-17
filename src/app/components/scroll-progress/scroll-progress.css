@@ -1,0 +1,25 @@
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  z-index: 2000;
+
+  pointer-events: none;
+}
+
+.progress-track {
+  width: 100%;
+  height: 3px;
+
+  background: transparent;
+}
+
+.progress-fill {
+  height: 100%;
+
+  background: linear-gradient(90deg, var(--accent, #ed1c24), var(--primary, #0a5a9c));
+
+  transition: width 0.1s ease-out;
+}

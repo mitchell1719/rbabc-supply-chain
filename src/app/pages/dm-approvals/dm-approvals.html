@@ -10,9 +10,11 @@
 
 </div>
 
+<app-loading-skeleton *ngIf="loading" [rows]="3" label="Loading pending approvals…"></app-loading-skeleton>
+
 <div
   class="empty"
-  *ngIf="requests.length === 0">
+  *ngIf="!loading && requests.length === 0">
 
   No purchase requests are currently
   pending DM approval.
@@ -29,12 +31,15 @@
 
       <h3>
         {{ request.controlNumber }}
+        <app-copy-button [value]="request.controlNumber"></app-copy-button>
       </h3>
 
       <p>
         {{ request.branchName }}
         •
         {{ request.requestDate }}
+        •
+        <app-last-updated [date]="request.updatedAt || request.createdAt"></app-last-updated>
       </p>
 
     </div>

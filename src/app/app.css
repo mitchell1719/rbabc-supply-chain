@@ -4,7 +4,7 @@
 
 .application {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: var(--app-bg, #f4f7fb);
 }
 
 .main-content {
@@ -32,10 +32,9 @@
   .main-content,
   .main-content.collapsed {
 
-    margin-left: 80px;
+    margin-left: 0;
 
-    width:
-      calc(100% - 80px);
+    width: 100%;
 
   }
 

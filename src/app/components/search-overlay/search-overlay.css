@@ -1,0 +1,166 @@
+.search-backdrop {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(10, 18, 30, 0.55);
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  padding: 90px 20px 20px;
+
+  z-index: 4500;
+
+  animation: fade-in 0.12s ease;
+}
+
+.search-box {
+  width: 100%;
+  max-width: 560px;
+
+  background: var(--surface, #ffffff);
+  border-radius: 14px;
+
+  box-shadow: 0 25px 60px rgba(10, 20, 35, 0.4);
+
+  overflow: hidden;
+
+  animation: pop-in 0.16s ease;
+}
+
+.search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 16px 18px;
+
+  border-bottom: 1px solid var(--border, #edf0f3);
+}
+
+.search-icon {
+  font-size: 15px;
+}
+
+.search-input-row input {
+  flex: 1;
+
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text, #172033);
+
+  font-size: 13px;
+}
+
+.close-btn {
+  border: 0;
+  background: var(--surface-alt, #eef1f5);
+  color: var(--text-muted, #596578);
+
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: var(--primary, #0a5a9c);
+  color: white;
+}
+
+.search-results {
+  max-height: 55vh;
+  overflow-y: auto;
+
+  padding: 8px;
+}
+
+.search-hint,
+.search-loading,
+.search-empty {
+  padding: 20px 14px;
+  margin: 0;
+
+  font-size: 10.5px;
+  color: var(--text-muted, #8792a2);
+  text-align: center;
+}
+
+kbd {
+  background: var(--surface-alt, #eef1f5);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 9px;
+}
+
+.search-group-title {
+  margin: 10px 10px 4px;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-muted, #9aa4b2);
+}
+
+.search-result {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+
+  border: 0;
+  background: transparent;
+
+  padding: 10px 12px;
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  transition: background-color 0.12s ease;
+}
+
+.search-result strong {
+  font-size: 11.5px;
+  color: var(--text, #172033);
+}
+
+.search-result span {
+  font-size: 9px;
+  color: var(--text-muted, #8792a2);
+}
+
+.search-result:hover {
+  background: var(--surface-alt, #f2f6fb);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media print {
+  .search-backdrop {
+    display: none;
+  }
+}

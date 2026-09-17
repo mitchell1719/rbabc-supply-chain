@@ -1,0 +1,21 @@
+.last-updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  font-size: 8px;
+  color: var(--text-muted, #8792a2);
+
+  white-space: nowrap;
+  cursor: default;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  min-width: 5px;
+
+  border-radius: 50%;
+
+  background: var(--success, #2fa860);
+}

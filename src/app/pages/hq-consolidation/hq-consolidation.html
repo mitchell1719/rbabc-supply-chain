@@ -21,7 +21,9 @@
 
 <div class="table-card">
 
-  <table>
+  <app-loading-skeleton *ngIf="loading" [rows]="4" label="Loading DM-approved requests…"></app-loading-skeleton>
+
+  <table *ngIf="!loading">
 
     <thead>
 
@@ -32,6 +34,7 @@
         <th>HQ</th>
         <th>District Manager</th>
         <th>Total</th>
+        <th>Last Updated</th>
       </tr>
 
     </thead>
@@ -52,6 +55,7 @@
 
         <td>
           {{ request.controlNumber }}
+          <app-copy-button [value]="request.controlNumber"></app-copy-button>
         </td>
 
         <td>
@@ -70,6 +74,10 @@
           ₱{{ request.totalAmount | number:'1.2-2' }}
         </td>
 
+        <td>
+          <app-last-updated [date]="request.updatedAt || request.createdAt"></app-last-updated>
+        </td>
+
       </tr>
 
     </tbody>
@@ -78,7 +86,7 @@
 
   <div
     class="empty"
-    *ngIf="requests.length === 0">
+    *ngIf="!loading && requests.length === 0">
 
     No DM-approved requests waiting for
     HQ consolidation.

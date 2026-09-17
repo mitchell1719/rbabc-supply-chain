@@ -15,12 +15,27 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    LoadingSkeleton,
+    LastUpdated,
+    CopyButton
   ],
   templateUrl: './purchase-orders.html',
   styleUrl: './purchase-orders.css'
@@ -29,6 +44,10 @@ export class PurchaseOrders
 implements OnInit {
 
   orders: any[] = [];
+
+  loading = true;
+
+  saving = false;
 
   form = {
     supplierName: '',
@@ -48,9 +67,19 @@ implements OnInit {
 
   async load() {
 
-    this.orders =
-      await this.service
-        .getPurchaseOrders();
+    this.loading = true;
+
+    try {
+
+      this.orders =
+        await this.service
+          .getPurchaseOrders();
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -67,19 +96,29 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .createPurchaseOrder({
-        ...this.form
-      });
+    this.saving = true;
 
-    this.form = {
-      supplierName: '',
-      reference: '',
-      amount: 0,
-      remarks: ''
-    };
+    try {
 
-    await this.load();
+      await this.service
+        .createPurchaseOrder({
+          ...this.form
+        });
+
+      this.form = {
+        supplierName: '',
+        reference: '',
+        amount: 0,
+        remarks: ''
+      };
+
+      await this.load();
+
+    } finally {
+
+      this.saving = false;
+
+    }
 
   }
 

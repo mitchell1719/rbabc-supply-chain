@@ -11,10 +11,14 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoadingSkeleton],
   templateUrl: './reports.html',
   styleUrl: './reports.css'
 })
@@ -25,6 +29,8 @@ implements OnInit {
   inventory: any[] = [];
   deliveries: any[] = [];
 
+  loading = true;
+
   constructor(
     private service:
       SupplyChainService
@@ -32,17 +38,26 @@ implements OnInit {
 
   async ngOnInit() {
 
-    this.requests =
-      await this.service
-        .getPurchaseRequests();
+    this.loading = true;
 
-    this.inventory =
-      await this.service
-        .getInventory();
+    try {
 
-    this.deliveries =
-      await this.service
-        .getDeliveries();
+      // Fetch in parallel instead of sequentially awaiting each one.
+      const [requests, inventory, deliveries] = await Promise.all([
+        this.service.getPurchaseRequests(),
+        this.service.getInventory(),
+        this.service.getDeliveries(),
+      ]);
+
+      this.requests = requests;
+      this.inventory = inventory;
+      this.deliveries = deliveries;
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 

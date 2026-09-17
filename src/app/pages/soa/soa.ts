@@ -15,12 +15,27 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  LoadingSkeleton
+} from '../../components/loading-skeleton/loading-skeleton';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-soa',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    LoadingSkeleton,
+    LastUpdated,
+    CopyButton
   ],
   templateUrl: './soa.html',
   styleUrl: './soa.css'
@@ -29,6 +44,10 @@ export class Soa
 implements OnInit {
 
   records: any[] = [];
+
+  loading = true;
+
+  saving = false;
 
   form = {
 
@@ -55,9 +74,19 @@ implements OnInit {
 
   async load() {
 
-    this.records =
-      await this.service
-        .getSOA();
+    this.loading = true;
+
+    try {
+
+      this.records =
+        await this.service
+          .getSOA();
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -74,26 +103,36 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .createSOA({
-        ...this.form
-      });
+    this.saving = true;
 
-    this.form = {
+    try {
 
-      districtManagerName: '',
+      await this.service
+        .createSOA({
+          ...this.form
+        });
 
-      branchName: '',
+      this.form = {
 
-      reference: '',
+        districtManagerName: '',
 
-      totalAmount: 0,
+        branchName: '',
 
-      preparedBy: ''
+        reference: '',
 
-    };
+        totalAmount: 0,
 
-    await this.load();
+        preparedBy: ''
+
+      };
+
+      await this.load();
+
+    } finally {
+
+      this.saving = false;
+
+    }
 
   }
 

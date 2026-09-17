@@ -12,12 +12,24 @@ import { StatusBadge } from '../../components/status-badge/status-badge';
 
 import { WorkflowTimeline } from '../../components/workflow-timeline/workflow-timeline';
 
+import { LoadingSkeleton } from '../../components/loading-skeleton/loading-skeleton';
+import { LastUpdated } from '../../components/last-updated/last-updated';
+import { CopyButton } from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-request-details',
 
   standalone: true,
 
-  imports: [CommonModule, RouterLink, StatusBadge, WorkflowTimeline],
+  imports: [
+    CommonModule,
+    RouterLink,
+    StatusBadge,
+    WorkflowTimeline,
+    LoadingSkeleton,
+    LastUpdated,
+    CopyButton,
+  ],
 
   templateUrl: './request-details.html',
 
