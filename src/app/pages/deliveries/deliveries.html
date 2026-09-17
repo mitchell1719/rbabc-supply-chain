@@ -11,6 +11,14 @@
 
 <div class="card">
 
+  <app-data-state
+    [loading]="loading"
+    [error]="errorMessage"
+    [isEmpty]="deliveries.length === 0"
+    loadingMessage="Loading deliveries..."
+    emptyMessage="No deliveries have been recorded yet."
+    (retry)="load()">
+
   <table>
 
     <thead>
@@ -63,9 +71,10 @@
               delivery.status ===
               'PREPARING'
             "
+            [disabled]="dispatchingId === delivery.id"
             (click)="dispatch(delivery)">
 
-            Dispatch
+            {{ dispatchingId === delivery.id ? 'Dispatching...' : 'Dispatch' }}
 
           </button>
 
@@ -76,5 +85,7 @@
     </tbody>
 
   </table>
+
+  </app-data-state>
 
 </div>

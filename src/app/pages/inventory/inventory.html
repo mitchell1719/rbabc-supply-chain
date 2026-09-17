@@ -21,6 +21,14 @@
 
 <div class="table-card">
 
+  <app-data-state
+    [loading]="loading"
+    [error]="errorMessage"
+    [isEmpty]="filtered.length === 0"
+    loadingMessage="Loading inventory..."
+    [emptyMessage]="emptyMessage"
+    (retry)="load()">
+
   <table>
 
     <thead>
@@ -93,5 +101,7 @@
     </tbody>
 
   </table>
+
+  </app-data-state>
 
 </div>

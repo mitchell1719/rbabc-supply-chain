@@ -1,24 +1,32 @@
-<div class="application">
+<ng-container *ngIf="showShell; else bare">
 
-  <app-sidebar
-    (collapseChange)="sidebarChanged($event)">
-  </app-sidebar>
+  <div class="application">
 
-
-  <main
-    class="main-content"
-    [class.collapsed]="sidebarCollapsed">
-
-    <app-header></app-header>
+    <app-sidebar
+      (collapseChange)="sidebarChanged($event)">
+    </app-sidebar>
 
 
-    <div class="router-content">
+    <main
+      class="main-content"
+      [class.collapsed]="sidebarCollapsed">
 
-      <router-outlet>
-      </router-outlet>
+      <app-header></app-header>
 
-    </div>
 
-  </main>
+      <div class="router-content">
 
-</div>
+        <router-outlet>
+        </router-outlet>
+
+      </div>
+
+    </main>
+
+  </div>
+
+</ng-container>
+
+<ng-template #bare>
+  <router-outlet></router-outlet>
+</ng-template>

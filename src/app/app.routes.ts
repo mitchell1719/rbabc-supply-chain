@@ -74,8 +74,20 @@ import {
   Settings
 } from './pages/settings/settings';
 
+import {
+  Login
+} from './pages/login/login';
+
+import { authGuard, guestGuard } from './guards/auth.guard';
+
 
 export const routes: Routes = [
+
+  {
+    path: 'login',
+    component: Login,
+    canActivate: [guestGuard]
+  },
 
   {
     path: '',
@@ -85,92 +97,110 @@ export const routes: Routes = [
 
   {
     path: 'dashboard',
-    component: Dashboard
+    component: Dashboard,
+    canActivate: [authGuard]
   },
 
   {
     path: 'purchase-requests',
-    component: PurchaseRequests
+    component: PurchaseRequests,
+    canActivate: [authGuard]
   },
 
   {
     path: 'purchase-requests/new',
-    component: NewPurchaseRequest
+    component: NewPurchaseRequest,
+    canActivate: [authGuard]
   },
 
   {
     path: 'purchase-requests/:id',
-    component: RequestDetails
+    component: RequestDetails,
+    canActivate: [authGuard]
   },
 
   {
     path: 'dm-approvals',
-    component: DmApprovals
+    component: DmApprovals,
+    canActivate: [authGuard]
   },
 
   {
     path: 'hq-consolidation',
-    component: HqConsolidation
+    component: HqConsolidation,
+    canActivate: [authGuard]
   },
 
   {
     path: 'prs',
-    component: Prs
+    component: Prs,
+    canActivate: [authGuard]
   },
 
   {
     path: 'procurement',
-    component: Procurement
+    component: Procurement,
+    canActivate: [authGuard]
   },
 
   {
     path: 'purchase-orders',
-    component: PurchaseOrders
+    component: PurchaseOrders,
+    canActivate: [authGuard]
   },
 
   {
     path: 'deliveries',
-    component: Deliveries
+    component: Deliveries,
+    canActivate: [authGuard]
   },
 
   {
     path: 'receiving',
-    component: Receiving
+    component: Receiving,
+    canActivate: [authGuard]
   },
 
   {
     path: 'discrepancies',
-    component: Discrepancies
+    component: Discrepancies,
+    canActivate: [authGuard]
   },
 
   {
     path: 'inventory',
-    component: Inventory
+    component: Inventory,
+    canActivate: [authGuard]
   },
 
   {
     path: 'suppliers',
-    component: Suppliers
+    component: Suppliers,
+    canActivate: [authGuard]
   },
 
   {
     path: 'branches',
-    component: Branches
+    component: Branches,
+    canActivate: [authGuard]
   },
 
   {
     path: 'soa',
-    component: Soa
+    component: Soa,
+    canActivate: [authGuard]
   },
 
   {
     path: 'reports',
-    component: Reports
+    component: Reports,
+    canActivate: [authGuard]
   },
 
   {
     path: 'settings',
-    component: Settings
+    component: Settings,
+    canActivate: [authGuard]
   },
 
   {

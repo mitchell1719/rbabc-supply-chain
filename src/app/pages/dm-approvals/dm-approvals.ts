@@ -18,13 +18,20 @@ import {
   StatusBadge
 } from '../../components/status-badge/status-badge';
 
+import {
+  DataState
+} from '../../components/data-state/data-state';
+
+import { AuthService } from '../../services/auth.service';
+
 @Component({
   selector: 'app-dm-approvals',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    StatusBadge
+    StatusBadge,
+    DataState
   ],
   templateUrl: './dm-approvals.html',
   styleUrl: './dm-approvals.css'
@@ -35,8 +42,16 @@ export class DmApprovals implements OnInit {
 
   comments: Record<string,string> = {};
 
+  loading = false;
+
+  errorMessage = '';
+
+  processingId: string | null = null;
+
   constructor(
-    private service: SupplyChainService
+    private service: SupplyChainService,
+
+    private auth: AuthService
   ) {}
 
   async ngOnInit() {
@@ -45,15 +60,29 @@ export class DmApprovals implements OnInit {
 
   async load() {
 
-    const all =
-      await this.service.getPurchaseRequests();
+    this.loading = true;
 
-    this.requests =
-      all.filter(
-        x =>
-          x.status ===
+    this.errorMessage = '';
+
+    try {
+
+      this.requests =
+        await this.service.getRequestsByStatus(
           'PENDING_DM_APPROVAL'
-      );
+        );
+
+    } catch (error) {
+
+      this.errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to load pending approvals.';
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -74,11 +103,13 @@ export class DmApprovals implements OnInit {
       return;
     }
 
+    this.processingId = request.id;
+
     try {
 
       await this.service.approveByDM(
         request.id,
-        request.districtManagerName,
+        this.auth.displayName(),
         this.comments[request.id] || ''
       );
 
@@ -90,6 +121,10 @@ export class DmApprovals implements OnInit {
         error?.message ||
         'Unable to approve request.'
       );
+
+    } finally {
+
+      this.processingId = null;
 
     }
 
@@ -115,11 +150,13 @@ export class DmApprovals implements OnInit {
       return;
     }
 
+    this.processingId = request.id;
+
     try {
 
       await this.service.returnForRevision(
         request.id,
-        request.districtManagerName,
+        this.auth.displayName(),
         reason
       );
 
@@ -131,6 +168,10 @@ export class DmApprovals implements OnInit {
         error?.message ||
         'Unable to return request.'
       );
+
+    } finally {
+
+      this.processingId = null;
 
     }
 

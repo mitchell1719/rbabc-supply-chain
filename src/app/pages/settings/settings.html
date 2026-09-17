@@ -1,35 +1,49 @@
 <h1>Settings</h1>
 
-<div class="card">
+<app-data-state
+  [loading]="loading"
+  [error]="errorMessage"
+  [isEmpty]="false"
+  loadingMessage="Loading settings..."
+  (retry)="load()">
 
-  <h3>System Information</h3>
+  <div class="card">
 
-  <label>
-    Company Name
-  </label>
+    <h3>System Information</h3>
 
-  <input
-    [(ngModel)]="companyName">
+    <div class="message success" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
 
-  <label>
-    Department
-  </label>
+    <label>
+      Company Name
+    </label>
 
-  <input
-    [(ngModel)]="department">
+    <input
+      [(ngModel)]="companyName">
 
-  <label>
-    System Name
-  </label>
+    <label>
+      Department
+    </label>
 
-  <input
-    [(ngModel)]="systemName">
+    <input
+      [(ngModel)]="department">
 
-  <button
-    (click)="save()">
+    <label>
+      System Name
+    </label>
 
-    Save Settings
+    <input
+      [(ngModel)]="systemName">
 
-  </button>
+    <button
+      [disabled]="saving"
+      (click)="save()">
 
-</div>
+      {{ saving ? 'Saving...' : 'Save Settings' }}
+
+    </button>
+
+  </div>
+
+</app-data-state>

@@ -12,12 +12,14 @@ import { StatusBadge } from '../../components/status-badge/status-badge';
 
 import { WorkflowTimeline } from '../../components/workflow-timeline/workflow-timeline';
 
+import { DataState } from '../../components/data-state/data-state';
+
 @Component({
   selector: 'app-request-details',
 
   standalone: true,
 
-  imports: [CommonModule, RouterLink, StatusBadge, WorkflowTimeline],
+  imports: [CommonModule, RouterLink, StatusBadge, WorkflowTimeline, DataState],
 
   templateUrl: './request-details.html',
 
@@ -30,6 +32,8 @@ export class RequestDetails implements OnInit {
 
   loading = true;
 
+  errorMessage = '';
+
   constructor(
     private route: ActivatedRoute,
 
@@ -37,36 +41,47 @@ export class RequestDetails implements OnInit {
   ) {}
 
   async ngOnInit() {
-    console.log('REQUEST DETAILS INIT');
-
     const id = this.route.snapshot.paramMap.get('id');
 
-    console.log('REQUEST ID:', id);
-
     if (!id) {
-      console.error('NO ID FOUND IN URL');
+      this.errorMessage = 'No purchase request was specified.';
 
       this.loading = false;
 
       return;
     }
 
+    await this.load(id);
+  }
+
+  async load(id: string) {
+    this.loading = true;
+
+    this.errorMessage = '';
+
     try {
       this.request = await this.service.getPurchaseRequest(id);
 
-      console.log('REQUEST RESULT:', this.request);
+      if (!this.request) {
+        this.errorMessage = 'Purchase request not found.';
 
-      if (this.request) {
-        this.history = await this.service.getWorkflowHistory(id);
-
-        console.log('HISTORY RESULT:', this.history);
+        return;
       }
+
+      this.history = await this.service.getWorkflowHistory(id);
     } catch (error) {
-      console.error('REQUEST DETAILS ERROR:', error);
+      this.errorMessage =
+        error instanceof Error ? error.message : 'Unable to load purchase request details.';
     } finally {
       this.loading = false;
+    }
+  }
 
-      console.log('LOADING FALSE');
+  retry() {
+    const id = this.route.snapshot.paramMap.get('id');
+
+    if (id) {
+      this.load(id);
     }
   }
 }

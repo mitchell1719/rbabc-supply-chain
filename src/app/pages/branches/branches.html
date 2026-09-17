@@ -278,39 +278,18 @@
     </div>
 
 
-    <!-- Loading -->
-
-    <div
-      class="loading"
-      *ngIf="loading">
-
-      Loading branches...
-
-    </div>
-
-
-    <!-- Empty -->
-
-    <div
-      class="empty"
-      *ngIf="
-        !loading &&
-        branches.length === 0
-      ">
-
-      No branches have been saved yet.
-
-    </div>
-
+    <app-data-state
+      [loading]="loading"
+      [error]="errorMessage"
+      [isEmpty]="branches.length === 0"
+      loadingMessage="Loading branches..."
+      emptyMessage="No branches have been saved yet."
+      (retry)="loadBranches()">
 
     <!-- Table -->
 
     <div
-      class="table-wrapper"
-      *ngIf="
-        !loading &&
-        branches.length > 0
-      ">
+      class="table-wrapper">
 
       <table>
 
@@ -414,6 +393,8 @@
       </table>
 
     </div>
+
+    </app-data-state>
 
   </div>
 

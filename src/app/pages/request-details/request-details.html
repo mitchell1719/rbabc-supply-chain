@@ -1,18 +1,12 @@
-<div *ngIf="loading">
-  Loading...
+<app-data-state
+  [loading]="loading"
+  [error]="errorMessage"
+  [isEmpty]="!request"
+  loadingMessage="Loading purchase request details..."
+  emptyMessage="Purchase request not found."
+  (retry)="retry()">
 
-  <p>
-    Loading status:
-    {{loading}}
-  </p>
-
-  <p>
-    Request:
-    {{request | json}}
-  </p>
-</div>
-
-<div class="page" *ngIf="!loading && request">
+<div class="page" *ngIf="request">
 
   <a routerLink="/purchase-requests" class="back">
 
@@ -174,3 +168,5 @@
   </div>
 
 </div>
+
+</app-data-state>

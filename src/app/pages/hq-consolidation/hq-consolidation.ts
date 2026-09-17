@@ -13,10 +13,16 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  DataState
+} from '../../components/data-state/data-state';
+
+import { AuthService } from '../../services/auth.service';
+
 @Component({
   selector: 'app-hq-consolidation',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DataState],
   templateUrl: './hq-consolidation.html',
   styleUrl: './hq-consolidation.css'
 })
@@ -28,22 +34,49 @@ implements OnInit {
   selected =
     new Set<string>();
 
+  loading = false;
+
+  errorMessage = '';
+
+  consolidating = false;
+
   async ngOnInit() {
     await this.load();
   }
 
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+
+    private auth: AuthService
   ) {}
 
   async load() {
 
-    this.requests =
-      await this.service
-        .getRequestsByStatus(
-          'DM_APPROVED'
-        );
+    this.loading = true;
+
+    this.errorMessage = '';
+
+    try {
+
+      this.requests =
+        await this.service
+          .getRequestsByStatus(
+            'DM_APPROVED'
+          );
+
+    } catch (error) {
+
+      this.errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to load DM-approved requests.';
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -118,7 +151,12 @@ implements OnInit {
       return;
     }
 
+    this.consolidating = true;
+
     try {
+
+      const performedBy =
+        this.auth.displayName();
 
       for (
         const request
@@ -128,7 +166,7 @@ implements OnInit {
         await this.service
           .markHQConsolidated(
             request.id!,
-            'HQ Supply Officer'
+            performedBy
           );
 
       }
@@ -147,6 +185,10 @@ implements OnInit {
         error?.message ||
         'Unable to consolidate requests.'
       );
+
+    } finally {
+
+      this.consolidating = false;
 
     }
 

@@ -1,32 +1,13 @@
 rules_version = '2';
 
 service cloud.firestore {
-   match /databases/{database}/documents {
+  match /databases/{database}/documents {
 
+    // Every collection in this app requires a signed-in user.
+    // Unauthenticated clients (including direct REST/SDK calls that
+    // bypass the Angular app) are rejected.
     match /{document=**} {
-
-      allow read, write: if true;
-
-    }
-
-    match /branches/{branchId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    match /purchaseRequests/{requestId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    match /workflowHistory/{historyId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
+      allow read, write: if request.auth != null;
     }
 
   }

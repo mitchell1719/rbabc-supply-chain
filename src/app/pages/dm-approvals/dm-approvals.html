@@ -10,14 +10,13 @@
 
 </div>
 
-<div
-  class="empty"
-  *ngIf="requests.length === 0">
-
-  No purchase requests are currently
-  pending DM approval.
-
-</div>
+<app-data-state
+  [loading]="loading"
+  [error]="errorMessage"
+  [isEmpty]="requests.length === 0"
+  loadingMessage="Loading pending approvals..."
+  emptyMessage="No purchase requests are currently pending DM approval."
+  (retry)="load()">
 
 <div
   class="approval-card"
@@ -132,6 +131,7 @@
 
     <button
       class="return"
+      [disabled]="processingId === request.id"
       (click)="returnRequest(request)">
 
       Return for Revision
@@ -140,12 +140,15 @@
 
     <button
       class="approve"
+      [disabled]="processingId === request.id"
       (click)="approve(request)">
 
-      ✓ Approve Request
+      {{ processingId === request.id ? 'Processing...' : '✓ Approve Request' }}
 
     </button>
 
   </div>
 
 </div>
+
+</app-data-state>

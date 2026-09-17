@@ -15,12 +15,21 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  StatementOfAccount
+} from '../../models/supply-chain.model';
+
+import {
+  DataState
+} from '../../components/data-state/data-state';
+
 @Component({
   selector: 'app-soa',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    DataState
   ],
   templateUrl: './soa.html',
   styleUrl: './soa.css'
@@ -28,7 +37,7 @@ import {
 export class Soa
 implements OnInit {
 
-  records: any[] = [];
+  records: StatementOfAccount[] = [];
 
   form = {
 
@@ -44,6 +53,12 @@ implements OnInit {
 
   };
 
+  loading = false;
+
+  errorMessage = '';
+
+  saving = false;
+
   constructor(
     private service:
       SupplyChainService
@@ -55,9 +70,28 @@ implements OnInit {
 
   async load() {
 
-    this.records =
-      await this.service
-        .getSOA();
+    this.loading = true;
+
+    this.errorMessage = '';
+
+    try {
+
+      this.records =
+        await this.service
+          .getSOA();
+
+    } catch (error) {
+
+      this.errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to load statements of account.';
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -74,26 +108,44 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .createSOA({
-        ...this.form
-      });
+    this.saving = true;
 
-    this.form = {
+    try {
 
-      districtManagerName: '',
+      await this.service
+        .createSOA({
+          ...this.form
+        });
 
-      branchName: '',
+      this.form = {
 
-      reference: '',
+        districtManagerName: '',
 
-      totalAmount: 0,
+        branchName: '',
 
-      preparedBy: ''
+        reference: '',
 
-    };
+        totalAmount: 0,
 
-    await this.load();
+        preparedBy: ''
+
+      };
+
+      await this.load();
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to create statement of account.'
+      );
+
+    } finally {
+
+      this.saving = false;
+
+    }
 
   }
 

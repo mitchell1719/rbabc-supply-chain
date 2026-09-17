@@ -15,12 +15,21 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  DeliveryNote
+} from '../../models/supply-chain.model';
+
+import {
+  DataState
+} from '../../components/data-state/data-state';
+
 @Component({
   selector: 'app-receiving',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    DataState
   ],
   templateUrl: './receiving.html',
   styleUrl: './receiving.css'
@@ -28,7 +37,7 @@ import {
 export class Receiving
 implements OnInit {
 
-  deliveries: any[] = [];
+  deliveries: DeliveryNote[] = [];
 
   receiver:
     Record<string,string> = {};
@@ -38,6 +47,12 @@ implements OnInit {
 
   remarks:
     Record<string,string> = {};
+
+  loading = false;
+
+  errorMessage = '';
+
+  submittingId: string | null = null;
 
   constructor(
     private service:
@@ -50,15 +65,38 @@ implements OnInit {
 
   async load() {
 
-    this.deliveries =
-      await this.service
-        .getDeliveriesForReceiving();
+    this.loading = true;
+
+    this.errorMessage = '';
+
+    try {
+
+      this.deliveries =
+        await this.service
+          .getDeliveriesForReceiving();
+
+    } catch (error) {
+
+      this.errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to load deliveries for receiving.';
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
   async receive(
-    delivery: any
+    delivery: DeliveryNote
   ) {
+
+    if (!delivery.id) {
+      return;
+    }
 
     const name =
       this.receiver[
@@ -96,19 +134,37 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .createReceivingReport(
-        delivery,
-        name,
-        hasDiscrepancy,
-        remarks
+    this.submittingId = delivery.id;
+
+    try {
+
+      await this.service
+        .createReceivingReport(
+          delivery,
+          name,
+          hasDiscrepancy,
+          remarks
+        );
+
+      await this.load();
+
+      alert(
+        'Receiving Report submitted.'
       );
 
-    await this.load();
+    } catch (error) {
 
-    alert(
-      'Receiving Report submitted.'
-    );
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to submit receiving report.'
+      );
+
+    } finally {
+
+      this.submittingId = null;
+
+    }
 
   }
 

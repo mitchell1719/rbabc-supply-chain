@@ -268,11 +268,11 @@ export interface StatementOfAccount {
 
   soaNumber: string;
 
-  districtManagerId: string;
-
   districtManagerName: string;
 
-  purchaseRequestIds: string[];
+  branchName: string;
+
+  reference: string;
 
   totalAmount: number;
 
@@ -281,4 +281,58 @@ export interface StatementOfAccount {
   status: 'DRAFT' | 'FOR_VERIFICATION' | 'SUBMITTED_TO_FINANCE' | 'PROCESSED' | 'PAID';
 
   createdAt?: any;
+}
+
+export interface Supplier {
+  id?: string;
+
+  name: string;
+
+  contactPerson: string;
+
+  phone: string;
+
+  email: string;
+
+  address: string;
+
+  active: boolean;
+
+  createdAt?: any;
+}
+
+export interface PurchaseOrder {
+  id?: string;
+
+  poNumber: string;
+
+  supplierName: string;
+
+  reference: string;
+
+  amount: number;
+
+  remarks: string;
+
+  status: 'DRAFT' | 'SENT' | 'FULFILLED' | 'CANCELLED';
+
+  createdAt?: any;
+}
+
+export interface AppUser {
+  uid: string;
+
+  email: string | null;
+
+  displayName: string | null;
+}
+
+export interface SystemSettings {
+  companyName: string;
+
+  department: string;
+
+  systemName: string;
+
+  updatedAt?: any;
 }

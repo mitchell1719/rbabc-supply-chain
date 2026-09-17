@@ -6,19 +6,23 @@
 
   <div class="header-right">
 
-    <button class="notification-btn">
+    <button class="notification-btn" type="button">
       🔔
       <span class="notification-dot"></span>
     </button>
 
     <div class="user-avatar">
-      SC
+      {{ initials }}
     </div>
 
     <div class="user-info">
-      <strong>Supply Chain</strong>
-      <span>Administrator</span>
+      <strong>{{ user?.displayName || user?.email || 'User' }}</strong>
+      <span>{{ user?.email }}</span>
     </div>
+
+    <button class="logout-btn" type="button" (click)="logOut()" title="Log out">
+      ⏻
+    </button>
 
   </div>
 

@@ -10,6 +10,14 @@
 
 </div>
 
+<app-data-state
+  [loading]="loading"
+  [error]="errorMessage"
+  [isEmpty]="deliveries.length === 0"
+  loadingMessage="Loading deliveries..."
+  emptyMessage="No dispatched deliveries are waiting to be received."
+  (retry)="load()">
+
 <div
   class="delivery-card"
   *ngFor="let delivery of deliveries">
@@ -70,31 +78,34 @@
   <div class="form">
 
     <input
-      [(ngModel)]="receiver[delivery.id]"
+      [(ngModel)]="receiver[delivery.id!]"
       placeholder="Received By">
 
     <label>
 
       <input
         type="checkbox"
-        [(ngModel)]="discrepancy[delivery.id]">
+        [(ngModel)]="discrepancy[delivery.id!]">
 
       There is a discrepancy
 
     </label>
 
     <textarea
-      [(ngModel)]="remarks[delivery.id]"
+      [(ngModel)]="remarks[delivery.id!]"
       placeholder="Discrepancy details / remarks">
     </textarea>
 
   </div>
 
   <button
+    [disabled]="submittingId === delivery.id"
     (click)="receive(delivery)">
 
-    Submit Receiving Report
+    {{ submittingId === delivery.id ? 'Submitting...' : 'Submit Receiving Report' }}
 
   </button>
 
 </div>
+
+</app-data-state>

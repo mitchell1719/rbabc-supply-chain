@@ -15,12 +15,21 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  PurchaseOrder
+} from '../../models/supply-chain.model';
+
+import {
+  DataState
+} from '../../components/data-state/data-state';
+
 @Component({
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    DataState
   ],
   templateUrl: './purchase-orders.html',
   styleUrl: './purchase-orders.css'
@@ -28,7 +37,7 @@ import {
 export class PurchaseOrders
 implements OnInit {
 
-  orders: any[] = [];
+  orders: PurchaseOrder[] = [];
 
   form = {
     supplierName: '',
@@ -36,6 +45,12 @@ implements OnInit {
     amount: 0,
     remarks: ''
   };
+
+  loading = false;
+
+  errorMessage = '';
+
+  saving = false;
 
   constructor(
     private service:
@@ -48,9 +63,28 @@ implements OnInit {
 
   async load() {
 
-    this.orders =
-      await this.service
-        .getPurchaseOrders();
+    this.loading = true;
+
+    this.errorMessage = '';
+
+    try {
+
+      this.orders =
+        await this.service
+          .getPurchaseOrders();
+
+    } catch (error) {
+
+      this.errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to load purchase orders.';
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
@@ -67,19 +101,37 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .createPurchaseOrder({
-        ...this.form
-      });
+    this.saving = true;
 
-    this.form = {
-      supplierName: '',
-      reference: '',
-      amount: 0,
-      remarks: ''
-    };
+    try {
 
-    await this.load();
+      await this.service
+        .createPurchaseOrder({
+          ...this.form
+        });
+
+      this.form = {
+        supplierName: '',
+        reference: '',
+        amount: 0,
+        remarks: ''
+      };
+
+      await this.load();
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to save purchase order.'
+      );
+
+    } finally {
+
+      this.saving = false;
+
+    }
 
   }
 

@@ -28,9 +28,10 @@
       placeholder="Prepared By">
 
     <button
+      [disabled]="saving"
       (click)="create()">
 
-      Create SOA
+      {{ saving ? 'Saving...' : 'Create SOA' }}
 
     </button>
 
@@ -39,6 +40,14 @@
   <div class="card">
 
     <h3>SOA Records</h3>
+
+    <app-data-state
+      [loading]="loading"
+      [error]="errorMessage"
+      [isEmpty]="records.length === 0"
+      loadingMessage="Loading statements of account..."
+      emptyMessage="No statements of account have been created yet."
+      (retry)="load()">
 
     <table>
 
@@ -87,6 +96,8 @@
       </tbody>
 
     </table>
+
+    </app-data-state>
 
   </div>
 

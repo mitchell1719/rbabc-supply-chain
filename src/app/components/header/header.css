@@ -84,6 +84,25 @@
   color: #8a94a3;
 }
 
+.logout-btn {
+  width: 38px;
+  height: 38px;
+
+  border: 1px solid #e1e6ec;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #c6252d;
+
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #fff0f0;
+  border-color: #f1c4c6;
+}
+
 @media(max-width: 700px) {
   .header-left h2 {
     font-size: 14px;

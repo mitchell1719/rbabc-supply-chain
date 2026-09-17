@@ -25,9 +25,10 @@
     </textarea>
 
     <button
+      [disabled]="saving"
       (click)="save()">
 
-      Create PO
+      {{ saving ? 'Saving...' : 'Create PO' }}
 
     </button>
 
@@ -36,6 +37,14 @@
   <div class="card">
 
     <h3>Purchase Orders</h3>
+
+    <app-data-state
+      [loading]="loading"
+      [error]="errorMessage"
+      [isEmpty]="orders.length === 0"
+      loadingMessage="Loading purchase orders..."
+      emptyMessage="No purchase orders have been created yet."
+      (retry)="load()">
 
     <table>
 
@@ -75,6 +84,8 @@
       </tbody>
 
     </table>
+
+    </app-data-state>
 
   </div>
 

@@ -3,9 +3,7 @@ import {
   OnInit
 } from '@angular/core';
 
-import {
-  CommonModule
-} from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 import {
   PurchaseRequest
@@ -15,10 +13,16 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  DataState
+} from '../../components/data-state/data-state';
+
+import { AuthService } from '../../services/auth.service';
+
 @Component({
   selector: 'app-procurement',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DataState],
   templateUrl: './procurement.html',
   styleUrl: './procurement.css'
 })
@@ -27,9 +31,17 @@ implements OnInit {
 
   records: PurchaseRequest[] = [];
 
+  loading = false;
+
+  errorMessage = '';
+
+  processingId: string | null = null;
+
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+
+    private auth: AuthService
   ) {}
 
   async ngOnInit() {
@@ -38,31 +50,33 @@ implements OnInit {
 
   async load() {
 
-    const all =
-      await this.service
-        .getPurchaseRequests();
+    this.loading = true;
 
-    this.records =
-      all.filter(
-        x =>
-          x.status ===
-          'PRS_CREATED'
+    this.errorMessage = '';
 
-          ||
+    try {
 
-          x.status ===
-          'WAREHOUSE_CHECK'
+      this.records =
+        await this.service
+          .getRequestsByStatuses([
+            'PRS_CREATED',
+            'WAREHOUSE_CHECK',
+            'FOR_PROCUREMENT',
+            'PROCUREMENT_COMPLETED'
+          ]);
 
-          ||
+    } catch (error) {
 
-          x.status ===
-          'FOR_PROCUREMENT'
+      this.errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to load procurement records.';
 
-          ||
+    } finally {
 
-          x.status ===
-          'PROCUREMENT_COMPLETED'
-      );
+      this.loading = false;
+
+    }
 
   }
 
@@ -70,13 +84,35 @@ implements OnInit {
     request: PurchaseRequest
   ) {
 
-    await this.service
-      .sendForProcurement(
-        request.id!,
-        'Supply Officer'
+    if (!request.id) {
+      return;
+    }
+
+    this.processingId = request.id;
+
+    try {
+
+      await this.service
+        .sendForProcurement(
+          request.id,
+          this.auth.displayName()
+        );
+
+      await this.load();
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to send for procurement.'
       );
 
-    await this.load();
+    } finally {
+
+      this.processingId = null;
+
+    }
 
   }
 
@@ -84,13 +120,35 @@ implements OnInit {
     request: PurchaseRequest
   ) {
 
-    await this.service
-      .completeProcurement(
-        request.id!,
-        'Supply Officer'
+    if (!request.id) {
+      return;
+    }
+
+    this.processingId = request.id;
+
+    try {
+
+      await this.service
+        .completeProcurement(
+          request.id,
+          this.auth.displayName()
+        );
+
+      await this.load();
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to complete procurement.'
       );
 
-    await this.load();
+    } finally {
+
+      this.processingId = null;
+
+    }
 
   }
 

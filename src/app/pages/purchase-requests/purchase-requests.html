@@ -25,27 +25,15 @@
 
 <div class="table-card">
 
-  <div *ngIf="loading" class="empty">
+  <app-data-state
+    [loading]="loading"
+    [error]="errorMessage"
+    [isEmpty]="requests.length === 0"
+    loadingMessage="Loading purchase requests..."
+    emptyMessage="No purchase requests found."
+    (retry)="loadRequests()">
 
-    Loading purchase requests...
-
-  </div>
-
-
-  <div *ngIf="
-      !loading &&
-      requests.length === 0
-    " class="empty">
-
-    No purchase requests found.
-
-  </div>
-
-
-  <table *ngIf="
-      !loading &&
-      requests.length > 0
-    ">
+  <table>
 
     <thead>
 
@@ -128,5 +116,7 @@
     </tbody>
 
   </table>
+
+  </app-data-state>
 
 </div>

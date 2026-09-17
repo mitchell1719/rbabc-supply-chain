@@ -11,19 +11,33 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  DeliveryNote,
+  Inventory,
+  PurchaseRequest
+} from '../../models/supply-chain.model';
+
+import {
+  DataState
+} from '../../components/data-state/data-state';
+
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DataState],
   templateUrl: './reports.html',
   styleUrl: './reports.css'
 })
 export class Reports
 implements OnInit {
 
-  requests: any[] = [];
-  inventory: any[] = [];
-  deliveries: any[] = [];
+  requests: PurchaseRequest[] = [];
+  inventory: Inventory[] = [];
+  deliveries: DeliveryNote[] = [];
+
+  loading = false;
+
+  errorMessage = '';
 
   constructor(
     private service:
@@ -31,18 +45,39 @@ implements OnInit {
   ) {}
 
   async ngOnInit() {
+    await this.load();
+  }
 
-    this.requests =
-      await this.service
-        .getPurchaseRequests();
+  async load() {
 
-    this.inventory =
-      await this.service
-        .getInventory();
+    this.loading = true;
 
-    this.deliveries =
-      await this.service
-        .getDeliveries();
+    this.errorMessage = '';
+
+    try {
+
+      const [requests, inventory, deliveries] = await Promise.all([
+        this.service.getPurchaseRequests(),
+        this.service.getInventory(),
+        this.service.getDeliveries(),
+      ]);
+
+      this.requests = requests;
+      this.inventory = inventory;
+      this.deliveries = deliveries;
+
+    } catch (error) {
+
+      this.errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to load report data.';
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 

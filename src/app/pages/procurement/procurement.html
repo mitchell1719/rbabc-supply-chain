@@ -6,6 +6,14 @@
 
 <div class="card">
 
+  <app-data-state
+    [loading]="loading"
+    [error]="errorMessage"
+    [isEmpty]="records.length === 0"
+    loadingMessage="Loading procurement records..."
+    emptyMessage="No requests are currently in procurement."
+    (retry)="load()">
+
   <table>
 
     <thead>
@@ -54,9 +62,10 @@
               request.status ===
               'WAREHOUSE_CHECK'
             "
+            [disabled]="processingId === request.id"
             (click)="procure(request)">
 
-            Send for Procurement
+            {{ processingId === request.id ? 'Processing...' : 'Send for Procurement' }}
 
           </button>
 
@@ -65,9 +74,10 @@
               request.status ===
               'FOR_PROCUREMENT'
             "
+            [disabled]="processingId === request.id"
             (click)="complete(request)">
 
-            Complete Procurement
+            {{ processingId === request.id ? 'Processing...' : 'Complete Procurement' }}
 
           </button>
 
@@ -78,5 +88,7 @@
     </tbody>
 
   </table>
+
+  </app-data-state>
 
 </div>

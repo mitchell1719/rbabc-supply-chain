@@ -4,37 +4,48 @@
   Receiving reports requiring resolution.
 </p>
 
-<div
-  class="card"
-  *ngFor="let record of records">
+<app-data-state
+  [loading]="loading"
+  [error]="errorMessage"
+  [isEmpty]="records.length === 0"
+  loadingMessage="Loading discrepancies..."
+  emptyMessage="No open discrepancies. Great job!"
+  (retry)="load()">
 
-  <h3>
-    {{ record.receivingNumber }}
-  </h3>
+  <div
+    class="card"
+    *ngFor="let record of records">
 
-  <p>
-    Branch:
-    <strong>
-      {{ record.branchName }}
-    </strong>
-  </p>
+    <h3>
+      {{ record.receivingNumber }}
+    </h3>
 
-  <div class="issue">
+    <p>
+      Branch:
+      <strong>
+        {{ record.branchName }}
+      </strong>
+    </p>
 
-    {{ record.discrepancyRemarks }}
+    <div class="issue">
+
+      {{ record.discrepancyRemarks }}
+
+    </div>
+
+    <textarea
+      [(ngModel)]="resolution[record.id!]"
+      placeholder="Enter corrective action / resolution">
+    </textarea>
+
+    <button
+      [disabled]="resolvingId === record.id"
+      (click)="resolve(record)">
+
+      {{ resolvingId === record.id ? 'Resolving...' : 'Resolve Discrepancy' }}
+
+    </button>
 
   </div>
 
-  <textarea
-    [(ngModel)]="resolution[record.id]"
-    placeholder="Enter corrective action / resolution">
-  </textarea>
-
-  <button
-    (click)="resolve(record)">
-
-    Resolve Discrepancy
-
-  </button>
-
-</div>
+</app-data-state>

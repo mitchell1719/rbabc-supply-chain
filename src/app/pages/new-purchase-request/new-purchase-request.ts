@@ -8,9 +8,9 @@ import { Router } from '@angular/router';
 
 import { SupplyChainService } from '../../services/supply-chain.service';
 
-import { Branch, PurchaseRequest, PurchaseRequestItem } from '../../models/supply-chain.model';
+import { AuthService } from '../../services/auth.service';
 
-import { BRANCHES, BranchOption } from '../../data/branches.data';
+import { Branch, PurchaseRequest, PurchaseRequestItem } from '../../models/supply-chain.model';
 
 @Component({
   selector: 'app-new-purchase-request',
@@ -40,8 +40,16 @@ export class NewPurchaseRequest implements OnInit {
 
   items: PurchaseRequestItem[] = [];
 
+  loadingBranches = false;
+
+  loadError = '';
+
+  submitting = false;
+
   constructor(
     private service: SupplyChainService,
+
+    private auth: AuthService,
 
     private router: Router,
   ) {}
@@ -49,10 +57,26 @@ export class NewPurchaseRequest implements OnInit {
   async ngOnInit() {
     this.controlNumber = this.service.createTemporaryControlNumber('PR');
 
-    this.branches = await this.service.getBranches();
+    this.preparedBy = this.auth.displayName();
 
     for (let i = 0; i < 3; i++) {
       this.addItem();
+    }
+
+    await this.loadBranches();
+  }
+
+  async loadBranches() {
+    this.loadingBranches = true;
+
+    this.loadError = '';
+
+    try {
+      this.branches = await this.service.getBranches();
+    } catch (error) {
+      this.loadError = error instanceof Error ? error.message : 'Unable to load branches.';
+    } finally {
+      this.loadingBranches = false;
     }
   }
 
@@ -95,6 +119,10 @@ export class NewPurchaseRequest implements OnInit {
   }
 
   async submit() {
+    if (this.submitting) {
+      return;
+    }
+
     if (!this.selectedBranchId) {
       alert('Please select a branch.');
 
@@ -131,6 +159,8 @@ export class NewPurchaseRequest implements OnInit {
       return;
     }
 
+    this.submitting = true;
+
     try {
       const request: PurchaseRequest = {
         controlNumber: this.controlNumber,
@@ -164,19 +194,15 @@ export class NewPurchaseRequest implements OnInit {
 
       const id = await this.service.createPurchaseRequest(request);
 
-      await this.service.submitPurchaseRequest(
-        id,
-
-        this.preparedBy,
-      );
+      await this.service.submitPurchaseRequest(id, this.preparedBy);
 
       alert(`${this.controlNumber} submitted successfully for DM approval.`);
 
       this.router.navigate(['/purchase-requests']);
     } catch (error) {
-      console.error(error);
-
-      alert('Unable to submit the Purchase Request.');
+      alert(error instanceof Error ? error.message : 'Unable to submit the Purchase Request.');
+    } finally {
+      this.submitting = false;
     }
   }
 

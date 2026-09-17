@@ -15,12 +15,21 @@ import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
+import {
+  ReceivingReport
+} from '../../models/supply-chain.model';
+
+import {
+  DataState
+} from '../../components/data-state/data-state';
+
 @Component({
   selector: 'app-discrepancies',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    DataState
   ],
   templateUrl: './discrepancies.html',
   styleUrl: './discrepancies.css'
@@ -28,10 +37,16 @@ import {
 export class Discrepancies
 implements OnInit {
 
-  records: any[] = [];
+  records: ReceivingReport[] = [];
 
   resolution:
     Record<string,string> = {};
+
+  loading = false;
+
+  errorMessage = '';
+
+  resolvingId: string | null = null;
 
   constructor(
     private service:
@@ -44,15 +59,38 @@ implements OnInit {
 
   async load() {
 
-    this.records =
-      await this.service
-        .getDiscrepancies();
+    this.loading = true;
+
+    this.errorMessage = '';
+
+    try {
+
+      this.records =
+        await this.service
+          .getDiscrepancies();
+
+    } catch (error) {
+
+      this.errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to load discrepancies.';
+
+    } finally {
+
+      this.loading = false;
+
+    }
 
   }
 
   async resolve(
-    record: any
+    record: ReceivingReport
   ) {
+
+    if (!record.id) {
+      return;
+    }
 
     const text =
       this.resolution[
@@ -68,13 +106,31 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .resolveDiscrepancy(
-        record.id,
-        text
+    this.resolvingId = record.id;
+
+    try {
+
+      await this.service
+        .resolveDiscrepancy(
+          record.id,
+          text
+        );
+
+      await this.load();
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to resolve discrepancy.'
       );
 
-    await this.load();
+    } finally {
+
+      this.resolvingId = null;
+
+    }
 
   }
 

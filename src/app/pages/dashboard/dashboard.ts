@@ -15,6 +15,10 @@ import {
 } from '../../components/status-badge/status-badge';
 
 import {
+  DataState
+} from '../../components/data-state/data-state';
+
+import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
@@ -29,7 +33,8 @@ import {
     CommonModule,
     RouterLink,
     StatCard,
-    StatusBadge
+    StatusBadge,
+    DataState
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
@@ -38,14 +43,36 @@ export class Dashboard implements OnInit {
 
   requests: PurchaseRequest[] = [];
 
-  async ngOnInit() {
-    this.requests =
-      await this.service.getPurchaseRequests();
-  }
+  loading = false;
+
+  errorMessage = '';
 
   constructor(
     private service: SupplyChainService
   ) {}
+
+  async ngOnInit() {
+    await this.load();
+  }
+
+  async load() {
+    this.loading = true;
+
+    this.errorMessage = '';
+
+    try {
+      this.requests = await this.service.getPurchaseRequests();
+    } catch (error) {
+      this.errorMessage =
+        error instanceof Error ? error.message : 'Unable to load dashboard data.';
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  get recentRequests() {
+    return this.requests.slice(0, 5);
+  }
 
   get pendingDM() {
     return this.requests.filter(

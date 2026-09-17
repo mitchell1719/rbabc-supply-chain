@@ -19,6 +19,10 @@ import type {
   Branch
 } from '../../models/supply-chain.model';
 
+import {
+  DataState
+} from '../../components/data-state/data-state';
+
 
 @Component({
 
@@ -28,7 +32,8 @@ import type {
 
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    DataState
   ],
 
   templateUrl:
@@ -147,23 +152,12 @@ implements OnInit {
         await this.service
           .getBranches();
 
-
-      console.log(
-        'Branches loaded:',
-        this.branches
-      );
-
-
     } catch (error) {
 
-      console.error(
-        'Unable to load branches:',
-        error
-      );
-
-
       this.errorMessage =
-        'Unable to load branches from the database.';
+        error instanceof Error
+          ? error.message
+          : 'Unable to load branches from the database.';
 
 
     } finally {
@@ -302,17 +296,10 @@ implements OnInit {
       /*
        * Save to Firestore
        */
-      const id =
-        await this.service
-          .createBranch(
-            branchToSave
-          );
-
-
-      console.log(
-        'Branch created:',
-        id
-      );
+      await this.service
+        .createBranch(
+          branchToSave
+        );
 
 
       /*

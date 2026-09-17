@@ -13,6 +13,14 @@
 
   <h3>Ready for PRS Generation</h3>
 
+  <app-data-state
+    [loading]="loading"
+    [error]="errorMessage"
+    [isEmpty]="pending.length === 0"
+    loadingMessage="Loading HQ-consolidated requests..."
+    emptyMessage="No HQ-consolidated requests are ready for PRS generation."
+    (retry)="load()">
+
   <table>
 
     <thead>
@@ -47,9 +55,11 @@
 
         <td>
 
-          <button (click)="generate(request)">
+          <button
+            [disabled]="generatingId === request.id"
+            (click)="generate(request)">
 
-            Generate PRS
+            {{ generatingId === request.id ? 'Generating...' : 'Generate PRS' }}
 
           </button>
 
@@ -61,11 +71,21 @@
 
   </table>
 
+  </app-data-state>
+
 </div>
 
 <div class="card">
 
   <h3>PRS Records</h3>
+
+  <app-data-state
+    [loading]="loading"
+    [error]="errorMessage"
+    [isEmpty]="prsRecords.length === 0"
+    loadingMessage="Loading PRS records..."
+    emptyMessage="No PRS records have been generated yet."
+    (retry)="load()">
 
   <table>
 
@@ -81,30 +101,26 @@
 
     <tbody>
 
-      <tr *ngFor="
-let request of pending
-">
+      <tr *ngFor="let prs of prsRecords">
 
         <td>
-          {{request.controlNumber}}
+          {{ prs.prsNumber }}
         </td>
 
         <td>
-          {{request.branchName}}
+          {{ prs.date }}
         </td>
 
         <td>
-          {{request.status}}
+          {{ prs.headquartersName }}
         </td>
 
         <td>
+          ₱{{ prs.totalAmount | number:'1.2-2' }}
+        </td>
 
-          <button (click)="generate(request)">
-
-            Generate PRS
-
-          </button>
-
+        <td>
+          {{ prs.status }}
         </td>
 
       </tr>
@@ -112,5 +128,7 @@ let request of pending
     </tbody>
 
   </table>
+
+  </app-data-state>
 
 </div>
