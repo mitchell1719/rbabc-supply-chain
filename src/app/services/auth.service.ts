@@ -1,11 +1,14 @@
 import { Injectable, signal } from '@angular/core';
 
 import {
+  EmailAuthProvider,
   User,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   signInWithEmailAndPassword,
   signOut,
+  updatePassword,
   updateProfile,
 } from 'firebase/auth';
 
@@ -140,5 +143,24 @@ export class AuthService {
 
   async logOut(): Promise<void> {
     await signOut(auth);
+  }
+
+  /** Re-authenticates with the current password, then sets a new one. */
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const current = auth.currentUser;
+
+    if (!current || !current.email) {
+      throw new Error('You must be signed in to change your password.');
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(current.email, currentPassword);
+
+      await reauthenticateWithCredential(current, credential);
+
+      await updatePassword(current, newPassword);
+    } catch (error) {
+      throw new Error(describeAuthError(error));
+    }
   }
 }

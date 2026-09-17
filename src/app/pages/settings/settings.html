@@ -46,4 +46,98 @@
 
   </div>
 
+  <div class="card">
+
+    <h3>Appearance</h3>
+
+    <div class="theme-row">
+
+      <div>
+        <strong>Dark Mode</strong>
+        <p>Switch between light and dark themes for this device.</p>
+      </div>
+
+      <button
+        type="button"
+        class="theme-switch"
+        [class.on]="theme.isDark()"
+        role="switch"
+        [attr.aria-checked]="theme.isDark()"
+        (click)="theme.toggle()">
+
+        <span class="knob"></span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Account Security</h3>
+
+    <label>Current Password</label>
+
+    <div class="password-field">
+      <input
+        [type]="showCurrentPassword ? 'text' : 'password'"
+        [(ngModel)]="currentPassword"
+        placeholder="Enter current password"
+        autocomplete="current-password">
+
+      <button
+        type="button"
+        class="visibility-toggle"
+        [attr.aria-label]="showCurrentPassword ? 'Hide password' : 'Show password'"
+        (click)="showCurrentPassword = !showCurrentPassword">
+        {{ showCurrentPassword ? '🙈' : '👁' }}
+      </button>
+    </div>
+
+    <label>New Password</label>
+
+    <div class="password-field">
+      <input
+        [type]="showNewPassword ? 'text' : 'password'"
+        [(ngModel)]="newPassword"
+        placeholder="At least 8 characters"
+        autocomplete="new-password">
+
+      <button
+        type="button"
+        class="visibility-toggle"
+        [attr.aria-label]="showNewPassword ? 'Hide password' : 'Show password'"
+        (click)="showNewPassword = !showNewPassword">
+        {{ showNewPassword ? '🙈' : '👁' }}
+      </button>
+    </div>
+
+    <label>Confirm New Password</label>
+
+    <div class="password-field">
+      <input
+        [type]="showConfirmPassword ? 'text' : 'password'"
+        [(ngModel)]="confirmPassword"
+        placeholder="Re-enter new password"
+        autocomplete="new-password">
+
+      <button
+        type="button"
+        class="visibility-toggle"
+        [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+        (click)="showConfirmPassword = !showConfirmPassword">
+        {{ showConfirmPassword ? '🙈' : '👁' }}
+      </button>
+    </div>
+
+    <p class="field-message error" *ngIf="passwordError">{{ passwordError }}</p>
+    <p class="field-message success" *ngIf="passwordMessage">{{ passwordMessage }}</p>
+
+    <button [disabled]="changingPassword" (click)="updatePassword()">
+      {{ changingPassword ? 'Changing...' : 'Change Password' }}
+    </button>
+
+  </div>
+
 </app-data-state>

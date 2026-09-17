@@ -28,12 +28,15 @@
 
       <h3>
         {{ request.controlNumber }}
+        <app-copy-button [value]="request.controlNumber"></app-copy-button>
       </h3>
 
       <p>
         {{ request.branchName }}
         •
         {{ request.requestDate }}
+        •
+        <app-last-updated [date]="request.updatedAt || request.createdAt"></app-last-updated>
       </p>
 
     </div>

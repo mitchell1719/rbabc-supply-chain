@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
-
+import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { Router } from '@angular/router';
 
+import { ThemeService } from '../../services/theme.service';
+import { SearchUiService } from '../../services/search-ui.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -15,7 +16,13 @@ import { AuthService } from '../../services/auth.service';
 })
 export class Header {
 
+  @Output()
+  menuToggle = new EventEmitter<void>();
+
   constructor(
+    public theme: ThemeService,
+    public searchUi: SearchUiService,
+
     private auth: AuthService,
 
     private router: Router
@@ -47,4 +54,11 @@ export class Header {
     this.router.navigate(['/login']);
   }
 
+  onMenuToggle(): void {
+    this.menuToggle.emit();
+  }
+
+  onSearchClick(): void {
+    this.searchUi.show();
+  }
 }

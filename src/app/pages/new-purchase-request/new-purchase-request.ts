@@ -12,6 +12,8 @@ import { AuthService } from '../../services/auth.service';
 
 import { Branch, PurchaseRequest, PurchaseRequestItem } from '../../models/supply-chain.model';
 
+import { ConfirmService } from '../../services/confirm.service';
+
 @Component({
   selector: 'app-new-purchase-request',
 
@@ -52,6 +54,8 @@ export class NewPurchaseRequest implements OnInit {
     private auth: AuthService,
 
     private router: Router,
+
+    private confirmService: ConfirmService,
   ) {}
 
   async ngOnInit() {
@@ -156,6 +160,16 @@ export class NewPurchaseRequest implements OnInit {
     if (validItems.length === 0) {
       alert('Add at least one requested item.');
 
+      return;
+    }
+
+    const confirmed = await this.confirmService.confirm({
+      title: 'Submit Purchase Request',
+      message: `Submit ${this.controlNumber} for District Manager approval? You won't be able to edit it once submitted.`,
+      confirmLabel: 'Submit Request',
+    });
+
+    if (!confirmed) {
       return;
     }
 

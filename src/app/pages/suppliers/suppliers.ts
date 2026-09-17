@@ -23,13 +23,18 @@ import {
   DataState
 } from '../../components/data-state/data-state';
 
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
 @Component({
   selector: 'app-suppliers',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    DataState
+    DataState,
+    LastUpdated
   ],
   templateUrl: './suppliers.html',
   styleUrl: './suppliers.css'

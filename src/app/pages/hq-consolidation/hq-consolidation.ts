@@ -14,15 +14,27 @@ import {
 } from '../../services/supply-chain.service';
 
 import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
   DataState
 } from '../../components/data-state/data-state';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
 
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-hq-consolidation',
   standalone: true,
-  imports: [CommonModule, DataState],
+  imports: [CommonModule, DataState, LastUpdated, CopyButton],
   templateUrl: './hq-consolidation.html',
   styleUrl: './hq-consolidation.css'
 })
@@ -47,6 +59,9 @@ implements OnInit {
   constructor(
     private service:
       SupplyChainService,
+
+    private confirmService:
+      ConfirmService,
 
     private auth: AuthService
   ) {}
@@ -143,9 +158,11 @@ implements OnInit {
     }
 
     const confirmed =
-      confirm(
-        `Consolidate ${selectedRequests.length} request(s)?`
-      );
+      await this.confirmService.confirm({
+        title: 'Consolidate Requests',
+        message: `Consolidate ${selectedRequests.length} request(s) into the HQ batch? This will advance their workflow status.`,
+        confirmLabel: 'Consolidate',
+      });
 
     if (!confirmed) {
       return;

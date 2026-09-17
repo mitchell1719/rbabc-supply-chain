@@ -41,6 +41,7 @@
         <th>HQ</th>
         <th>District Manager</th>
         <th>Total</th>
+        <th>Last Updated</th>
       </tr>
 
     </thead>
@@ -61,6 +62,7 @@
 
         <td>
           {{ request.controlNumber }}
+          <app-copy-button [value]="request.controlNumber"></app-copy-button>
         </td>
 
         <td>
@@ -77,6 +79,10 @@
 
         <td>
           ₱{{ request.totalAmount | number:'1.2-2' }}
+        </td>
+
+        <td>
+          <app-last-updated [date]="request.updatedAt || request.createdAt"></app-last-updated>
         </td>
 
       </tr>

@@ -23,13 +23,23 @@ import {
   DataState
 } from '../../components/data-state/data-state';
 
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    DataState
+    DataState,
+    LastUpdated,
+    CopyButton
   ],
   templateUrl: './purchase-orders.html',
   styleUrl: './purchase-orders.css'

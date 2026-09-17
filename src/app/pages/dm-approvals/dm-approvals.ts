@@ -11,6 +11,10 @@ import {
 } from '../../services/supply-chain.service';
 
 import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
   PurchaseRequest
 } from '../../models/supply-chain.model';
 
@@ -22,6 +26,14 @@ import {
   DataState
 } from '../../components/data-state/data-state';
 
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -31,7 +43,9 @@ import { AuthService } from '../../services/auth.service';
     CommonModule,
     FormsModule,
     StatusBadge,
-    DataState
+    DataState,
+    LastUpdated,
+    CopyButton
   ],
   templateUrl: './dm-approvals.html',
   styleUrl: './dm-approvals.css'
@@ -50,6 +64,8 @@ export class DmApprovals implements OnInit {
 
   constructor(
     private service: SupplyChainService,
+
+    private confirmService: ConfirmService,
 
     private auth: AuthService
   ) {}
@@ -95,9 +111,11 @@ export class DmApprovals implements OnInit {
     }
 
     const confirmed =
-      confirm(
-        `Approve ${request.controlNumber}?`
-      );
+      await this.confirmService.confirm({
+        title: 'Approve Purchase Request',
+        message: `Approve ${request.controlNumber}? This will move it forward to HQ Consolidation.`,
+        confirmLabel: 'Approve',
+      });
 
     if (!confirmed) {
       return;
@@ -147,6 +165,18 @@ export class DmApprovals implements OnInit {
         'Please enter a reason before returning the request.'
       );
 
+      return;
+    }
+
+    const confirmed =
+      await this.confirmService.confirm({
+        title: 'Return for Revision',
+        message: `Return ${request.controlNumber} to the branch for revision? This cannot be undone.`,
+        confirmLabel: 'Return Request',
+        danger: true,
+      });
+
+    if (!confirmed) {
       return;
     }
 

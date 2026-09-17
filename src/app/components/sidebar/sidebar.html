@@ -1,6 +1,7 @@
 <aside
   class="sidebar"
-  [class.collapsed]="collapsed">
+  [class.collapsed]="collapsed"
+  [class.mobile-open]="mobileOpen">
 
 
   <div class="brand">
@@ -33,7 +34,7 @@
   </button>
 
 
-  <nav>
+  <nav (click)="onNavClick($event)">
 
     <p class="menu-title">
       MAIN MENU
@@ -228,6 +229,27 @@
 
     </a>
 
+
+    <p class="menu-title">
+      SUPPORT
+    </p>
+
+
+    <a
+      routerLink="/help"
+      routerLinkActive="active">
+
+      <span>❓</span>
+      <label>Help &amp; FAQ</label>
+
+    </a>
+
   </nav>
 
 </aside>
+
+<div
+  class="sidebar-overlay"
+  *ngIf="mobileOpen"
+  (click)="closeMobile()">
+</div>

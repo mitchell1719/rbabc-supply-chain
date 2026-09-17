@@ -57,6 +57,7 @@
           <th>Contact Person</th>
           <th>Phone</th>
           <th>Email</th>
+          <th>Last Updated</th>
         </tr>
       </thead>
 
@@ -79,6 +80,10 @@
 
           <td>
             {{ supplier.email }}
+          </td>
+
+          <td>
+            <app-last-updated [date]="supplier.updatedAt || supplier.createdAt"></app-last-updated>
           </td>
 
         </tr>

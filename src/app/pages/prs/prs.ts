@@ -15,15 +15,27 @@ import {
 } from '../../services/supply-chain.service';
 
 import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
   DataState
 } from '../../components/data-state/data-state';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
 
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-prs',
   standalone: true,
-  imports: [CommonModule, DataState],
+  imports: [CommonModule, DataState, LastUpdated, CopyButton],
   templateUrl: './prs.html',
   styleUrl: './prs.css'
 })
@@ -42,6 +54,9 @@ export class Prs implements OnInit {
   constructor(
     private service:
       SupplyChainService,
+
+    private confirmService:
+      ConfirmService,
 
     private auth: AuthService
   ) {}
@@ -91,9 +106,11 @@ export class Prs implements OnInit {
     }
 
     const confirmed =
-      confirm(
-        `Generate PRS for ${request.controlNumber}?`
-      );
+      await this.confirmService.confirm({
+        title: 'Generate PRS',
+        message: `Generate a Purchase Requisition Slip for ${request.controlNumber}?`,
+        confirmLabel: 'Generate PRS',
+      });
 
     if (!confirmed) {
       return;

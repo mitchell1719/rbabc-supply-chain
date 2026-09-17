@@ -1,0 +1,92 @@
+.cookie-banner {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+
+  max-width: 380px;
+
+  /* Intentionally a fixed dark surface (not the theme's --surface token) so
+     this banner stays high-contrast in both light and dark mode. */
+  background: #172033;
+  color: #ffffff;
+
+  border-radius: 12px;
+  padding: 18px 20px;
+
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+
+  z-index: 4000;
+
+  animation: slide-up 0.25s ease;
+}
+
+.cookie-banner p {
+  margin: 0 0 14px;
+
+  font-size: 10.5px;
+  line-height: 1.6;
+
+  opacity: 0.9;
+}
+
+.cookie-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cookie-actions button {
+  border: 0;
+  border-radius: 6px;
+
+  padding: 8px 14px;
+
+  font-size: 9.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    filter 0.15s ease,
+    transform 0.15s ease;
+}
+
+.cookie-actions .decline {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+}
+
+.cookie-actions .accept {
+  background: var(--accent, #ed1c24);
+  color: white;
+}
+
+.cookie-actions button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 500px) {
+  .cookie-banner {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+  }
+}
+
+@media print {
+  .cookie-banner {
+    display: none;
+  }
+}

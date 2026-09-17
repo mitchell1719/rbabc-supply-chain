@@ -1,0 +1,96 @@
+<div class="page-header">
+
+  <div>
+    <h1>Help &amp; FAQ</h1>
+    <p>Answers to common questions about the Supply Chain Management System.</p>
+  </div>
+
+</div>
+
+<div class="help-layout">
+
+  <div class="card faq-card">
+
+    <h3>Frequently Asked Questions</h3>
+
+    <div class="faq-list">
+
+      <div class="faq-item" *ngFor="let faq of faqs" [class.open]="faq.open">
+
+        <button
+          type="button"
+          class="faq-question"
+          [attr.aria-expanded]="faq.open"
+          (click)="toggleFaq(faq)">
+
+          <span>{{ faq.question }}</span>
+          <span class="chevron">{{ faq.open ? '−' : '+' }}</span>
+
+        </button>
+
+        <div class="faq-answer" *ngIf="faq.open">
+          <p>{{ faq.answer }}</p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="side-column">
+
+    <div class="card newsletter-card">
+
+      <h3>System Updates</h3>
+
+      <div *ngIf="!subscribed()">
+
+        <p>Subscribe to get notified about maintenance windows and new features.</p>
+
+        <div class="newsletter-form">
+
+          <input
+            type="email"
+            [ngModel]="newsletterEmail()"
+            (ngModelChange)="newsletterEmail.set($event)"
+            placeholder="you@rbabc-holding.ph"
+            [disabled]="subscribing()">
+
+          <button type="button" [disabled]="subscribing()" (click)="subscribe()">
+            {{ subscribing() ? 'Subscribing…' : 'Subscribe' }}
+          </button>
+
+        </div>
+
+        <p class="newsletter-error" *ngIf="newsletterError()">{{ newsletterError() }}</p>
+
+      </div>
+
+      <div class="newsletter-success" *ngIf="subscribed()">
+        <div class="success-icon">✓</div>
+        <strong>You're subscribed!</strong>
+        <p>We'll email you about important system updates.</p>
+      </div>
+
+    </div>
+
+    <div class="card resources-card">
+
+      <h3>Resources</h3>
+
+      <a
+        appUtmLink
+        href="https://console.firebase.google.com/project/rbabc-supply-chain/overview">
+        Firebase Console
+      </a>
+
+      <a appUtmLink href="https://angular.dev">
+        Angular Documentation
+      </a>
+
+    </div>
+
+  </div>
+
+</div>

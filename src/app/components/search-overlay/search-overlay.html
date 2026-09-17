@@ -1,0 +1,52 @@
+<div class="search-backdrop" *ngIf="open()" (click)="close()">
+
+  <div class="search-box" role="dialog" aria-label="Site search" (click)="$event.stopPropagation()">
+
+    <div class="search-input-row">
+      <span class="search-icon">🔎</span>
+
+      <input
+        #searchInput
+        autofocus
+        [(ngModel)]="term"
+        (ngModelChange)="onTermChange()"
+        placeholder="Search purchase requests, branches, suppliers, deliveries…">
+
+      <button type="button" class="close-btn" aria-label="Close search" (click)="close()">✕</button>
+    </div>
+
+    <div class="search-results">
+
+      <p class="search-hint" *ngIf="!term">
+        Type to search across the whole system. Press <kbd>Esc</kbd> to close, <kbd>Ctrl</kbd>+<kbd>K</kbd>
+        to reopen anytime.
+      </p>
+
+      <p class="search-loading" *ngIf="loading()">Searching…</p>
+
+      <p class="search-empty" *ngIf="!loading() && term && results().length === 0">
+        No results for "{{ term }}".
+      </p>
+
+      <div class="search-group" *ngFor="let group of groupedResults">
+
+        <p class="search-group-title">{{ group.category }}</p>
+
+        <button
+          type="button"
+          class="search-result"
+          *ngFor="let item of group.items"
+          (click)="goTo(item)">
+
+          <strong>{{ item.title }}</strong>
+          <span>{{ item.subtitle }}</span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -42,6 +42,7 @@
         <th>Quantity</th>
         <th>Reorder Level</th>
         <th>Status</th>
+        <th>Last Updated</th>
       </tr>
 
     </thead>
@@ -94,6 +95,10 @@
 
           </span>
 
+        </td>
+
+        <td>
+          <app-last-updated [date]="item.updatedAt"></app-last-updated>
         </td>
 
       </tr>

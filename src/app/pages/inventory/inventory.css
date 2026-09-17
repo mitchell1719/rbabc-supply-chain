@@ -80,3 +80,11 @@ td {
   background: #ffe2e2;
   color: #d6222b;
 }
+
+.empty-note {
+  padding: 25px;
+  text-align: center;
+  color: var(--text-muted, #8792a2);
+  font-size: 10px;
+  margin: 0;
+}

@@ -31,7 +31,7 @@
       [disabled]="saving"
       (click)="create()">
 
-      {{ saving ? 'Saving...' : 'Create SOA' }}
+      {{ saving ? 'Creating...' : 'Create SOA' }}
 
     </button>
 
@@ -59,6 +59,7 @@
           <th>Reference</th>
           <th>Total</th>
           <th>Status</th>
+          <th>Last Updated</th>
         </tr>
       </thead>
 
@@ -69,6 +70,7 @@
 
           <td>
             {{ soa.soaNumber }}
+            <app-copy-button [value]="soa.soaNumber"></app-copy-button>
           </td>
 
           <td>
@@ -89,6 +91,10 @@
 
           <td>
             {{ soa.status }}
+          </td>
+
+          <td>
+            <app-last-updated [date]="soa.updatedAt || soa.createdAt"></app-last-updated>
           </td>
 
         </tr>

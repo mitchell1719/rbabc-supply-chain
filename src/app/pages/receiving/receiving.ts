@@ -16,6 +16,10 @@ import {
 } from '../../services/supply-chain.service';
 
 import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
   DeliveryNote
 } from '../../models/supply-chain.model';
 
@@ -56,7 +60,10 @@ implements OnInit {
 
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+
+    private confirmService:
+      ConfirmService
   ) {}
 
   async ngOnInit() {
@@ -131,6 +138,20 @@ implements OnInit {
         'Describe the discrepancy.'
       );
 
+      return;
+    }
+
+    const confirmed =
+      await this.confirmService.confirm({
+        title: 'Submit Receiving Report',
+        message: hasDiscrepancy
+          ? `Submit this receiving report for ${delivery.deliveryNumber} with a flagged discrepancy? It will require resolution.`
+          : `Submit this receiving report for ${delivery.deliveryNumber} as fully verified? This cannot be undone.`,
+        confirmLabel: 'Submit Report',
+        danger: hasDiscrepancy,
+      });
+
+    if (!confirmed) {
       return;
     }
 

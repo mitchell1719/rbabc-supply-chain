@@ -207,3 +207,70 @@ nav a.active {
 
   padding: 0;
 }
+
+
+/* =====================================
+   MOBILE OFF-CANVAS MENU
+===================================== */
+
+.sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 700px) {
+
+  .sidebar,
+  .sidebar.collapsed {
+
+    width: 260px;
+
+    transform: translateX(-100%);
+
+    transition: transform .25s ease;
+
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+
+  .sidebar.collapsed .brand-name,
+  .sidebar.collapsed .menu-title,
+  .sidebar.collapsed nav label {
+    display: flex;
+  }
+
+  .sidebar.collapsed .brand {
+    justify-content: flex-start;
+  }
+
+  .sidebar.collapsed nav a {
+    justify-content: flex-start;
+    padding: 0 13px;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 10px 0 30px rgba(0,0,0,.25);
+  }
+
+  .collapse-btn {
+    display: none;
+  }
+
+  .sidebar-overlay {
+    display: block;
+
+    position: fixed;
+    inset: 0;
+
+    background: rgba(6,12,22,.55);
+
+    z-index: 999;
+
+    animation: overlay-fade .15s ease;
+  }
+
+}
+
+@keyframes overlay-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

@@ -1,0 +1,54 @@
+.back-to-top {
+  position: fixed;
+  right: 28px;
+  bottom: 96px;
+
+  width: 42px;
+  height: 42px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: var(--surface, #ffffff);
+  color: var(--primary, #0a5a9c);
+
+  box-shadow: 0 8px 22px rgba(10, 20, 35, 0.2);
+  border: 1px solid var(--border, #e1e6ec);
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  z-index: 1500;
+
+  animation: rise-in 0.2s ease;
+
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.back-to-top:hover {
+  background: var(--primary, #0a5a9c);
+  color: white;
+  transform: translateY(-3px);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media print {
+  .back-to-top {
+    display: none;
+  }
+}

@@ -9,13 +9,15 @@ import { PurchaseRequest } from '../../models/supply-chain.model';
 import { SupplyChainService } from '../../services/supply-chain.service';
 
 import { DataState } from '../../components/data-state/data-state';
+import { LastUpdated } from '../../components/last-updated/last-updated';
+import { CopyButton } from '../../components/copy-button/copy-button';
 
 @Component({
   selector: 'app-purchase-requests',
 
   standalone: true,
 
-  imports: [CommonModule, RouterLink, DataState],
+  imports: [CommonModule, RouterLink, DataState, LastUpdated, CopyButton],
 
   templateUrl: './purchase-requests.html',
 

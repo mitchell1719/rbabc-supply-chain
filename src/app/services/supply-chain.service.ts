@@ -447,6 +447,7 @@ export class SupplyChainService {
         poNumber: this.createTemporaryControlNumber('PO'),
         status: 'DRAFT',
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
     });
   }
@@ -480,6 +481,7 @@ export class SupplyChainService {
         approvedBy: '',
         status: 'DRAFT',
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
 
       await this.changeStatus(request.id, 'PRS_CREATED', `PRS ${prsNumber} Created`, preparedBy);
@@ -544,6 +546,7 @@ export class SupplyChainService {
         ...delivery,
         status: 'PREPARING',
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
     });
   }
@@ -553,6 +556,7 @@ export class SupplyChainService {
       await updateDoc(doc(db, 'deliveryNotes', id), {
         status: 'DISPATCHED',
         dispatchedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
     });
   }
@@ -605,12 +609,14 @@ export class SupplyChainService {
         discrepancyRemarks: remarks,
         status: hasDiscrepancy ? 'DISCREPANCY' : 'VERIFIED',
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
 
       await updateDoc(doc(db, 'deliveryNotes', delivery.id), {
         status: hasDiscrepancy ? 'DELIVERED' : 'RECEIVED',
         receivedBy,
         receivedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
 
       return result.id;
@@ -641,6 +647,7 @@ export class SupplyChainService {
         status: 'RESOLVED',
         resolution,
         resolvedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
     });
   }
@@ -663,6 +670,7 @@ export class SupplyChainService {
         ...supplier,
         active: true,
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
     });
   }
@@ -686,6 +694,7 @@ export class SupplyChainService {
         soaNumber: this.createTemporaryControlNumber('SOA'),
         status: 'DRAFT',
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
     });
   }
@@ -711,6 +720,48 @@ export class SupplyChainService {
       await setDoc(doc(db, 'systemSettings', 'general'), {
         ...settings,
         updatedAt: serverTimestamp(),
+      });
+    });
+  }
+
+  /* =====================================
+     CONTACT / SUPPORT
+  ===================================== */
+
+  async submitContactMessage(data: { name: string; email: string; message: string }) {
+    return withErrorHandling('Send contact message', async () => {
+      return addDoc(collection(db, 'contactMessages'), {
+        ...data,
+        status: 'NEW',
+        createdAt: serverTimestamp(),
+      });
+    });
+  }
+
+  /* =====================================
+     NEWSLETTER / SYSTEM UPDATES
+  ===================================== */
+
+  async subscribeNewsletter(email: string): Promise<void> {
+    return withErrorHandling('Subscribe to updates', async () => {
+      const normalized = email.trim().toLowerCase();
+
+      if (!normalized) {
+        throw new Error('Email address is required.');
+      }
+
+      const existing = await getDocs(
+        query(collection(db, 'newsletterSubscribers'), where('email', '==', normalized)),
+      );
+
+      if (!existing.empty) {
+        // Already subscribed - treat as a successful, idempotent signup.
+        return;
+      }
+
+      await addDoc(collection(db, 'newsletterSubscribers'), {
+        email: normalized,
+        subscribedAt: serverTimestamp(),
       });
     });
   }

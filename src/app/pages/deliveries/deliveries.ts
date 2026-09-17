@@ -12,6 +12,10 @@ import {
 } from '../../services/supply-chain.service';
 
 import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
   DeliveryNote
 } from '../../models/supply-chain.model';
 
@@ -19,10 +23,18 @@ import {
   DataState
 } from '../../components/data-state/data-state';
 
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-deliveries',
   standalone: true,
-  imports: [CommonModule, DataState],
+  imports: [CommonModule, DataState, LastUpdated, CopyButton],
   templateUrl: './deliveries.html',
   styleUrl: './deliveries.css'
 })
@@ -39,7 +51,10 @@ implements OnInit {
 
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+
+    private confirmService:
+      ConfirmService
   ) {}
 
   async ngOnInit() {
@@ -82,9 +97,11 @@ implements OnInit {
     }
 
     const confirmed =
-      confirm(
-        `Dispatch ${delivery.deliveryNumber}?`
-      );
+      await this.confirmService.confirm({
+        title: 'Dispatch Delivery',
+        message: `Dispatch ${delivery.deliveryNumber} to ${delivery.branchName}? This cannot be undone.`,
+        confirmLabel: 'Dispatch',
+      });
 
     if (!confirmed) {
       return;

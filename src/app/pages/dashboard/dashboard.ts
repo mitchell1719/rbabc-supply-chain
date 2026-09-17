@@ -19,6 +19,14 @@ import {
 } from '../../components/data-state/data-state';
 
 import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
+import {
   SupplyChainService
 } from '../../services/supply-chain.service';
 
@@ -34,7 +42,9 @@ import {
     RouterLink,
     StatCard,
     StatusBadge,
-    DataState
+    DataState,
+    LastUpdated,
+    CopyButton
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'

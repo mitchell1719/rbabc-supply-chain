@@ -1,8 +1,13 @@
 import {
   Component,
   EventEmitter,
+  Input,
   Output
 } from '@angular/core';
+
+import {
+  CommonModule
+} from '@angular/common';
 
 import {
   RouterLink,
@@ -19,6 +24,7 @@ import {
     true,
 
   imports: [
+    CommonModule,
     RouterLink,
     RouterLinkActive
   ],
@@ -34,9 +40,16 @@ export class Sidebar {
 
   collapsed = false;
 
+  @Input()
+  mobileOpen = false;
+
 
   @Output()
   collapseChange =
+    new EventEmitter<boolean>();
+
+  @Output()
+  mobileOpenChange =
     new EventEmitter<boolean>();
 
 
@@ -49,6 +62,18 @@ export class Sidebar {
       this.collapsed
     );
 
+  }
+
+  closeMobile() {
+    this.mobileOpenChange.emit(false);
+  }
+
+  onNavClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+
+    if (target.closest('a')) {
+      this.closeMobile();
+    }
   }
 
 }

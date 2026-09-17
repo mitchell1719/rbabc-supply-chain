@@ -35,6 +35,9 @@ export interface Branch {
   rnsName: string;
 
   active: boolean;
+
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 export interface Product {
@@ -151,6 +154,8 @@ export interface PRS {
   status: 'DRAFT' | 'FOR_APPROVAL' | 'APPROVED' | 'PROCESSING' | 'COMPLETED';
 
   createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface Inventory {
@@ -237,6 +242,8 @@ export interface DeliveryNote {
   status: 'PREPARING' | 'DISPATCHED' | 'DELIVERED' | 'RECEIVED';
 
   createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface ReceivingReport {
@@ -261,6 +268,8 @@ export interface ReceivingReport {
   status: 'PENDING' | 'VERIFIED' | 'DISCREPANCY' | 'RESOLVED';
 
   createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface StatementOfAccount {
@@ -281,6 +290,8 @@ export interface StatementOfAccount {
   status: 'DRAFT' | 'FOR_VERIFICATION' | 'SUBMITTED_TO_FINANCE' | 'PROCESSED' | 'PAID';
 
   createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface Supplier {
@@ -299,6 +310,8 @@ export interface Supplier {
   active: boolean;
 
   createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface PurchaseOrder {
@@ -317,6 +330,8 @@ export interface PurchaseOrder {
   status: 'DRAFT' | 'SENT' | 'FULFILLED' | 'CANCELLED';
 
   createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface AppUser {

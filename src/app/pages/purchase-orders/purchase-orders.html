@@ -28,7 +28,7 @@
       [disabled]="saving"
       (click)="save()">
 
-      {{ saving ? 'Saving...' : 'Create PO' }}
+      {{ saving ? 'Creating...' : 'Create PO' }}
 
     </button>
 
@@ -55,6 +55,7 @@
           <th>Reference</th>
           <th>Amount</th>
           <th>Status</th>
+          <th>Last Updated</th>
         </tr>
       </thead>
 
@@ -63,7 +64,10 @@
         <tr
           *ngFor="let po of orders">
 
-          <td>{{ po.poNumber }}</td>
+          <td>
+            {{ po.poNumber }}
+            <app-copy-button [value]="po.poNumber"></app-copy-button>
+          </td>
 
           <td>
             {{ po.supplierName }}
@@ -78,6 +82,10 @@
           </td>
 
           <td>{{ po.status }}</td>
+
+          <td>
+            <app-last-updated [date]="po.updatedAt || po.createdAt"></app-last-updated>
+          </td>
 
         </tr>
 

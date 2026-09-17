@@ -1,0 +1,12 @@
+<button
+  type="button"
+  class="copy-button"
+  [class.copied]="copied()"
+  [attr.aria-label]="copied() ? 'Copied' : label + ' ' + value"
+  [title]="copied() ? 'Copied!' : label"
+  (click)="copy($event)">
+
+  <span *ngIf="!copied()">⧉</span>
+  <span *ngIf="copied()">✓</span>
+
+</button>

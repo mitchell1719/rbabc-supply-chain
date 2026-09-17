@@ -16,7 +16,7 @@
     [error]="errorMessage"
     [isEmpty]="deliveries.length === 0"
     loadingMessage="Loading deliveries..."
-    emptyMessage="No deliveries have been recorded yet."
+    emptyMessage="No deliveries recorded yet."
     (retry)="load()">
 
   <table>
@@ -30,6 +30,7 @@
         <th>Date</th>
         <th>Prepared By</th>
         <th>Status</th>
+        <th>Last Updated</th>
         <th></th>
       </tr>
 
@@ -42,6 +43,7 @@
 
         <td>
           {{ delivery.deliveryNumber }}
+          <app-copy-button [value]="delivery.deliveryNumber"></app-copy-button>
         </td>
 
         <td>
@@ -62,6 +64,10 @@
 
         <td>
           {{ delivery.status }}
+        </td>
+
+        <td>
+          <app-last-updated [date]="delivery.updatedAt || delivery.createdAt"></app-last-updated>
         </td>
 
         <td>

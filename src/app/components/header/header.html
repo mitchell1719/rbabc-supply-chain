@@ -1,12 +1,46 @@
 <header class="top-header">
 
   <div class="header-left">
+
+    <button
+      type="button"
+      class="menu-btn"
+      aria-label="Toggle navigation menu"
+      (click)="onMenuToggle()">
+
+      ☰
+
+    </button>
+
     <h2>Supply Chain Management System</h2>
   </div>
 
   <div class="header-right">
 
-    <button class="notification-btn" type="button">
+    <button
+      type="button"
+      class="icon-btn search-btn"
+      aria-label="Search (Ctrl+K)"
+      title="Search (Ctrl+K)"
+      (click)="onSearchClick()">
+
+      🔎
+
+    </button>
+
+    <button
+      type="button"
+      class="icon-btn theme-btn"
+      [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+      [title]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+      (click)="theme.toggle()">
+
+      <span *ngIf="!theme.isDark()">🌙</span>
+      <span *ngIf="theme.isDark()">☀️</span>
+
+    </button>
+
+    <button class="notification-btn" type="button" aria-label="Notifications">
       🔔
       <span class="notification-dot"></span>
     </button>

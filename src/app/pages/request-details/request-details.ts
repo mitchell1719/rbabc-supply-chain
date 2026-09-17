@@ -13,13 +13,23 @@ import { StatusBadge } from '../../components/status-badge/status-badge';
 import { WorkflowTimeline } from '../../components/workflow-timeline/workflow-timeline';
 
 import { DataState } from '../../components/data-state/data-state';
+import { LastUpdated } from '../../components/last-updated/last-updated';
+import { CopyButton } from '../../components/copy-button/copy-button';
 
 @Component({
   selector: 'app-request-details',
 
   standalone: true,
 
-  imports: [CommonModule, RouterLink, StatusBadge, WorkflowTimeline, DataState],
+  imports: [
+    CommonModule,
+    RouterLink,
+    StatusBadge,
+    WorkflowTimeline,
+    DataState,
+    LastUpdated,
+    CopyButton,
+  ],
 
   templateUrl: './request-details.html',
 

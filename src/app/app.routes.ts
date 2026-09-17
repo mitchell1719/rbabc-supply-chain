@@ -80,6 +80,14 @@ import {
 
 import { authGuard, guestGuard } from './guards/auth.guard';
 
+import {
+  Help
+} from './rb-help/rb-help';
+
+import {
+  NotFound
+} from './pages/not-found/not-found';
+
 
 export const routes: Routes = [
 
@@ -204,8 +212,13 @@ export const routes: Routes = [
   },
 
   {
+    path: 'help',
+    component: Help
+  },
+
+  {
     path: '**',
-    redirectTo: 'dashboard'
+    component: NotFound
   }
 
 ];

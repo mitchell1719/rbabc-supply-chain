@@ -14,15 +14,27 @@ import {
 } from '../../services/supply-chain.service';
 
 import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
   DataState
 } from '../../components/data-state/data-state';
+
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
 
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-procurement',
   standalone: true,
-  imports: [CommonModule, DataState],
+  imports: [CommonModule, DataState, LastUpdated, CopyButton],
   templateUrl: './procurement.html',
   styleUrl: './procurement.css'
 })
@@ -40,6 +52,9 @@ implements OnInit {
   constructor(
     private service:
       SupplyChainService,
+
+    private confirmService:
+      ConfirmService,
 
     private auth: AuthService
   ) {}
@@ -88,6 +103,17 @@ implements OnInit {
       return;
     }
 
+    const confirmed =
+      await this.confirmService.confirm({
+        title: 'Send for Procurement',
+        message: `Send ${request.controlNumber} for supplier procurement? Warehouse stock was insufficient to fulfill it directly.`,
+        confirmLabel: 'Send for Procurement',
+      });
+
+    if (!confirmed) {
+      return;
+    }
+
     this.processingId = request.id;
 
     try {
@@ -121,6 +147,17 @@ implements OnInit {
   ) {
 
     if (!request.id) {
+      return;
+    }
+
+    const confirmed =
+      await this.confirmService.confirm({
+        title: 'Complete Procurement',
+        message: `Mark procurement for ${request.controlNumber} as completed? This finalizes the procurement step.`,
+        confirmLabel: 'Complete Procurement',
+      });
+
+    if (!confirmed) {
       return;
     }
 

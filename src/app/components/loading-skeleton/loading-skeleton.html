@@ -1,0 +1,13 @@
+<div class="skeleton-wrapper" role="status" [attr.aria-label]="label">
+
+  <div class="skeleton-row" *ngFor="let row of rowArray">
+    <span class="skeleton-block" style="width: 18%"></span>
+    <span class="skeleton-block" style="width: 28%"></span>
+    <span class="skeleton-block" style="width: 15%"></span>
+    <span class="skeleton-block" style="width: 20%"></span>
+    <span class="skeleton-block" style="width: 12%"></span>
+  </div>
+
+  <span class="sr-only">{{ label }}</span>
+
+</div>

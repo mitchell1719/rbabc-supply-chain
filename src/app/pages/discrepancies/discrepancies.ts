@@ -16,6 +16,10 @@ import {
 } from '../../services/supply-chain.service';
 
 import {
+  ConfirmService
+} from '../../services/confirm.service';
+
+import {
   ReceivingReport
 } from '../../models/supply-chain.model';
 
@@ -23,13 +27,23 @@ import {
   DataState
 } from '../../components/data-state/data-state';
 
+import {
+  LastUpdated
+} from '../../components/last-updated/last-updated';
+
+import {
+  CopyButton
+} from '../../components/copy-button/copy-button';
+
 @Component({
   selector: 'app-discrepancies',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    DataState
+    DataState,
+    LastUpdated,
+    CopyButton
   ],
   templateUrl: './discrepancies.html',
   styleUrl: './discrepancies.css'
@@ -50,7 +64,10 @@ implements OnInit {
 
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+
+    private confirmService:
+      ConfirmService
   ) {}
 
   async ngOnInit() {
@@ -103,6 +120,17 @@ implements OnInit {
         'Enter the discrepancy resolution.'
       );
 
+      return;
+    }
+
+    const confirmed =
+      await this.confirmService.confirm({
+        title: 'Resolve Discrepancy',
+        message: `Mark the discrepancy on ${record.receivingNumber} as resolved? This action cannot be undone.`,
+        confirmLabel: 'Resolve',
+      });
+
+    if (!confirmed) {
       return;
     }
 
