@@ -76,7 +76,7 @@ import {
 
 import {
   Help
-} from './pages/help/help';
+} from './rb-help/rb-help';
 
 import {
   NotFound

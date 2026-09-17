@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ConfirmService } from '../../services/confirm.service';
+import { ConfirmService } from '../services/confirm.service';
 
 @Component({
   selector: 'app-confirm-dialog',

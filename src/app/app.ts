@@ -32,7 +32,7 @@ import {
 
 import {
   ConfirmDialog
-} from './components/confirm-dialog/confirm-dialog';
+} from './confirm-dialog/confirm-dialog';
 
 import {
   SearchOverlay

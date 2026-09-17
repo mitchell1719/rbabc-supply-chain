@@ -2,8 +2,8 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { SupplyChainService } from '../../services/supply-chain.service';
-import { UtmLinkDirective } from '../../directives/utm-link.directive';
+import { SupplyChainService } from '../services/supply-chain.service';
+import { UtmLinkDirective } from '../directives/utm-link.directive';
 
 interface FaqEntry {
   question: string;
@@ -12,11 +12,11 @@ interface FaqEntry {
 }
 
 @Component({
-  selector: 'app-help',
+  selector: 'app-rb-help',
   standalone: true,
   imports: [CommonModule, FormsModule, UtmLinkDirective],
-  templateUrl: './help.html',
-  styleUrl: './help.css',
+  templateUrl: './rb-help.html',
+  styleUrl: './rb-help.css',
 })
 export class Help {
   faqs: FaqEntry[] = [
