@@ -12,7 +12,7 @@ Record<RequestStatus, RequestStatus[]> = {
   ],
 
   PENDING_RNS_REVIEW: [
-    'PENDING_DM_APPROVAL',
+    'RECEIVED_BY_HQ',
     'RETURNED_FOR_REVISION'
   ],
 

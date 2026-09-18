@@ -28,6 +28,8 @@ import {
   LastUpdated
 } from '../../components/last-updated/last-updated';
 
+import { AuthService } from '../../services/auth.service';
+
 @Component({
   selector: 'app-inventory',
   standalone: true,
@@ -52,7 +54,9 @@ export class Inventory implements OnInit {
 
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+
+    private auth: AuthService,
   ) {}
 
   async ngOnInit() {
@@ -67,9 +71,17 @@ export class Inventory implements OnInit {
 
     try {
 
+      const profile = this.auth.profile();
+
+      const records = await this.service.getInventory();
+
+      // A Nurse only sees inventory held at their own assigned branch.
       this.inventory.set(
-        await this.service
-          .getInventory()
+        profile?.role === 'NURSE' && profile.branchId
+          ? records.filter(
+              (item) => item.locationType === 'BRANCH' && item.locationId === profile.branchId,
+            )
+          : records,
       );
 
     } catch (error) {

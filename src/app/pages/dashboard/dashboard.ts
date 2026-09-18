@@ -74,12 +74,8 @@ export class Dashboard implements OnInit {
     () => this.requests().filter(x => x.status === 'PENDING_RNS_REVIEW').length
   );
 
-  readonly pendingDM = computed(
-    () => this.requests().filter(x => x.status === 'PENDING_DM_APPROVAL').length
-  );
-
-  readonly approved = computed(
-    () => this.requests().filter(x => x.status === 'DM_APPROVED').length
+  readonly awaitingHQ = computed(
+    () => this.requests().filter(x => x.status === 'RECEIVED_BY_HQ').length
   );
 
   readonly procurement = computed(
@@ -109,7 +105,14 @@ export class Dashboard implements OnInit {
     this.errorMessage.set('');
 
     try {
-      this.requests.set(await this.service.getPurchaseRequests());
+      const profile = this.auth.profile();
+
+      // A Nurse's dashboard is scoped to their own assigned branch.
+      this.requests.set(
+        profile?.role === 'NURSE' && profile.branchId
+          ? await this.service.getPurchaseRequestsForBranch(profile.branchId)
+          : await this.service.getPurchaseRequests(),
+      );
     } catch (error) {
       this.errorMessage.set(
         error instanceof Error ? error.message : 'Unable to load dashboard data.'

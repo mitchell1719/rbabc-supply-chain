@@ -32,11 +32,12 @@ export const ALL_ROLES: UserRole[] = [
 /** Roles that initiate a branch Purchase Request. */
 export const REQUEST_CREATOR_ROLES: UserRole[] = ['NURSE'];
 
-/** Roles that perform the Regional Nurse Supervisor review/endorsement step. */
+/**
+ * Roles that perform the Regional Nurse Supervisor review/endorsement step.
+ * RNS endorsement forwards a request straight to its assigned HQ - the
+ * District Manager does not approve individual purchase requests.
+ */
 export const RNS_REVIEW_ROLES: UserRole[] = ['RNS'];
-
-/** Roles that approve or return branch purchase requests. */
-export const APPROVAL_ROLES: UserRole[] = ['DISTRICT_MANAGER'];
 
 /** Roles that manage centralized procurement, PRS processing, and suppliers. */
 export const PROCUREMENT_ROLES: UserRole[] = ['SUPPLY_OFFICER'];

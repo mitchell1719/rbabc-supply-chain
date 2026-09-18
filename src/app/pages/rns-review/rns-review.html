@@ -4,7 +4,7 @@
     <h1>RNS Review</h1>
     <p>
       Validate branch purchase requests
-      before District Manager approval.
+      before forwarding them to the assigned Headquarters.
     </p>
   </div>
 
@@ -50,7 +50,7 @@
   <div class="request-info">
 
     <div>
-      <span>Assigned RNS</span>
+      <span>Assigned HQ</span>
       <strong>
         {{ request.headquartersName }}
       </strong>
@@ -146,7 +146,7 @@
       [disabled]="processingId() === request.id"
       (click)="endorse(request)">
 
-      {{ processingId() === request.id ? 'Processing...' : '✓ Endorse to DM' }}
+      {{ processingId() === request.id ? 'Processing...' : '✓ Endorse to HQ' }}
 
     </button>
 

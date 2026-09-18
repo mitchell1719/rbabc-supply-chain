@@ -1,12 +1,15 @@
 import {
   Component,
   OnInit,
+  computed,
   signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import {
+  Branch,
   PRS as PRSRecord,
   PurchaseRequest
 } from '../../models/supply-chain.model';
@@ -36,7 +39,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-prs',
   standalone: true,
-  imports: [CommonModule, DataState, LastUpdated, CopyButton],
+  imports: [CommonModule, FormsModule, DataState, LastUpdated, CopyButton],
   templateUrl: './prs.html',
   styleUrl: './prs.css'
 })
@@ -46,11 +49,101 @@ export class Prs implements OnInit {
 
   readonly prsRecords = signal<PRSRecord[]>([]);
 
+  readonly branches = signal<Branch[]>([]);
+
   readonly loading = signal(false);
 
   readonly errorMessage = signal('');
 
   readonly generatingId = signal<string | null>(null);
+
+  /* =====================================
+     ADMIN FILTERS
+  ===================================== */
+
+  readonly filterHq = signal('');
+  readonly filterBranch = signal('');
+  readonly filterRns = signal('');
+  readonly filterDm = signal('');
+
+  /** branchId -> assigned RNS name, so pending requests (which don't store RNS directly) can be filtered by it. */
+  private readonly rnsByBranchId = computed(() => {
+    const map = new Map<string, string>();
+
+    for (const branch of this.branches()) {
+      if (branch.id) {
+        map.set(branch.id, branch.rnsName);
+      }
+    }
+
+    return map;
+  });
+
+  readonly hqOptions = computed(() =>
+    this.distinctSorted(this.pending().map((r) => r.headquartersName))
+  );
+
+  readonly branchOptions = computed(() =>
+    this.distinctSorted(this.pending().map((r) => r.branchName))
+  );
+
+  readonly dmOptions = computed(() =>
+    this.distinctSorted(this.pending().map((r) => r.districtManagerName))
+  );
+
+  readonly rnsOptions = computed(() => {
+    const lookup = this.rnsByBranchId();
+
+    return this.distinctSorted(
+      this.pending()
+        .map((r) => lookup.get(r.branchId) || '')
+        .filter((name) => name !== ''),
+    );
+  });
+
+  readonly filteredPending = computed(() => {
+    const lookup = this.rnsByBranchId();
+
+    const hq = this.filterHq();
+    const branch = this.filterBranch();
+    const rns = this.filterRns();
+    const dm = this.filterDm();
+
+    return this.pending().filter((request) => {
+      if (hq && request.headquartersName !== hq) {
+        return false;
+      }
+
+      if (branch && request.branchName !== branch) {
+        return false;
+      }
+
+      if (dm && request.districtManagerName !== dm) {
+        return false;
+      }
+
+      if (rns && lookup.get(request.branchId) !== rns) {
+        return false;
+      }
+
+      return true;
+    });
+  });
+
+  readonly hasActiveFilters = computed(
+    () => !!(this.filterHq() || this.filterBranch() || this.filterRns() || this.filterDm())
+  );
+
+  private distinctSorted(values: string[]): string[] {
+    return Array.from(new Set(values.filter((v) => v))).sort((a, b) => a.localeCompare(b));
+  }
+
+  clearFilters() {
+    this.filterHq.set('');
+    this.filterBranch.set('');
+    this.filterRns.set('');
+    this.filterDm.set('');
+  }
 
   constructor(
     private service:
@@ -74,14 +167,17 @@ export class Prs implements OnInit {
 
     try {
 
-      const [pending, prsRecords] = await Promise.all([
+      const [pending, prsRecords, branches] = await Promise.all([
         this.service.getRequestsByStatus('HQ_CONSOLIDATED'),
         this.service.getPRS(),
+        this.service.getBranches(),
       ]);
 
       this.pending.set(pending);
 
       this.prsRecords.set(prsRecords);
+
+      this.branches.set(branches);
 
     } catch (error) {
 

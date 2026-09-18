@@ -62,7 +62,8 @@ export class RequestDetails implements OnInit {
     return (
       !!request &&
       request.status === 'RETURNED_FOR_REVISION' &&
-      this.auth.hasAnyRole(REQUEST_CREATOR_ROLES)
+      this.auth.hasAnyRole(REQUEST_CREATOR_ROLES) &&
+      this.auth.canAccessBranch(request.branchId)
     );
   }
 
@@ -88,13 +89,19 @@ export class RequestDetails implements OnInit {
     try {
       const request = await this.service.getPurchaseRequest(id);
 
-      this.request.set(request);
-
       if (!request) {
         this.errorMessage.set('Purchase request not found.');
 
         return;
       }
+
+      if (!this.auth.canAccessBranch(request.branchId)) {
+        this.errorMessage.set('You do not have access to this purchase request.');
+
+        return;
+      }
+
+      this.request.set(request);
 
       this.history.set(await this.service.getWorkflowHistory(id));
     } catch (error) {

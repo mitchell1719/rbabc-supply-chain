@@ -5,7 +5,6 @@ import {
 import { authGuard, guestGuard, roleGuard } from './guards/auth.guard';
 
 import {
-  APPROVAL_ROLES,
   PROCUREMENT_ROLES,
   REFERENCE_DATA_ROLES,
   RNS_REVIEW_ROLES,
@@ -75,12 +74,6 @@ export const routes: Routes = [
     path: 'rns-review',
     loadComponent: () => import('./pages/rns-review/rns-review').then((m) => m.RnsReview),
     canActivate: [authGuard, roleGuard(RNS_REVIEW_ROLES)]
-  },
-
-  {
-    path: 'dm-approvals',
-    loadComponent: () => import('./pages/dm-approvals/dm-approvals').then((m) => m.DmApprovals),
-    canActivate: [authGuard, roleGuard(APPROVAL_ROLES)]
   },
 
   {

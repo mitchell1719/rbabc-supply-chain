@@ -4,7 +4,7 @@
     <h1>HQ Consolidation</h1>
 
     <p>
-      Consolidate DM-approved requests
+      Consolidate RNS-endorsed requests
       according to assigned headquarters.
     </p>
   </div>
@@ -26,8 +26,8 @@
     [loading]="loading()"
     [error]="errorMessage()"
     [isEmpty]="requests().length === 0"
-    loadingMessage="Loading DM-approved requests..."
-    emptyMessage="No DM-approved requests waiting for HQ consolidation."
+    loadingMessage="Loading requests awaiting HQ consolidation..."
+    emptyMessage="No requests are currently awaiting HQ consolidation."
     (retry)="load()">
 
   <table>
@@ -55,7 +55,7 @@
 
           <input
             type="checkbox"
-            [checked]="selected.has(request.id!)"
+            [checked]="isSelected(request)"
             (change)="toggle(request)">
 
         </td>
@@ -92,5 +92,53 @@
   </table>
 
   </app-data-state>
+
+</div>
+
+<div class="table-card summary-card" *ngIf="itemSummary().length > 0">
+
+  <div class="summary-header">
+
+    <h3>
+      Item Summary
+      {{ selected().size > 0 ? '(Selected Requests)' : '(All Awaiting Consolidation)' }}
+    </h3>
+
+    <p>
+      Requested items segregated by description, with total quantity
+      and number of orders across {{ selected().size > 0 ? 'the selected requests' : 'every request awaiting consolidation' }}.
+    </p>
+
+  </div>
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Description</th>
+        <th>Unit</th>
+        <th>Total Quantity</th>
+        <th>Orders</th>
+        <th>Total Cost</th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let item of itemSummary()">
+
+        <td>{{ item.description }}</td>
+        <td>{{ item.unit }}</td>
+        <td>{{ item.totalQuantity }}</td>
+        <td>{{ item.orderCount }}</td>
+        <td>₱{{ item.totalCost | number:'1.2-2' }}</td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
 
 </div>

@@ -101,6 +101,13 @@ export class NewPurchaseRequest implements OnInit {
     }
   }
 
+  /** A Nurse is limited to their own assigned branch and can't switch to another one. */
+  get branchLocked(): boolean {
+    const profile = this.auth.profile();
+
+    return profile?.role === 'NURSE' && !!profile.branchId;
+  }
+
   async loadExisting(id: string) {
     this.loadingExisting.set(true);
 
@@ -115,6 +122,10 @@ export class NewPurchaseRequest implements OnInit {
 
       if (request.status !== 'RETURNED_FOR_REVISION') {
         throw new Error('Only requests returned for revision can be edited.');
+      }
+
+      if (!this.auth.canAccessBranch(request.branchId)) {
+        throw new Error('You do not have access to this purchase request.');
       }
 
       this.controlNumber = request.controlNumber;
@@ -221,6 +232,12 @@ export class NewPurchaseRequest implements OnInit {
 
     if (!branch) {
       alert('Invalid branch.');
+
+      return;
+    }
+
+    if (!this.auth.canAccessBranch(branch.id!)) {
+      alert('You can only submit requests for your assigned branch.');
 
       return;
     }

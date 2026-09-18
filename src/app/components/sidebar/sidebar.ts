@@ -17,7 +17,6 @@ import {
 import { AuthService } from '../../services/auth.service';
 
 import {
-  APPROVAL_ROLES,
   PROCUREMENT_ROLES,
   REFERENCE_DATA_ROLES,
   RNS_REVIEW_ROLES,
@@ -54,10 +53,6 @@ export class Sidebar {
 
   get canReviewAsRns(): boolean {
     return this.auth.hasAnyRole(RNS_REVIEW_ROLES);
-  }
-
-  get canApprove(): boolean {
-    return this.auth.hasAnyRole(APPROVAL_ROLES);
   }
 
   get canManageProcurement(): boolean {

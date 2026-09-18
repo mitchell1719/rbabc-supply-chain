@@ -23,6 +23,8 @@ import {
   DataState
 } from '../../components/data-state/data-state';
 
+import { AuthService } from '../../services/auth.service';
+
 @Component({
   selector: 'app-reports',
   standalone: true,
@@ -51,7 +53,9 @@ implements OnInit {
 
   constructor(
     private service:
-      SupplyChainService
+      SupplyChainService,
+
+    private auth: AuthService,
   ) {}
 
   async ngOnInit() {
@@ -66,15 +70,31 @@ implements OnInit {
 
     try {
 
+      const profile = this.auth.profile();
+      const branchId = profile?.role === 'NURSE' ? profile.branchId : '';
+
       const [requests, inventory, deliveries] = await Promise.all([
-        this.service.getPurchaseRequests(),
+        branchId
+          ? this.service.getPurchaseRequestsForBranch(branchId)
+          : this.service.getPurchaseRequests(),
         this.service.getInventory(),
         this.service.getDeliveries(),
       ]);
 
+      // A Nurse's report is scoped to their own branch ("Branch Only" in
+      // the user-access matrix); inventory and deliveries don't have a
+      // per-branch Firestore query, so they're filtered client-side.
       this.requests.set(requests);
-      this.inventory.set(inventory);
-      this.deliveries.set(deliveries);
+
+      this.inventory.set(
+        branchId
+          ? inventory.filter((i) => i.locationType === 'BRANCH' && i.locationId === branchId)
+          : inventory,
+      );
+
+      this.deliveries.set(
+        branchId ? deliveries.filter((d) => d.branchId === branchId) : deliveries,
+      );
 
     } catch (error) {
 

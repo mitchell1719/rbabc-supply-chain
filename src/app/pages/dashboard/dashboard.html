@@ -37,17 +37,17 @@
     </app-stat-card>
 
     <app-stat-card
-      title="Pending DM Approval"
-      [value]="pendingDM()"
-      icon="⏳"
-      subtitle="Waiting for review">
+      title="Awaiting HQ Consolidation"
+      [value]="awaitingHQ()"
+      icon="🏢"
+      subtitle="Received by HQ">
     </app-stat-card>
 
     <app-stat-card
-      title="Approved Requests"
-      [value]="approved()"
-      icon="✓"
-      subtitle="Approved by DM">
+      title="For Procurement"
+      [value]="procurement()"
+      icon="🛒"
+      subtitle="Sent to procurement">
     </app-stat-card>
 
     <app-stat-card

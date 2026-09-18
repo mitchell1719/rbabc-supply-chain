@@ -163,6 +163,26 @@ export class AuthService {
     return roleCanAccess(this.profileSignal()?.role, allowed);
   }
 
+  /**
+   * Whether the signed-in user may view/edit data scoped to `branchId`.
+   * A Nurse is limited to their own assigned branch; every other role
+   * (RNS, District Manager, Supply Officer, Supply Chain Director) works
+   * across branches, so only a Nurse account is actually restricted here.
+   */
+  canAccessBranch(branchId: string): boolean {
+    const profile = this.profileSignal();
+
+    if (!profile) {
+      return false;
+    }
+
+    if (profile.role !== 'NURSE') {
+      return true;
+    }
+
+    return !!profile.branchId && profile.branchId === branchId;
+  }
+
   /* =====================================
      SIGN IN / SIGN UP / SIGN OUT
   ===================================== */

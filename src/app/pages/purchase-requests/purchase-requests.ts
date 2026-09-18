@@ -43,7 +43,8 @@ export class PurchaseRequests implements OnInit {
   canEditReturned(request: PurchaseRequest): boolean {
     return (
       request.status === 'RETURNED_FOR_REVISION' &&
-      this.auth.hasAnyRole(REQUEST_CREATOR_ROLES)
+      this.auth.hasAnyRole(REQUEST_CREATOR_ROLES) &&
+      this.auth.canAccessBranch(request.branchId)
     );
   }
 
@@ -61,7 +62,14 @@ export class PurchaseRequests implements OnInit {
     this.errorMessage.set('');
 
     try {
-      this.requests.set(await this.service.getPurchaseRequests());
+      const profile = this.auth.profile();
+
+      // A Nurse only sees requests for their own assigned branch.
+      this.requests.set(
+        profile?.role === 'NURSE' && profile.branchId
+          ? await this.service.getPurchaseRequestsForBranch(profile.branchId)
+          : await this.service.getPurchaseRequests(),
+      );
     } catch (error) {
       this.errorMessage.set(
         error instanceof Error ? error.message : 'Unable to load purchase requests.'

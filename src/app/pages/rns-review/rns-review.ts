@@ -39,8 +39,8 @@ import { AuthService } from '../../services/auth.service';
 
 /**
  * Regional Nurse Supervisor review queue: validates branch purchase
- * requests before they reach District Manager approval, matching the
- * RNS step in the RB ABC branch procurement workflow.
+ * requests before forwarding them to the assigned Headquarters - District
+ * Manager approval is not part of this step.
  */
 @Component({
   selector: 'app-rns-review',
@@ -121,7 +121,7 @@ export class RnsReview implements OnInit {
     const confirmed =
       await this.confirmService.confirm({
         title: 'Endorse Purchase Request',
-        message: `Endorse ${request.controlNumber}? This will forward it to the District Manager for approval.`,
+        message: `Endorse ${request.controlNumber}? This will forward it to the assigned Headquarters.`,
         confirmLabel: 'Endorse',
       });
 

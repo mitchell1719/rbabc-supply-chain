@@ -310,6 +310,17 @@ export class SupplyChainService {
     });
   }
 
+  /** Requests belonging to a single branch - used to scope a Nurse account to their assigned branch. */
+  async getPurchaseRequestsForBranch(branchId: string): Promise<PurchaseRequest[]> {
+    return this.withErrorHandling('Load purchase requests', async () => {
+      const q = query(collection(db, 'purchaseRequests'), where('branchId', '==', branchId));
+
+      const snapshot = await getDocs(q);
+
+      return snapshot.docs.map((document) => toRecord<PurchaseRequest>(document));
+    });
+  }
+
   /* =====================================
      WORKFLOW
   ===================================== */
@@ -426,25 +437,18 @@ export class SupplyChainService {
      RNS REVIEW
   ===================================== */
 
+  /** RNS endorsement forwards straight to the assigned HQ; District Manager approval is not required. */
   async endorseByRNS(requestId: string, rns: string, comments = '') {
     await this.changeStatus(
       requestId,
-      'PENDING_DM_APPROVAL',
-      'Endorsed by Regional Nurse Supervisor',
+      'RECEIVED_BY_HQ',
+      'Endorsed by Regional Nurse Supervisor - Forwarded to Assigned HQ',
       rns,
       comments,
     );
   }
 
-  /* =====================================
-     DM APPROVAL
-  ===================================== */
-
-  async approveByDM(requestId: string, dm: string, comments = '') {
-    await this.changeStatus(requestId, 'DM_APPROVED', 'Approved by District Manager', dm, comments);
-  }
-
-  /** Returns a request to the branch for revision; usable from the RNS review or DM approval stage. */
+  /** Returns a request to the branch for revision; usable from the RNS review stage. */
   async returnForRevision(requestId: string, actor: string, comments: string) {
     if (!comments.trim()) {
       throw new Error('Reason for return is required.');
