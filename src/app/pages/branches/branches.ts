@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import {
@@ -20,8 +21,8 @@ import type {
 } from '../../models/supply-chain.model';
 
 import {
-  LoadingSkeleton
-} from '../../components/loading-skeleton/loading-skeleton';
+  DataState
+} from '../../components/data-state/data-state';
 
 import {
   LastUpdated
@@ -41,7 +42,7 @@ import {
   imports: [
     CommonModule,
     FormsModule,
-    LoadingSkeleton,
+    DataState,
     LastUpdated,
     CopyButton
   ],
@@ -62,7 +63,7 @@ implements OnInit {
    * DATABASE BRANCHES
    * =========================================
    */
-  branches: Branch[] = [];
+  readonly branches = signal<Branch[]>([]);
 
 
   /*
@@ -79,13 +80,13 @@ implements OnInit {
    * UI STATE
    * =========================================
    */
-  loading = false;
+  readonly loading = signal(false);
 
-  saving = false;
+  readonly saving = signal(false);
 
-  errorMessage = '';
+  readonly errorMessage = signal('');
 
-  successMessage = '';
+  readonly successMessage = signal('');
 
 
   constructor(
@@ -148,42 +149,35 @@ implements OnInit {
    * LOAD DATABASE
    * =========================================
    */
-  async loadBranches():
+  async loadBranches(
+    forceRefresh = false
+  ):
   Promise<void> {
 
-    this.loading = true;
+    this.loading.set(true);
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
 
     try {
 
-      this.branches =
+      this.branches.set(
         await this.service
-          .getBranches();
-
-
-      console.log(
-        'Branches loaded:',
-        this.branches
+          .getBranches(forceRefresh)
       );
-
 
     } catch (error) {
 
-      console.error(
-        'Unable to load branches:',
-        error
+      this.errorMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load branches from the database.'
       );
-
-
-      this.errorMessage =
-        'Unable to load branches from the database.';
 
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -198,9 +192,9 @@ implements OnInit {
   async save():
   Promise<void> {
 
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
-    this.successMessage = '';
+    this.successMessage.set('');
 
 
     /*
@@ -210,8 +204,9 @@ implements OnInit {
       !this.form.name.trim()
     ) {
 
-      this.errorMessage =
-        'Branch name is required.';
+      this.errorMessage.set(
+        'Branch name is required.'
+      );
 
       return;
 
@@ -225,8 +220,9 @@ implements OnInit {
       !this.form.region
     ) {
 
-      this.errorMessage =
-        'Region is required.';
+      this.errorMessage.set(
+        'Region is required.'
+      );
 
       return;
 
@@ -242,8 +238,9 @@ implements OnInit {
         .trim()
     ) {
 
-      this.errorMessage =
-        'Headquarters is required.';
+      this.errorMessage.set(
+        'Headquarters is required.'
+      );
 
       return;
 
@@ -259,15 +256,16 @@ implements OnInit {
         .trim()
     ) {
 
-      this.errorMessage =
-        'District Manager is required.';
+      this.errorMessage.set(
+        'District Manager is required.'
+      );
 
       return;
 
     }
 
 
-    this.saving = true;
+    this.saving.set(true);
 
 
     try {
@@ -317,24 +315,18 @@ implements OnInit {
       /*
        * Save to Firestore
        */
-      const id =
-        await this.service
-          .createBranch(
-            branchToSave
-          );
-
-
-      console.log(
-        'Branch created:',
-        id
-      );
+      await this.service
+        .createBranch(
+          branchToSave
+        );
 
 
       /*
        * Show success
        */
-      this.successMessage =
-        `${branchToSave.name} saved successfully.`;
+      this.successMessage.set(
+        `${branchToSave.name} saved successfully.`
+      );
 
 
       /*
@@ -365,20 +357,22 @@ implements OnInit {
         error instanceof Error
       ) {
 
-        this.errorMessage =
-          error.message;
+        this.errorMessage.set(
+          error.message
+        );
 
       } else {
 
-        this.errorMessage =
-          'Unable to save branch.';
+        this.errorMessage.set(
+          'Unable to save branch.'
+        );
 
       }
 
 
     } finally {
 
-      this.saving = false;
+      this.saving.set(false);
 
     }
 

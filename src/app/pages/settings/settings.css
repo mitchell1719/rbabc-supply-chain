@@ -67,6 +67,33 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.message {
+  padding: 12px 15px;
+  margin-bottom: 5px;
+  border-radius: 7px;
+  font-size: 10px;
+}
+
+.message.success {
+  background: #e6f7ed;
+  color: #147a43;
+  border: 1px solid #bce7ce;
+}
+
+.field-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  background: #f0f3f7;
+  color: #667386;
+  font-size: 9px;
+}
+
 .theme-row {
   display: flex;
   align-items: center;

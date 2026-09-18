@@ -13,9 +13,61 @@
 
   <h3>Ready for PRS Generation</h3>
 
-  <app-loading-skeleton *ngIf="loading" [rows]="3" label="Loading HQ-consolidated requests…"></app-loading-skeleton>
+  <div class="filters" *ngIf="pending().length > 0">
 
-  <table *ngIf="!loading">
+    <div class="filter-group">
+      <label>Headquarters</label>
+      <select [ngModel]="filterHq()" (ngModelChange)="filterHq.set($event)">
+        <option value="">All Headquarters</option>
+        <option *ngFor="let hq of hqOptions()" [value]="hq">{{ hq }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Branch</label>
+      <select [ngModel]="filterBranch()" (ngModelChange)="filterBranch.set($event)">
+        <option value="">All Branches</option>
+        <option *ngFor="let branch of branchOptions()" [value]="branch">{{ branch }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Regional Nurse Supervisor</label>
+      <select [ngModel]="filterRns()" (ngModelChange)="filterRns.set($event)">
+        <option value="">All RNS</option>
+        <option *ngFor="let rns of rnsOptions()" [value]="rns">{{ rns }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>District Manager</label>
+      <select [ngModel]="filterDm()" (ngModelChange)="filterDm.set($event)">
+        <option value="">All District Managers</option>
+        <option *ngFor="let dm of dmOptions()" [value]="dm">{{ dm }}</option>
+      </select>
+    </div>
+
+    <button
+      type="button"
+      class="clear-filters"
+      *ngIf="hasActiveFilters()"
+      (click)="clearFilters()">
+
+      Clear Filters
+
+    </button>
+
+  </div>
+
+  <app-data-state
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="filteredPending().length === 0"
+    loadingMessage="Loading HQ-consolidated requests..."
+    [emptyMessage]="pending().length === 0 ? 'No HQ-consolidated requests awaiting PRS generation.' : 'No requests match the selected filters.'"
+    (retry)="load()">
+
+  <table>
 
     <thead>
       <tr>
@@ -30,7 +82,7 @@
 
     <tbody>
 
-      <tr *ngFor="let request of pending">
+      <tr *ngFor="let request of filteredPending()">
 
         <td>
           {{ request.controlNumber }}
@@ -55,9 +107,11 @@
 
         <td>
 
-          <button (click)="generate(request)">
+          <button
+            [disabled]="generatingId() === request.id"
+            (click)="generate(request)">
 
-            Generate PRS
+            {{ generatingId() === request.id ? 'Generating...' : 'Generate PRS' }}
 
           </button>
 
@@ -69,9 +123,7 @@
 
   </table>
 
-  <p class="empty" *ngIf="!loading && pending.length === 0">
-    No HQ-consolidated requests awaiting PRS generation.
-  </p>
+  </app-data-state>
 
 </div>
 
@@ -79,43 +131,59 @@
 
   <h3>PRS Records</h3>
 
-  <app-loading-skeleton *ngIf="loading" [rows]="3" label="Loading PRS records…"></app-loading-skeleton>
+  <app-data-state
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="prsRecords().length === 0"
+    loadingMessage="Loading PRS records..."
+    emptyMessage="No PRS records have been generated yet."
+    (retry)="load()">
 
-  <table *ngIf="!loading">
+  <table>
 
     <thead>
       <tr>
         <th>PRS Number</th>
-        <th>Headquarters</th>
+        <th>Date</th>
+        <th>HQ</th>
         <th>Total</th>
         <th>Status</th>
         <th>Last Updated</th>
+        <th></th>
       </tr>
     </thead>
 
     <tbody>
 
-      <tr *ngFor="let record of prsRecords">
+      <tr *ngFor="let prs of prsRecords()">
 
         <td>
-          {{ record.prsNumber }}
-          <app-copy-button [value]="record.prsNumber"></app-copy-button>
+          {{ prs.prsNumber }}
+          <app-copy-button [value]="prs.prsNumber"></app-copy-button>
         </td>
 
         <td>
-          {{ record.headquartersName }}
+          {{ prs.date }}
         </td>
 
         <td>
-          ₱{{ record.totalAmount | number:'1.2-2' }}
+          {{ prs.headquartersName }}
         </td>
 
         <td>
-          {{ record.status }}
+          ₱{{ prs.totalAmount | number:'1.2-2' }}
         </td>
 
         <td>
-          <app-last-updated [date]="record.updatedAt || record.createdAt"></app-last-updated>
+          {{ prs.status }}
+        </td>
+
+        <td>
+          <app-last-updated [date]="prs.updatedAt || prs.createdAt"></app-last-updated>
+        </td>
+
+        <td>
+          <a [routerLink]="['/prs', prs.id, 'print']">Print</a>
         </td>
 
       </tr>
@@ -124,8 +192,6 @@
 
   </table>
 
-  <p class="empty" *ngIf="!loading && prsRecords.length === 0">
-    No PRS records yet.
-  </p>
+  </app-data-state>
 
 </div>

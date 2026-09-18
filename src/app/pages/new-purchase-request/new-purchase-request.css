@@ -38,6 +38,29 @@
   cursor: pointer;
 }
 
+.field-error {
+  margin: 6px 0 0;
+  font-size: 9px;
+  color: var(--danger, #c6252d);
+}
+
+.field-note {
+  margin: 6px 0 0;
+  font-size: 9px;
+  color: var(--text-muted, #8792a2);
+}
+
+.retry-link {
+  border: 0;
+  background: transparent;
+  color: var(--primary, #0a62aa);
+  padding: 0;
+  margin-left: 6px;
+  font-size: 9px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .form-card {
 
   background: white;

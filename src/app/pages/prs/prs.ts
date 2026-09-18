@@ -1,11 +1,17 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  computed,
+  signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import {
+  Branch,
+  PRS as PRSRecord,
   PurchaseRequest
 } from '../../models/supply-chain.model';
 
@@ -18,8 +24,8 @@ import {
 } from '../../services/confirm.service';
 
 import {
-  LoadingSkeleton
-} from '../../components/loading-skeleton/loading-skeleton';
+  DataState
+} from '../../components/data-state/data-state';
 
 import {
   LastUpdated
@@ -29,27 +35,125 @@ import {
   CopyButton
 } from '../../components/copy-button/copy-button';
 
+import { AuthService } from '../../services/auth.service';
+
 @Component({
   selector: 'app-prs',
   standalone: true,
-  imports: [CommonModule, LoadingSkeleton, LastUpdated, CopyButton],
+  imports: [CommonModule, FormsModule, RouterLink, DataState, LastUpdated, CopyButton],
   templateUrl: './prs.html',
   styleUrl: './prs.css'
 })
 export class Prs implements OnInit {
 
-  // Only HQ-consolidated requests are eligible for PRS generation.
-  pending: PurchaseRequest[] = [];
+  readonly pending = signal<PurchaseRequest[]>([]);
 
-  prsRecords: any[] = [];
+  readonly prsRecords = signal<PRSRecord[]>([]);
 
-  loading = true;
+  readonly branches = signal<Branch[]>([]);
+
+  readonly loading = signal(false);
+
+  readonly errorMessage = signal('');
+
+  readonly generatingId = signal<string | null>(null);
+
+  /* =====================================
+     ADMIN FILTERS
+  ===================================== */
+
+  readonly filterHq = signal('');
+  readonly filterBranch = signal('');
+  readonly filterRns = signal('');
+  readonly filterDm = signal('');
+
+  /** branchId -> assigned RNS name, so pending requests (which don't store RNS directly) can be filtered by it. */
+  private readonly rnsByBranchId = computed(() => {
+    const map = new Map<string, string>();
+
+    for (const branch of this.branches()) {
+      if (branch.id) {
+        map.set(branch.id, branch.rnsName);
+      }
+    }
+
+    return map;
+  });
+
+  readonly hqOptions = computed(() =>
+    this.distinctSorted(this.pending().map((r) => r.headquartersName))
+  );
+
+  readonly branchOptions = computed(() =>
+    this.distinctSorted(this.pending().map((r) => r.branchName))
+  );
+
+  readonly dmOptions = computed(() =>
+    this.distinctSorted(this.pending().map((r) => r.districtManagerName))
+  );
+
+  readonly rnsOptions = computed(() => {
+    const lookup = this.rnsByBranchId();
+
+    return this.distinctSorted(
+      this.pending()
+        .map((r) => lookup.get(r.branchId) || '')
+        .filter((name) => name !== ''),
+    );
+  });
+
+  readonly filteredPending = computed(() => {
+    const lookup = this.rnsByBranchId();
+
+    const hq = this.filterHq();
+    const branch = this.filterBranch();
+    const rns = this.filterRns();
+    const dm = this.filterDm();
+
+    return this.pending().filter((request) => {
+      if (hq && request.headquartersName !== hq) {
+        return false;
+      }
+
+      if (branch && request.branchName !== branch) {
+        return false;
+      }
+
+      if (dm && request.districtManagerName !== dm) {
+        return false;
+      }
+
+      if (rns && lookup.get(request.branchId) !== rns) {
+        return false;
+      }
+
+      return true;
+    });
+  });
+
+  readonly hasActiveFilters = computed(
+    () => !!(this.filterHq() || this.filterBranch() || this.filterRns() || this.filterDm())
+  );
+
+  private distinctSorted(values: string[]): string[] {
+    return Array.from(new Set(values.filter((v) => v))).sort((a, b) => a.localeCompare(b));
+  }
+
+  clearFilters() {
+    this.filterHq.set('');
+    this.filterBranch.set('');
+    this.filterRns.set('');
+    this.filterDm.set('');
+  }
 
   constructor(
     private service:
       SupplyChainService,
+
     private confirmService:
-      ConfirmService
+      ConfirmService,
+
+    private auth: AuthService
   ) {}
 
   async ngOnInit() {
@@ -58,26 +162,35 @@ export class Prs implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
+
+    this.errorMessage.set('');
 
     try {
 
-      const all =
-        await this.service
-          .getPurchaseRequests();
+      const [pending, prsRecords, branches] = await Promise.all([
+        this.service.getRequestsByStatus('HQ_CONSOLIDATED'),
+        this.service.getPRS(),
+        this.service.getBranches(),
+      ]);
 
-      this.pending =
-        all.filter(
-          x => x.status === 'HQ_CONSOLIDATED'
-        );
+      this.pending.set(pending);
 
-      this.prsRecords =
-        await this.service
-          .getPRS();
+      this.prsRecords.set(prsRecords);
+
+      this.branches.set(branches);
+
+    } catch (error) {
+
+      this.errorMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load PRS data.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -86,6 +199,10 @@ export class Prs implements OnInit {
   async generate(
     request: PurchaseRequest
   ) {
+
+    if (!request.id) {
+      return;
+    }
 
     const confirmed =
       await this.confirmService.confirm({
@@ -98,12 +215,14 @@ export class Prs implements OnInit {
       return;
     }
 
+    this.generatingId.set(request.id);
+
     try {
 
       await this.service
         .createPRSFromRequest(
           request,
-          'HQ Supply Officer'
+          this.auth.displayName()
         );
 
       await this.load();
@@ -118,6 +237,10 @@ export class Prs implements OnInit {
         error?.message ||
         'Unable to generate PRS.'
       );
+
+    } finally {
+
+      this.generatingId.set(null);
 
     }
 

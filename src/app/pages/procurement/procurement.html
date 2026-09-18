@@ -6,9 +6,15 @@
 
 <div class="card">
 
-  <app-loading-skeleton *ngIf="loading" [rows]="4" label="Loading procurement records…"></app-loading-skeleton>
+  <app-data-state
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="records().length === 0"
+    loadingMessage="Loading procurement records..."
+    emptyMessage="No requests currently in procurement."
+    (retry)="load()">
 
-  <table *ngIf="!loading">
+  <table>
 
     <thead>
       <tr>
@@ -25,7 +31,7 @@
     <tbody>
 
       <tr
-        *ngFor="let request of records">
+        *ngFor="let request of records()">
 
         <td>
           {{ request.controlNumber }}
@@ -62,9 +68,10 @@
               request.status ===
               'WAREHOUSE_CHECK'
             "
+            [disabled]="processingId() === request.id"
             (click)="procure(request)">
 
-            Send for Procurement
+            {{ processingId() === request.id ? 'Processing...' : 'Send for Procurement' }}
 
           </button>
 
@@ -73,9 +80,10 @@
               request.status ===
               'FOR_PROCUREMENT'
             "
+            [disabled]="processingId() === request.id"
             (click)="complete(request)">
 
-            Complete Procurement
+            {{ processingId() === request.id ? 'Processing...' : 'Complete Procurement' }}
 
           </button>
 
@@ -87,8 +95,6 @@
 
   </table>
 
-  <p class="empty" *ngIf="!loading && records.length === 0">
-    No requests currently in procurement.
-  </p>
+  </app-data-state>
 
 </div>

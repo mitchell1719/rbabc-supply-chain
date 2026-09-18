@@ -1,0 +1,100 @@
+<div class="page-actions no-print">
+
+  <a routerLink="/prs" class="back-link">← Back to PRS</a>
+
+  <button type="button" class="print-button" (click)="print()">Print / Save as PDF</button>
+
+</div>
+
+<app-data-state
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [isEmpty]="false"
+  loadingMessage="Loading PRS..."
+  (retry)="retry()">
+
+  <div class="document" *ngIf="prs() as prs">
+
+    <app-document-letterhead title="Purchase Requisition Slip"></app-document-letterhead>
+
+    <div class="fields">
+
+      <div class="field">
+        <span>PRS Control No.</span>
+        <strong>{{ prs.prsNumber }}</strong>
+      </div>
+
+      <div class="field">
+        <span>Date</span>
+        <strong>{{ prs.date }}</strong>
+      </div>
+
+      <div class="field">
+        <span>Branch</span>
+        <strong>{{ prs.branchName || '—' }}</strong>
+      </div>
+
+      <div class="field">
+        <span>Department</span>
+        <strong>{{ prs.department || '—' }}</strong>
+      </div>
+
+    </div>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th colspan="3" class="section-heading">Branch/Department Request</th>
+        </tr>
+        <tr>
+          <th class="col-qty">Quantity</th>
+          <th class="col-unit">Unit</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let item of prs.items">
+          <td class="col-qty">{{ item.quantity }}</td>
+          <td class="col-unit">{{ item.unit }}</td>
+          <td>{{ item.description }}</td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+    <div class="totals">
+      Total Amount: <strong>₱{{ prs.totalAmount | number:'1.2-2' }}</strong>
+    </div>
+
+    <div class="signatures">
+
+      <div class="signature-block">
+        <p class="signee-name">{{ prs.preparedBy || ' ' }}</p>
+        <div class="signature-line"></div>
+        <span>Prepared by:</span>
+        <small>Personnel-in-Charge</small>
+      </div>
+
+      <div class="signature-block">
+        <p class="signee-name">{{ prs.reviewedBy || ' ' }}</p>
+        <div class="signature-line"></div>
+        <span>Reviewed by:</span>
+        <small>Branch Head/District Manager</small>
+      </div>
+
+      <div class="signature-block">
+        <p class="signee-name">{{ prs.approvedBy || ' ' }}</p>
+        <div class="signature-line"></div>
+        <span>Approved by:</span>
+        <small>Branch Head/District Manager</small>
+      </div>
+
+    </div>
+
+  </div>
+
+</app-data-state>

@@ -1,5 +1,6 @@
 export type RequestStatus =
   | 'DRAFT'
+  | 'PENDING_RNS_REVIEW'
   | 'PENDING_DM_APPROVAL'
   | 'RETURNED_FOR_REVISION'
   | 'DM_APPROVED'
@@ -139,9 +140,15 @@ export interface PRS {
 
   headquartersName: string;
 
+  /** The originating branch/department - printed on the PRS form. */
+  branchName: string;
+  department: string;
+
   purchaseRequestIds: string[];
 
   date: string;
+
+  items: PurchaseRequestItem[];
 
   totalAmount: number;
 
@@ -154,6 +161,8 @@ export interface PRS {
   status: 'DRAFT' | 'FOR_APPROVAL' | 'APPROVED' | 'PROCESSING' | 'COMPLETED';
 
   createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface Inventory {
@@ -240,6 +249,8 @@ export interface DeliveryNote {
   status: 'PREPARING' | 'DISPATCHED' | 'DELIVERED' | 'RECEIVED';
 
   createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface ReceivingReport {
@@ -264,6 +275,8 @@ export interface ReceivingReport {
   status: 'PENDING' | 'VERIFIED' | 'DISCREPANCY' | 'RESOLVED';
 
   createdAt?: any;
+
+  updatedAt?: any;
 }
 
 export interface StatementOfAccount {
@@ -271,17 +284,169 @@ export interface StatementOfAccount {
 
   soaNumber: string;
 
-  districtManagerId: string;
-
   districtManagerName: string;
 
-  purchaseRequestIds: string[];
+  branchName: string;
+
+  reference: string;
 
   totalAmount: number;
 
   preparedBy: string;
 
   status: 'DRAFT' | 'FOR_VERIFICATION' | 'SUBMITTED_TO_FINANCE' | 'PROCESSED' | 'PAID';
+
+  createdAt?: any;
+
+  updatedAt?: any;
+}
+
+export interface Supplier {
+  id?: string;
+
+  name: string;
+
+  contactPerson: string;
+
+  phone: string;
+
+  email: string;
+
+  address: string;
+
+  active: boolean;
+
+  createdAt?: any;
+
+  updatedAt?: any;
+}
+
+export interface PurchaseOrder {
+  id?: string;
+
+  poNumber: string;
+
+  supplierName: string;
+
+  reference: string;
+
+  amount: number;
+
+  remarks: string;
+
+  status: 'DRAFT' | 'SENT' | 'FULFILLED' | 'CANCELLED';
+
+  createdAt?: any;
+
+  updatedAt?: any;
+}
+
+export interface AppUser {
+  uid: string;
+
+  email: string | null;
+
+  displayName: string | null;
+}
+
+/**
+ * The five system roles from the RB ABC Supply Chain user-access matrix.
+ * SUPPLY_DIRECTOR is treated as a super-role with full system access
+ * everywhere in the app (see roles.config.ts's roleCanAccess helper).
+ */
+export type UserRole =
+  | 'NURSE'
+  | 'RNS'
+  | 'DISTRICT_MANAGER'
+  | 'SUPPLY_OFFICER'
+  | 'SUPPLY_DIRECTOR';
+
+/** Role + assignment record stored in the `users` Firestore collection, keyed by Firebase Auth uid. */
+export interface UserProfile {
+  uid: string;
+
+  email: string | null;
+
+  displayName: string | null;
+
+  role: UserRole;
+
+  /** Assigned branch (Nurse role only); the branch this user prepares requests for. */
+  branchId: string;
+  branchName: string;
+
+  /** Assigned headquarters/region (RNS role only); scopes their RNS Review queue. */
+  headquartersId: string;
+  headquartersName: string;
+
+  active: boolean;
+
+  createdAt?: any;
+
+  updatedAt?: any;
+}
+
+export interface SystemSettings {
+  companyName: string;
+
+  department: string;
+
+  systemName: string;
+
+  updatedAt?: any;
+}
+
+/** A single recorded action, written to the `auditLogs` collection by AuditService. */
+export interface AuditLogEntry {
+  id?: string;
+
+  uid: string;
+  userDisplayName: string;
+  role: string;
+
+  action: string;
+
+  entityType: string;
+  entityId: string;
+
+  details: string;
+
+  createdAt?: any;
+}
+
+/** Vaccines needing dedicated wastage monitoring, per the RB ABC workflow. */
+export type MonitoredVaccine = 'Abhayrab' | 'Speeda' | 'RIG' | 'Tetanus Toxoid' | 'TIG';
+
+/**
+ * A monthly vial-usage/wastage entry for one branch and vaccine.
+ * expectedUsage and wastage follow the workflow's formulas:
+ *   Expected Usage = Patients Served ÷ Vaccine Capacity
+ *   Wastage = Available Vials - Used Vials
+ */
+export interface VaccineWastageEntry {
+  id?: string;
+
+  branchId: string;
+  branchName: string;
+
+  vaccineName: MonitoredVaccine;
+
+  date: string;
+
+  patientsServed: number;
+
+  /** Doses obtainable from one vial (e.g. 5 for a shared-vial ID regimen). */
+  vaccineCapacity: number;
+
+  availableVials: number;
+  usedVials: number;
+
+  expectedUsage: number;
+  wastage: number;
+
+  reason: string;
+
+  recordedBy: string;
 
   createdAt?: any;
 }

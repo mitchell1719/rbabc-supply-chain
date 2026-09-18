@@ -1,27 +1,41 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, signal } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
+
+import { FormsModule } from '@angular/forms';
+
+import { SupplyChainService } from '../../services/supply-chain.service';
 
 import { ThemeService } from '../../services/theme.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { AuthService } from '../../services/auth.service';
+
+import { DataState } from '../../components/data-state/data-state';
+
+import { PROCUREMENT_ROLES } from '../../config/roles.config';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [CommonModule, FormsModule, DataState],
   templateUrl: './settings.html',
   styleUrl: './settings.css'
 })
-export class Settings {
+export class Settings implements OnInit {
 
-  companyName =
-    'RB ABC Holding OPC';
+  readonly companyName = signal('RB ABC Holding OPC');
 
-  department =
-    'Supply Chain Office';
+  readonly department = signal('Supply Chain Office');
 
-  systemName =
-    'Supply Chain Management System';
+  readonly systemName = signal('Supply Chain Management System');
+
+  readonly loading = signal(false);
+
+  readonly errorMessage = signal('');
+
+  readonly saving = signal(false);
+
+  readonly successMessage = signal('');
 
   currentPassword = '';
   newPassword = '';
@@ -31,38 +45,95 @@ export class Settings {
   showNewPassword = false;
   showConfirmPassword = false;
 
-  passwordMessage = '';
-  passwordError = '';
+  readonly passwordMessage = signal('');
+  readonly passwordError = signal('');
+
+  readonly changingPassword = signal(false);
 
   constructor(
+    private service: SupplyChainService,
+
     public theme: ThemeService,
+
     private confirmService: ConfirmService,
+
+    private auth: AuthService,
   ) {}
 
-  save() {
+  /** System-wide company info is Supply Officer/Director territory, not every account. */
+  get canEditCompanyInfo(): boolean {
+    return this.auth.hasAnyRole(PROCUREMENT_ROLES);
+  }
 
-    alert(
-      'Settings saved locally for this UI. Connect this page to Firestore systemSettings before production.'
-    );
+  async ngOnInit() {
+    await this.load();
+  }
 
+  async load() {
+    this.loading.set(true);
+
+    this.errorMessage.set('');
+
+    try {
+      const settings = await this.service.getSystemSettings();
+
+      if (settings) {
+        this.companyName.set(settings.companyName);
+
+        this.department.set(settings.department);
+
+        this.systemName.set(settings.systemName);
+      }
+    } catch (error) {
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'Unable to load settings.',
+      );
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async save() {
+    if (!this.canEditCompanyInfo) {
+      alert('You do not have permission to change system information.');
+      return;
+    }
+
+    this.successMessage.set('');
+
+    this.saving.set(true);
+
+    try {
+      await this.service.saveSystemSettings({
+        companyName: this.companyName(),
+        department: this.department(),
+        systemName: this.systemName(),
+      });
+
+      this.successMessage.set('Settings saved successfully.');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unable to save settings.');
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   async updatePassword() {
-    this.passwordMessage = '';
-    this.passwordError = '';
+    this.passwordMessage.set('');
+    this.passwordError.set('');
 
     if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
-      this.passwordError = 'Please fill in all password fields.';
+      this.passwordError.set('Please fill in all password fields.');
       return;
     }
 
     if (this.newPassword.length < 8) {
-      this.passwordError = 'New password must be at least 8 characters.';
+      this.passwordError.set('New password must be at least 8 characters.');
       return;
     }
 
     if (this.newPassword !== this.confirmPassword) {
-      this.passwordError = 'New password and confirmation do not match.';
+      this.passwordError.set('New password and confirmation do not match.');
       return;
     }
 
@@ -77,10 +148,22 @@ export class Settings {
       return;
     }
 
-    this.passwordMessage = 'Password updated locally for this UI. Connect this action to Firebase Authentication before production.';
-    this.currentPassword = '';
-    this.newPassword = '';
-    this.confirmPassword = '';
+    this.changingPassword.set(true);
+
+    try {
+      await this.auth.changePassword(this.currentPassword, this.newPassword);
+
+      this.passwordMessage.set('Password updated successfully.');
+      this.currentPassword = '';
+      this.newPassword = '';
+      this.confirmPassword = '';
+    } catch (error) {
+      this.passwordError.set(
+        error instanceof Error ? error.message : 'Unable to change password.',
+      );
+    } finally {
+      this.changingPassword.set(false);
+    }
   }
 
 }

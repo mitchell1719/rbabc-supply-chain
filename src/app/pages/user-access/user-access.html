@@ -1,0 +1,158 @@
+<div class="page-header">
+
+  <div>
+    <h1>User Access</h1>
+    <p>
+      Assign roles and branch scope for every account.
+      New accounts are created by signing up, then granted
+      access here.
+    </p>
+  </div>
+
+</div>
+
+<div class="card guide-card">
+
+  <h3>Role Guide</h3>
+
+  <div class="guide-grid">
+
+    <div *ngFor="let role of allRoles">
+      <strong>{{ roleLabels[role] }}</strong>
+      <p>{{ roleResponsibilities[role] }}</p>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="card table-card">
+
+  <div class="table-header">
+    <h3>Accounts</h3>
+    <p>{{ users().length }} account(s)</p>
+  </div>
+
+  <app-data-state
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="users().length === 0"
+    loadingMessage="Loading user accounts..."
+    emptyMessage="No accounts have signed up yet."
+    (retry)="load()">
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Assigned Branch / Headquarters</th>
+            <th>Active</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let user of users()">
+
+            <td>
+              <strong>{{ user.displayName || 'Unnamed User' }}</strong>
+              <span class="you-tag" *ngIf="user.uid === (auth.user()?.uid)">You</span>
+            </td>
+
+            <td>{{ user.email }}</td>
+
+            <td>
+
+              <select
+                [(ngModel)]="drafts[user.uid].role"
+                [disabled]="!canEditRow(user)">
+
+                <option
+                  *ngFor="let role of assignableRoles()"
+                  [value]="role">
+                  {{ roleLabels[role] }}
+                </option>
+
+              </select>
+
+            </td>
+
+            <td>
+
+              <select
+                *ngIf="branchRequired(user.uid)"
+                [(ngModel)]="drafts[user.uid].branchId"
+                [disabled]="!canEditRow(user)">
+
+                <option value="">Select branch</option>
+
+                <option
+                  *ngFor="let branch of branches()"
+                  [value]="branch.id">
+                  {{ branch.name }}
+                </option>
+
+              </select>
+
+              <select
+                *ngIf="hqRequired(user.uid)"
+                [(ngModel)]="drafts[user.uid].headquartersId"
+                [disabled]="!canEditRow(user)">
+
+                <option value="">Select headquarters</option>
+
+                <option
+                  *ngFor="let hq of headquartersOptions()"
+                  [value]="hq.id">
+                  {{ hq.name }}
+                </option>
+
+              </select>
+
+              <span *ngIf="!branchRequired(user.uid) && !hqRequired(user.uid)">—</span>
+
+            </td>
+
+            <td>
+
+              <label class="active-toggle">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="drafts[user.uid].active"
+                  [disabled]="!canEditRow(user)">
+                {{ drafts[user.uid].active ? 'Active' : 'Disabled' }}
+              </label>
+
+            </td>
+
+            <td>
+
+              <button
+                type="button"
+                class="save-button"
+                [disabled]="!canEditRow(user) || !isDirty(user) || savingUid() === user.uid"
+                (click)="save(user)">
+
+                {{ savingUid() === user.uid ? 'Saving...' : 'Save' }}
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </app-data-state>
+
+</div>

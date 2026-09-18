@@ -1,6 +1,8 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  computed,
+  signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -15,16 +17,8 @@ import {
 } from '../../components/status-badge/status-badge';
 
 import {
-  SupplyChainService
-} from '../../services/supply-chain.service';
-
-import {
-  PurchaseRequest
-} from '../../models/supply-chain.model';
-
-import {
-  LoadingSkeleton
-} from '../../components/loading-skeleton/loading-skeleton';
+  DataState
+} from '../../components/data-state/data-state';
 
 import {
   LastUpdated
@@ -34,6 +28,18 @@ import {
   CopyButton
 } from '../../components/copy-button/copy-button';
 
+import {
+  SupplyChainService
+} from '../../services/supply-chain.service';
+
+import {
+  PurchaseRequest
+} from '../../models/supply-chain.model';
+
+import { AuthService } from '../../services/auth.service';
+
+import { REQUEST_CREATOR_ROLES } from '../../config/roles.config';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -42,7 +48,7 @@ import {
     RouterLink,
     StatCard,
     StatusBadge,
-    LoadingSkeleton,
+    DataState,
     LastUpdated,
     CopyButton
   ],
@@ -51,45 +57,69 @@ import {
 })
 export class Dashboard implements OnInit {
 
-  requests: PurchaseRequest[] = [];
+  // Signals rather than plain properties: a signal write notifies
+  // Angular's change-detection scheduler directly, so the view updates
+  // reliably regardless of which zone the underlying Firestore call
+  // settles in (see SupplyChainService.withErrorHandling for why that
+  // matters with the Firebase SDK).
+  readonly requests = signal<PurchaseRequest[]>([]);
 
-  loading = true;
+  readonly loading = signal(false);
 
-  async ngOnInit() {
-    try {
-      this.requests =
-        await this.service.getPurchaseRequests();
-    } finally {
-      this.loading = false;
-    }
-  }
+  readonly errorMessage = signal('');
+
+  readonly recentRequests = computed(() => this.requests().slice(0, 5));
+
+  readonly pendingRNS = computed(
+    () => this.requests().filter(x => x.status === 'PENDING_RNS_REVIEW').length
+  );
+
+  readonly awaitingHQ = computed(
+    () => this.requests().filter(x => x.status === 'RECEIVED_BY_HQ').length
+  );
+
+  readonly procurement = computed(
+    () => this.requests().filter(x => x.status === 'FOR_PROCUREMENT').length
+  );
+
+  readonly completed = computed(
+    () => this.requests().filter(x => x.status === 'COMPLETED').length
+  );
 
   constructor(
-    private service: SupplyChainService
+    private service: SupplyChainService,
+    private auth: AuthService,
   ) {}
 
-  get pendingDM() {
-    return this.requests.filter(
-      x => x.status === 'PENDING_DM_APPROVAL'
-    ).length;
+  get canCreate(): boolean {
+    return this.auth.hasAnyRole(REQUEST_CREATOR_ROLES);
   }
 
-  get approved() {
-    return this.requests.filter(
-      x => x.status === 'DM_APPROVED'
-    ).length;
+  async ngOnInit() {
+    await this.load();
   }
 
-  get procurement() {
-    return this.requests.filter(
-      x => x.status === 'FOR_PROCUREMENT'
-    ).length;
-  }
+  async load() {
+    this.loading.set(true);
 
-  get completed() {
-    return this.requests.filter(
-      x => x.status === 'COMPLETED'
-    ).length;
+    this.errorMessage.set('');
+
+    try {
+      const profile = this.auth.profile();
+
+      // A Nurse's dashboard is scoped to their own assigned branch.
+      this.requests.set(
+        profile?.role === 'NURSE' && profile.branchId
+          ? await this.service.getPurchaseRequestsForBranch(profile.branchId)
+          : await this.service.getPurchaseRequests(),
+      );
+    } catch (error) {
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'Unable to load dashboard data.'
+      );
+    } finally {
+      this.loading.set(false);
+    }
   }
 
 }

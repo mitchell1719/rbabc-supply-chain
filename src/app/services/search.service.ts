@@ -2,6 +2,15 @@ import { Injectable } from '@angular/core';
 
 import { SupplyChainService } from './supply-chain.service';
 
+import {
+  Branch,
+  DeliveryNote,
+  PurchaseOrder,
+  PurchaseRequest,
+  StatementOfAccount,
+  Supplier,
+} from '../models/supply-chain.model';
+
 export interface SearchResult {
   id: string;
   title: string;
@@ -10,10 +19,28 @@ export interface SearchResult {
   route: string[];
 }
 
+interface SearchIndex {
+  requests: PurchaseRequest[];
+  branches: Branch[];
+  suppliers: Supplier[];
+  deliveries: DeliveryNote[];
+  purchaseOrders: PurchaseOrder[];
+  soaRecords: StatementOfAccount[];
+}
+
+/** How long a fetched search index stays fresh before the next search re-fetches it. */
+const INDEX_TTL_MS = 30_000;
+
 @Injectable({
   providedIn: 'root',
 })
 export class SearchService {
+  private indexCache: SearchIndex | null = null;
+
+  private indexCachedAt = 0;
+
+  private indexPromise: Promise<SearchIndex> | null = null;
+
   constructor(private service: SupplyChainService) {}
 
   async search(term: string): Promise<SearchResult[]> {
@@ -23,15 +50,8 @@ export class SearchService {
       return [];
     }
 
-    const [requests, branches, suppliers, deliveries, purchaseOrders, soaRecords] =
-      await Promise.all([
-        this.service.getPurchaseRequests(),
-        this.service.getBranches(),
-        this.service.getSuppliers(),
-        this.service.getDeliveries(),
-        this.service.getPurchaseOrders(),
-        this.service.getSOA(),
-      ]);
+    const { requests, branches, suppliers, deliveries, purchaseOrders, soaRecords } =
+      await this.loadIndex();
 
     const results: SearchResult[] = [];
 
@@ -60,11 +80,11 @@ export class SearchService {
     }
 
     for (const supplier of suppliers) {
-      if (this.matches(keyword, supplier['name'], supplier['contactPerson'], supplier['email'])) {
+      if (this.matches(keyword, supplier.name, supplier.contactPerson, supplier.email)) {
         results.push({
-          id: supplier.id,
-          title: supplier['name'] ?? 'Supplier',
-          subtitle: `Supplier • ${supplier['contactPerson'] ?? ''}`,
+          id: supplier.id ?? supplier.name,
+          title: supplier.name ?? 'Supplier',
+          subtitle: `Supplier • ${supplier.contactPerson ?? ''}`,
           category: 'Suppliers',
           route: ['/suppliers'],
         });
@@ -72,11 +92,11 @@ export class SearchService {
     }
 
     for (const delivery of deliveries) {
-      if (this.matches(keyword, delivery['deliveryNumber'], delivery['branchName'], delivery['status'])) {
+      if (this.matches(keyword, delivery.deliveryNumber, delivery.branchName, delivery.status)) {
         results.push({
-          id: delivery.id,
-          title: delivery['deliveryNumber'] ?? 'Delivery',
-          subtitle: `Delivery • ${delivery['branchName'] ?? ''}`,
+          id: delivery.id ?? delivery.deliveryNumber,
+          title: delivery.deliveryNumber ?? 'Delivery',
+          subtitle: `Delivery • ${delivery.branchName ?? ''}`,
           category: 'Deliveries',
           route: ['/deliveries'],
         });
@@ -84,11 +104,11 @@ export class SearchService {
     }
 
     for (const po of purchaseOrders) {
-      if (this.matches(keyword, po['poNumber'], po['supplierName'], po['reference'])) {
+      if (this.matches(keyword, po.poNumber, po.supplierName, po.reference)) {
         results.push({
-          id: po.id,
-          title: po['poNumber'] ?? 'Purchase Order',
-          subtitle: `Purchase Order • ${po['supplierName'] ?? ''}`,
+          id: po.id ?? po.poNumber,
+          title: po.poNumber ?? 'Purchase Order',
+          subtitle: `Purchase Order • ${po.supplierName ?? ''}`,
           category: 'Purchase Orders',
           route: ['/purchase-orders'],
         });
@@ -96,11 +116,11 @@ export class SearchService {
     }
 
     for (const soa of soaRecords) {
-      if (this.matches(keyword, soa['soaNumber'], soa['districtManagerName'], soa['branchName'])) {
+      if (this.matches(keyword, soa.soaNumber, soa.districtManagerName, soa.branchName)) {
         results.push({
-          id: soa.id,
-          title: soa['soaNumber'] ?? 'SOA',
-          subtitle: `Statement of Account • ${soa['districtManagerName'] ?? ''}`,
+          id: soa.id ?? soa.soaNumber,
+          title: soa.soaNumber ?? 'SOA',
+          subtitle: `Statement of Account • ${soa.districtManagerName ?? ''}`,
           category: 'SOA',
           route: ['/soa'],
         });
@@ -108,6 +128,47 @@ export class SearchService {
     }
 
     return results.slice(0, 30);
+  }
+
+  /**
+   * Returns the searchable index, fetching fresh only when the cache is missing,
+   * stale, or a caller explicitly forces it. Concurrent callers share one
+   * in-flight fetch instead of each triggering their own round trip - this is
+   * what keeps typing in the search box from firing six Firestore reads per
+   * keystroke.
+   */
+  private async loadIndex(forceRefresh = false): Promise<SearchIndex> {
+    const isFresh = this.indexCache !== null && Date.now() - this.indexCachedAt < INDEX_TTL_MS;
+
+    if (!forceRefresh && isFresh) {
+      return this.indexCache!;
+    }
+
+    if (!forceRefresh && this.indexPromise) {
+      return this.indexPromise;
+    }
+
+    this.indexPromise = Promise.all([
+      this.service.getPurchaseRequests(),
+      this.service.getBranches(),
+      this.service.getSuppliers(),
+      this.service.getDeliveries(),
+      this.service.getPurchaseOrders(),
+      this.service.getSOA(),
+    ]).then(([requests, branches, suppliers, deliveries, purchaseOrders, soaRecords]) => {
+      const index: SearchIndex = { requests, branches, suppliers, deliveries, purchaseOrders, soaRecords };
+
+      this.indexCache = index;
+      this.indexCachedAt = Date.now();
+
+      return index;
+    });
+
+    try {
+      return await this.indexPromise;
+    } finally {
+      this.indexPromise = null;
+    }
   }
 
   private matches(keyword: string, ...fields: Array<string | undefined | null>): boolean {

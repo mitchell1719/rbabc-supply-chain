@@ -1,0 +1,68 @@
+.state {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-muted, #8792a2);
+  font-size: 10px;
+}
+
+.state.error {
+  color: var(--danger, #c6252d);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.state.error .icon {
+  font-size: 20px;
+}
+
+.state.error p {
+  margin: 0;
+  max-width: 420px;
+}
+
+.retry-button {
+  border: 1px solid var(--danger-soft, #f1c4c6);
+  background: var(--surface, #ffffff);
+  color: var(--danger, #c6252d);
+
+  border-radius: 6px;
+  padding: 8px 16px;
+
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.retry-button:hover {
+  background: var(--danger-soft, #fff0f0);
+}
+
+.state.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+
+  border: 2px solid var(--border, #dce2e8);
+  border-top-color: var(--primary, #0a5a9c);
+  border-radius: 50%;
+
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.state-content {
+  display: contents;
+}

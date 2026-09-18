@@ -5,9 +5,21 @@
 
     <p>
       Monitor branch, HQ and Central
-      Warehouse inventory.
+      Warehouse inventory. Sorted First-Expiry-First-Out (FEFO).
     </p>
   </div>
+
+</div>
+
+<div class="alerts" *ngIf="expiringSoonCount > 0 || expiredCount > 0">
+
+  <span class="alert-tag expiring" *ngIf="expiringSoonCount > 0">
+    ⚠ {{ expiringSoonCount }} item(s) expiring within 90 days
+  </span>
+
+  <span class="alert-tag expired" *ngIf="expiredCount > 0">
+    ⛔ {{ expiredCount }} item(s) expired
+  </span>
 
 </div>
 
@@ -17,13 +29,32 @@
     [(ngModel)]="search"
     placeholder="Search product, branch, batch...">
 
+  <select [(ngModel)]="stockFilter">
+    <option value="ALL">All Items</option>
+    <option value="EXPIRING_SOON">Expiring Within 90 Days</option>
+    <option value="EXPIRED">Expired</option>
+    <option value="LOW_STOCK">Low Stock</option>
+    <option value="OUT_OF_STOCK">Out of Stock</option>
+  </select>
+
+  <div class="export-actions no-print">
+    <button type="button" (click)="exportCsv()">Export Excel</button>
+    <button type="button" (click)="exportPdf()">Export PDF</button>
+  </div>
+
 </div>
 
 <div class="table-card">
 
-  <app-loading-skeleton *ngIf="loading" [rows]="6" label="Loading inventory…"></app-loading-skeleton>
+  <app-data-state
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="filtered.length === 0"
+    loadingMessage="Loading inventory..."
+    [emptyMessage]="emptyMessage"
+    (retry)="load()">
 
-  <table *ngIf="!loading">
+  <table>
 
     <thead>
 
@@ -63,7 +94,15 @@
         </td>
 
         <td>
-          {{ item.expiryDate }}
+          <span
+            [class.expiring-text]="isExpiringSoon(item)"
+            [class.expired-text]="isExpired(item)">
+
+            {{ item.expiryDate }}
+            <span *ngIf="isExpired(item)">(expired)</span>
+            <span *ngIf="isExpiringSoon(item) && !isExpired(item)">(expiring soon)</span>
+
+          </span>
         </td>
 
         <td>
@@ -101,8 +140,6 @@
 
   </table>
 
-  <p class="empty-note" *ngIf="!loading && filtered.length === 0">
-    No inventory records match your search.
-  </p>
+  </app-data-state>
 
 </div>

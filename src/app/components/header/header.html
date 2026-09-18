@@ -40,19 +40,23 @@
 
     </button>
 
-    <button class="notification-btn" aria-label="Notifications">
+    <button class="notification-btn" type="button" aria-label="Notifications">
       🔔
       <span class="notification-dot"></span>
     </button>
 
     <div class="user-avatar">
-      SC
+      {{ initials }}
     </div>
 
     <div class="user-info">
-      <strong>Supply Chain</strong>
-      <span>Administrator</span>
+      <strong>{{ user?.displayName || user?.email || 'User' }}</strong>
+      <span>{{ roleLabel || user?.email }}</span>
     </div>
+
+    <button class="logout-btn" type="button" (click)="logOut()" title="Log out">
+      ⏻
+    </button>
 
   </div>
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
@@ -12,9 +12,13 @@ import { StatusBadge } from '../../components/status-badge/status-badge';
 
 import { WorkflowTimeline } from '../../components/workflow-timeline/workflow-timeline';
 
-import { LoadingSkeleton } from '../../components/loading-skeleton/loading-skeleton';
+import { DataState } from '../../components/data-state/data-state';
 import { LastUpdated } from '../../components/last-updated/last-updated';
 import { CopyButton } from '../../components/copy-button/copy-button';
+
+import { AuthService } from '../../services/auth.service';
+
+import { REQUEST_CREATOR_ROLES } from '../../config/roles.config';
 
 @Component({
   selector: 'app-request-details',
@@ -26,7 +30,7 @@ import { CopyButton } from '../../components/copy-button/copy-button';
     RouterLink,
     StatusBadge,
     WorkflowTimeline,
-    LoadingSkeleton,
+    DataState,
     LastUpdated,
     CopyButton,
   ],
@@ -36,49 +40,84 @@ import { CopyButton } from '../../components/copy-button/copy-button';
   styleUrl: './request-details.css',
 })
 export class RequestDetails implements OnInit {
-  request: PurchaseRequest | null = null;
+  readonly request = signal<PurchaseRequest | null>(null);
 
-  history: WorkflowHistory[] = [];
+  readonly history = signal<WorkflowHistory[]>([]);
 
-  loading = true;
+  readonly loading = signal(true);
+
+  readonly errorMessage = signal('');
 
   constructor(
     private route: ActivatedRoute,
 
     private service: SupplyChainService,
+
+    private auth: AuthService,
   ) {}
 
-  async ngOnInit() {
-    console.log('REQUEST DETAILS INIT');
+  get canEditReturned(): boolean {
+    const request = this.request();
 
+    return (
+      !!request &&
+      request.status === 'RETURNED_FOR_REVISION' &&
+      this.auth.hasAnyRole(REQUEST_CREATOR_ROLES) &&
+      this.auth.canAccessBranch(request.branchId)
+    );
+  }
+
+  async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
 
-    console.log('REQUEST ID:', id);
-
     if (!id) {
-      console.error('NO ID FOUND IN URL');
+      this.errorMessage.set('No purchase request was specified.');
 
-      this.loading = false;
+      this.loading.set(false);
 
       return;
     }
 
+    await this.load(id);
+  }
+
+  async load(id: string) {
+    this.loading.set(true);
+
+    this.errorMessage.set('');
+
     try {
-      this.request = await this.service.getPurchaseRequest(id);
+      const request = await this.service.getPurchaseRequest(id);
 
-      console.log('REQUEST RESULT:', this.request);
+      if (!request) {
+        this.errorMessage.set('Purchase request not found.');
 
-      if (this.request) {
-        this.history = await this.service.getWorkflowHistory(id);
-
-        console.log('HISTORY RESULT:', this.history);
+        return;
       }
-    } catch (error) {
-      console.error('REQUEST DETAILS ERROR:', error);
-    } finally {
-      this.loading = false;
 
-      console.log('LOADING FALSE');
+      if (!this.auth.canAccessBranch(request.branchId)) {
+        this.errorMessage.set('You do not have access to this purchase request.');
+
+        return;
+      }
+
+      this.request.set(request);
+
+      this.history.set(await this.service.getWorkflowHistory(id));
+    } catch (error) {
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'Unable to load purchase request details.',
+      );
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  retry() {
+    const id = this.route.snapshot.paramMap.get('id');
+
+    if (id) {
+      this.load(id);
     }
   }
 }

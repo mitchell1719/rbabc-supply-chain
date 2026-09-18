@@ -4,16 +4,17 @@
     <h1>HQ Consolidation</h1>
 
     <p>
-      Consolidate DM-approved requests
+      Consolidate RNS-endorsed requests
       according to assigned headquarters.
     </p>
   </div>
 
   <button
     class="primary"
+    [disabled]="consolidating()"
     (click)="consolidate()">
 
-    Consolidate Selected
+    {{ consolidating() ? 'Consolidating...' : 'Consolidate Selected' }}
 
   </button>
 
@@ -21,9 +22,15 @@
 
 <div class="table-card">
 
-  <app-loading-skeleton *ngIf="loading" [rows]="4" label="Loading DM-approved requests…"></app-loading-skeleton>
+  <app-data-state
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="requests().length === 0"
+    loadingMessage="Loading requests awaiting HQ consolidation..."
+    emptyMessage="No requests are currently awaiting HQ consolidation."
+    (retry)="load()">
 
-  <table *ngIf="!loading">
+  <table>
 
     <thead>
 
@@ -42,13 +49,13 @@
     <tbody>
 
       <tr
-        *ngFor="let request of requests">
+        *ngFor="let request of requests()">
 
         <td>
 
           <input
             type="checkbox"
-            [checked]="selected.has(request.id!)"
+            [checked]="isSelected(request)"
             (change)="toggle(request)">
 
         </td>
@@ -84,13 +91,54 @@
 
   </table>
 
-  <div
-    class="empty"
-    *ngIf="!loading && requests.length === 0">
+  </app-data-state>
 
-    No DM-approved requests waiting for
-    HQ consolidation.
+</div>
+
+<div class="table-card summary-card" *ngIf="itemSummary().length > 0">
+
+  <div class="summary-header">
+
+    <h3>
+      Item Summary
+      {{ selected().size > 0 ? '(Selected Requests)' : '(All Awaiting Consolidation)' }}
+    </h3>
+
+    <p>
+      Requested items segregated by description, with total quantity
+      and number of orders across {{ selected().size > 0 ? 'the selected requests' : 'every request awaiting consolidation' }}.
+    </p>
 
   </div>
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Description</th>
+        <th>Unit</th>
+        <th>Total Quantity</th>
+        <th>Orders</th>
+        <th>Total Cost</th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let item of itemSummary()">
+
+        <td>{{ item.description }}</td>
+        <td>{{ item.unit }}</td>
+        <td>{{ item.totalQuantity }}</td>
+        <td>{{ item.orderCount }}</td>
+        <td>₱{{ item.totalCost | number:'1.2-2' }}</td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
 
 </div>

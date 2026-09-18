@@ -66,16 +66,18 @@
 
 
     <a
-      routerLink="/dm-approvals"
+      *ngIf="canReviewAsRns"
+      routerLink="/rns-review"
       routerLinkActive="active">
 
-      <span>✓</span>
-      <label>DM Approvals</label>
+      <span>🩺</span>
+      <label>RNS Review</label>
 
     </a>
 
 
     <a
+      *ngIf="canManageProcurement"
       routerLink="/hq-consolidation"
       routerLinkActive="active">
 
@@ -86,6 +88,7 @@
 
 
     <a
+      *ngIf="canManageProcurement"
       routerLink="/prs"
       routerLinkActive="active">
 
@@ -95,12 +98,13 @@
     </a>
 
 
-    <p class="menu-title">
+    <p class="menu-title" *ngIf="canManageProcurement">
       PROCUREMENT
     </p>
 
 
     <a
+      *ngIf="canManageProcurement"
       routerLink="/procurement"
       routerLinkActive="active">
 
@@ -111,6 +115,7 @@
 
 
     <a
+      *ngIf="canManageProcurement"
       routerLink="/purchase-orders"
       routerLinkActive="active">
 
@@ -121,6 +126,7 @@
 
 
     <a
+      *ngIf="canManageProcurement"
       routerLink="/suppliers"
       routerLinkActive="active">
 
@@ -180,6 +186,16 @@
     </a>
 
 
+    <a
+      routerLink="/vaccine-wastage"
+      routerLinkActive="active">
+
+      <span>💉</span>
+      <label>Vaccine Wastage</label>
+
+    </a>
+
+
     <p class="menu-title">
       FINANCE
     </p>
@@ -201,11 +217,34 @@
 
 
     <a
+      *ngIf="canManageReferenceData"
       routerLink="/branches"
       routerLinkActive="active">
 
       <span>🏥</span>
       <label>Branches</label>
+
+    </a>
+
+
+    <a
+      *ngIf="canManageUsers"
+      routerLink="/user-access"
+      routerLinkActive="active">
+
+      <span>🔐</span>
+      <label>User Access</label>
+
+    </a>
+
+
+    <a
+      *ngIf="canManageUsers"
+      routerLink="/audit-log"
+      routerLinkActive="active">
+
+      <span>🧾</span>
+      <label>Audit Log</label>
 
     </a>
 

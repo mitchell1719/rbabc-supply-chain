@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import {
@@ -20,8 +21,12 @@ import {
 } from '../../services/confirm.service';
 
 import {
-  LoadingSkeleton
-} from '../../components/loading-skeleton/loading-skeleton';
+  ReceivingReport
+} from '../../models/supply-chain.model';
+
+import {
+  DataState
+} from '../../components/data-state/data-state';
 
 import {
   LastUpdated
@@ -31,13 +36,17 @@ import {
   CopyButton
 } from '../../components/copy-button/copy-button';
 
+import { AuthService } from '../../services/auth.service';
+
+import { PROCUREMENT_ROLES } from '../../config/roles.config';
+
 @Component({
   selector: 'app-discrepancies',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    LoadingSkeleton,
+    DataState,
     LastUpdated,
     CopyButton
   ],
@@ -47,19 +56,31 @@ import {
 export class Discrepancies
 implements OnInit {
 
-  records: any[] = [];
-
-  loading = true;
+  readonly records = signal<ReceivingReport[]>([]);
 
   resolution:
     Record<string,string> = {};
 
+  readonly loading = signal(false);
+
+  readonly errorMessage = signal('');
+
+  readonly resolvingId = signal<string | null>(null);
+
   constructor(
     private service:
       SupplyChainService,
+
     private confirmService:
-      ConfirmService
+      ConfirmService,
+
+    private auth: AuthService,
   ) {}
+
+  /** Only a Supply Officer resolves discrepancies (per the RB ABC receiving workflow). */
+  get canResolve(): boolean {
+    return this.auth.hasAnyRole(PROCUREMENT_ROLES);
+  }
 
   async ngOnInit() {
     await this.load();
@@ -67,25 +88,40 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
+
+    this.errorMessage.set('');
 
     try {
 
-      this.records =
+      this.records.set(
         await this.service
-          .getDiscrepancies();
+          .getDiscrepancies()
+      );
+
+    } catch (error) {
+
+      this.errorMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load discrepancies.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
   }
 
   async resolve(
-    record: any
+    record: ReceivingReport
   ) {
+
+    if (!record.id) {
+      return;
+    }
 
     const text =
       this.resolution[
@@ -112,13 +148,31 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .resolveDiscrepancy(
-        record.id,
-        text
+    this.resolvingId.set(record.id);
+
+    try {
+
+      await this.service
+        .resolveDiscrepancy(
+          record.id,
+          text
+        );
+
+      await this.load();
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to resolve discrepancy.'
       );
 
-    await this.load();
+    } finally {
+
+      this.resolvingId.set(null);
+
+    }
 
   }
 

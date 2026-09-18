@@ -28,10 +28,10 @@
       placeholder="Prepared By">
 
     <button
-      [disabled]="saving"
+      [disabled]="saving()"
       (click)="create()">
 
-      {{ saving ? 'Creating…' : 'Create SOA' }}
+      {{ saving() ? 'Creating...' : 'Create SOA' }}
 
     </button>
 
@@ -41,9 +41,15 @@
 
     <h3>SOA Records</h3>
 
-    <app-loading-skeleton *ngIf="loading" [rows]="4" label="Loading SOA records…"></app-loading-skeleton>
+    <app-data-state
+      [loading]="loading()"
+      [error]="errorMessage()"
+      [isEmpty]="records().length === 0"
+      loadingMessage="Loading statements of account..."
+      emptyMessage="No statements of account have been created yet."
+      (retry)="load()">
 
-    <table *ngIf="!loading">
+    <table>
 
       <thead>
         <tr>
@@ -60,7 +66,7 @@
       <tbody>
 
         <tr
-          *ngFor="let soa of records">
+          *ngFor="let soa of records()">
 
           <td>
             {{ soa.soaNumber }}
@@ -97,9 +103,7 @@
 
     </table>
 
-    <p class="empty" *ngIf="!loading && records.length === 0">
-      No statements of account yet.
-    </p>
+    </app-data-state>
 
   </div>
 

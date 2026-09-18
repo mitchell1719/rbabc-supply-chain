@@ -1,11 +1,14 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import {
   CommonModule
 } from '@angular/common';
+
+import { RouterLink } from '@angular/router';
 
 import {
   SupplyChainService
@@ -16,8 +19,12 @@ import {
 } from '../../services/confirm.service';
 
 import {
-  LoadingSkeleton
-} from '../../components/loading-skeleton/loading-skeleton';
+  DeliveryNote
+} from '../../models/supply-chain.model';
+
+import {
+  DataState
+} from '../../components/data-state/data-state';
 
 import {
   LastUpdated
@@ -27,26 +34,42 @@ import {
   CopyButton
 } from '../../components/copy-button/copy-button';
 
+import { AuthService } from '../../services/auth.service';
+
+import { PROCUREMENT_ROLES } from '../../config/roles.config';
+
 @Component({
   selector: 'app-deliveries',
   standalone: true,
-  imports: [CommonModule, LoadingSkeleton, LastUpdated, CopyButton],
+  imports: [CommonModule, RouterLink, DataState, LastUpdated, CopyButton],
   templateUrl: './deliveries.html',
   styleUrl: './deliveries.css'
 })
 export class Deliveries
 implements OnInit {
 
-  deliveries: any[] = [];
+  readonly deliveries = signal<DeliveryNote[]>([]);
 
-  loading = true;
+  readonly loading = signal(false);
+
+  readonly errorMessage = signal('');
+
+  readonly dispatchingId = signal<string | null>(null);
 
   constructor(
     private service:
       SupplyChainService,
+
     private confirmService:
-      ConfirmService
+      ConfirmService,
+
+    private auth: AuthService,
   ) {}
+
+  /** Only a Supply Officer dispatches deliveries (they "Manage" Delivery Tracking). */
+  get canDispatch(): boolean {
+    return this.auth.hasAnyRole(PROCUREMENT_ROLES);
+  }
 
   async ngOnInit() {
     await this.load();
@@ -54,24 +77,35 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
+
+    this.errorMessage.set('');
 
     try {
 
-      this.deliveries =
+      this.deliveries.set(
         await this.service
-          .getDeliveries();
+          .getDeliveries()
+      );
+
+    } catch (error) {
+
+      this.errorMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load deliveries.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
   }
 
   async dispatch(
-    delivery: any
+    delivery: DeliveryNote
   ) {
 
     if (!delivery.id) {
@@ -89,12 +123,30 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .dispatchDelivery(
-        delivery.id
+    this.dispatchingId.set(delivery.id);
+
+    try {
+
+      await this.service
+        .dispatchDelivery(
+          delivery.id
+        );
+
+      await this.load();
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to dispatch delivery.'
       );
 
-    await this.load();
+    } finally {
+
+      this.dispatchingId.set(null);
+
+    }
 
   }
 

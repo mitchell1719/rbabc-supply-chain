@@ -3,8 +3,14 @@ import {
 } from '@angular/core';
 
 import {
+  NavigationEnd,
+  Router,
   RouterOutlet
 } from '@angular/router';
+
+import { CommonModule } from '@angular/common';
+
+import { filter } from 'rxjs/operators';
 
 import {
   Sidebar
@@ -46,6 +52,7 @@ import {
   standalone: true,
 
   imports: [
+    CommonModule,
     RouterOutlet,
     Sidebar,
     Header,
@@ -68,8 +75,19 @@ export class App {
 
   sidebarCollapsed = false;
 
+  showShell = true;
+
   mobileMenuOpen = false;
 
+  constructor(private router: Router) {
+    this.showShell = !this.router.url.startsWith('/login');
+
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.showShell = !event.urlAfterRedirects.startsWith('/login');
+      });
+  }
 
   sidebarChanged(
     collapsed: boolean

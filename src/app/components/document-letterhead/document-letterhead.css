@@ -1,0 +1,64 @@
+.letterhead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+
+  border-bottom: 3px solid #0a5a9c;
+}
+
+.logo {
+  width: 78px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: .5px;
+}
+
+.rabies {
+  color: #ed1c24;
+}
+
+.animal {
+  color: #0a3d7a;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 10px;
+  font-style: italic;
+  color: #667386;
+}
+
+.doc-title {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.doc-subtitle {
+  margin: 2px 0 0;
+  text-align: center;
+  font-size: 10px;
+  color: #667386;
+}

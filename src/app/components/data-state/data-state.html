@@ -1,0 +1,22 @@
+<div class="state loading" *ngIf="loading">
+  <span class="spinner"></span>
+  {{ loadingMessage }}
+</div>
+
+<div class="state error" *ngIf="!loading && error">
+  <span class="icon">⚠</span>
+
+  <p>{{ error }}</p>
+
+  <button type="button" class="retry-button" (click)="retry.emit()">
+    Try Again
+  </button>
+</div>
+
+<div class="state empty" *ngIf="!loading && !error && isEmpty">
+  {{ emptyMessage }}
+</div>
+
+<div class="state-content" *ngIf="!loading && !error && !isEmpty">
+  <ng-content></ng-content>
+</div>

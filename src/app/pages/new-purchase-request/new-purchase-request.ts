@@ -1,16 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
 
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { SupplyChainService } from '../../services/supply-chain.service';
 
-import { Branch, PurchaseRequest, PurchaseRequestItem } from '../../models/supply-chain.model';
+import { AuthService } from '../../services/auth.service';
 
-import { BRANCHES, BranchOption } from '../../data/branches.data';
+import { Branch, PurchaseRequest, PurchaseRequestItem } from '../../models/supply-chain.model';
 
 import { ConfirmService } from '../../services/confirm.service';
 
@@ -26,7 +26,7 @@ import { ConfirmService } from '../../services/confirm.service';
   styleUrl: './new-purchase-request.css',
 })
 export class NewPurchaseRequest implements OnInit {
-  branches: Branch[] = [];
+  readonly branches = signal<Branch[]>([]);
 
   selectedBranchId = '';
 
@@ -42,21 +42,128 @@ export class NewPurchaseRequest implements OnInit {
 
   items: PurchaseRequestItem[] = [];
 
+  readonly loadingBranches = signal(false);
+
+  readonly loadError = signal('');
+
+  readonly submitting = signal(false);
+
+  /** Set when editing a request that was returned for revision (route: /purchase-requests/:id/edit). */
+  readonly editMode = signal(false);
+
+  readonly editId = signal<string | null>(null);
+
+  readonly loadingExisting = signal(false);
+
+  readonly loadExistingError = signal('');
+
   constructor(
     private service: SupplyChainService,
 
+    private auth: AuthService,
+
     private router: Router,
+
+    private route: ActivatedRoute,
 
     private confirmService: ConfirmService,
   ) {}
 
   async ngOnInit() {
-    this.controlNumber = this.service.createTemporaryControlNumber('PR');
+    this.preparedBy = this.auth.displayName();
 
-    this.branches = await this.service.getBranches();
+    await this.loadBranches();
 
-    for (let i = 0; i < 3; i++) {
-      this.addItem();
+    const id = this.route.snapshot.paramMap.get('id');
+
+    if (id) {
+      this.editMode.set(true);
+      this.editId.set(id);
+
+      await this.loadExisting(id);
+    } else {
+      this.controlNumber = this.service.createTemporaryControlNumber('PR');
+
+      for (let i = 0; i < 3; i++) {
+        this.addItem();
+      }
+
+      this.applyDefaultBranch();
+    }
+  }
+
+  /** Nurses (branch users) get their assigned branch preselected. */
+  private applyDefaultBranch() {
+    const profile = this.auth.profile();
+
+    if (profile?.role === 'NURSE' && profile.branchId) {
+      this.selectedBranchId = profile.branchId;
+    }
+  }
+
+  /** A Nurse is limited to their own assigned branch and can't switch to another one. */
+  get branchLocked(): boolean {
+    const profile = this.auth.profile();
+
+    return profile?.role === 'NURSE' && !!profile.branchId;
+  }
+
+  async loadExisting(id: string) {
+    this.loadingExisting.set(true);
+
+    this.loadExistingError.set('');
+
+    try {
+      const request = await this.service.getPurchaseRequest(id);
+
+      if (!request) {
+        throw new Error('Purchase request not found.');
+      }
+
+      if (request.status !== 'RETURNED_FOR_REVISION') {
+        throw new Error('Only requests returned for revision can be edited.');
+      }
+
+      if (!this.auth.canAccessBranch(request.branchId)) {
+        throw new Error('You do not have access to this purchase request.');
+      }
+
+      this.controlNumber = request.controlNumber;
+      this.requestDate = request.requestDate;
+      this.selectedBranchId = request.branchId;
+      this.department = request.department;
+      this.preparedBy = request.preparedBy;
+      this.remarks = request.remarks;
+
+      this.items = request.items.length
+        ? request.items.map((item) => ({ ...item }))
+        : [];
+
+      if (this.items.length === 0) {
+        this.addItem();
+      }
+    } catch (error) {
+      this.loadExistingError.set(
+        error instanceof Error ? error.message : 'Unable to load the purchase request.',
+      );
+    } finally {
+      this.loadingExisting.set(false);
+    }
+  }
+
+  async loadBranches() {
+    this.loadingBranches.set(true);
+
+    this.loadError.set('');
+
+    try {
+      this.branches.set(await this.service.getBranches());
+    } catch (error) {
+      this.loadError.set(
+        error instanceof Error ? error.message : 'Unable to load branches.'
+      );
+    } finally {
+      this.loadingBranches.set(false);
     }
   }
 
@@ -99,6 +206,10 @@ export class NewPurchaseRequest implements OnInit {
   }
 
   async submit() {
+    if (this.submitting()) {
+      return;
+    }
+
     if (!this.selectedBranchId) {
       alert('Please select a branch.');
 
@@ -117,10 +228,16 @@ export class NewPurchaseRequest implements OnInit {
       return;
     }
 
-    const branch = this.branches.find((b) => b.id === this.selectedBranchId);
+    const branch = this.branches().find((b) => b.id === this.selectedBranchId);
 
     if (!branch) {
       alert('Invalid branch.');
+
+      return;
+    }
+
+    if (!this.auth.canAccessBranch(branch.id!)) {
+      alert('You can only submit requests for your assigned branch.');
 
       return;
     }
@@ -135,66 +252,97 @@ export class NewPurchaseRequest implements OnInit {
       return;
     }
 
+    const isEdit = this.editMode();
+
     const confirmed = await this.confirmService.confirm({
-      title: 'Submit Purchase Request',
-      message: `Submit ${this.controlNumber} for District Manager approval? You won't be able to edit it once submitted.`,
-      confirmLabel: 'Submit Request',
+      title: isEdit ? 'Resubmit Purchase Request' : 'Submit Purchase Request',
+      message: isEdit
+        ? `Resubmit ${this.controlNumber} for Regional Nurse Supervisor review?`
+        : `Submit ${this.controlNumber} for Regional Nurse Supervisor review? You won't be able to edit it once submitted.`,
+      confirmLabel: isEdit ? 'Resubmit Request' : 'Submit Request',
     });
 
     if (!confirmed) {
       return;
     }
 
+    this.submitting.set(true);
+
     try {
-      const request: PurchaseRequest = {
-        controlNumber: this.controlNumber,
+      if (isEdit) {
+        const id = this.editId()!;
 
-        requestDate: this.requestDate,
+        await this.service.updatePurchaseRequest(id, {
+          requestDate: this.requestDate,
+          branchId: branch.id!,
+          branchName: branch.name,
+          headquartersId: branch.headquartersId,
+          headquartersName: branch.headquartersName,
+          districtManagerId: branch.districtManagerId,
+          districtManagerName: branch.districtManagerName,
+          department: this.department,
+          preparedBy: this.preparedBy,
+          items: validItems,
+          totalAmount: this.grandTotal,
+          remarks: this.remarks,
+        });
 
-        branchId: branch.id!,
+        await this.service.resubmitPurchaseRequest(id, this.preparedBy);
 
-        branchName: branch.name,
+        alert(`${this.controlNumber} resubmitted successfully for RNS review.`);
 
-        headquartersId: branch.headquartersId,
+        this.router.navigate(['/purchase-requests', id]);
+      } else {
+        const request: PurchaseRequest = {
+          controlNumber: this.controlNumber,
 
-        headquartersName: branch.headquartersName,
+          requestDate: this.requestDate,
 
-        districtManagerId: branch.districtManagerId,
+          branchId: branch.id!,
 
-        districtManagerName: branch.districtManagerName,
+          branchName: branch.name,
 
-        department: this.department,
+          headquartersId: branch.headquartersId,
 
-        preparedBy: this.preparedBy,
+          headquartersName: branch.headquartersName,
 
-        items: validItems,
+          districtManagerId: branch.districtManagerId,
 
-        totalAmount: this.grandTotal,
+          districtManagerName: branch.districtManagerName,
 
-        remarks: this.remarks,
+          department: this.department,
 
-        status: 'DRAFT',
-      };
+          preparedBy: this.preparedBy,
 
-      const id = await this.service.createPurchaseRequest(request);
+          items: validItems,
 
-      await this.service.submitPurchaseRequest(
-        id,
+          totalAmount: this.grandTotal,
 
-        this.preparedBy,
-      );
+          remarks: this.remarks,
 
-      alert(`${this.controlNumber} submitted successfully for DM approval.`);
+          status: 'DRAFT',
+        };
 
-      this.router.navigate(['/purchase-requests']);
+        const id = await this.service.createPurchaseRequest(request);
+
+        await this.service.submitPurchaseRequest(id, this.preparedBy);
+
+        alert(`${this.controlNumber} submitted successfully for RNS review.`);
+
+        this.router.navigate(['/purchase-requests']);
+      }
     } catch (error) {
-      console.error(error);
-
-      alert('Unable to submit the Purchase Request.');
+      alert(error instanceof Error ? error.message : 'Unable to submit the Purchase Request.');
+    } finally {
+      this.submitting.set(false);
     }
   }
 
   cancel() {
-    this.router.navigate(['/purchase-requests']);
+    if (this.editMode() && this.editId()) {
+      this.router.navigate(['/purchase-requests', this.editId()]);
+    } else {
+      this.router.navigate(['/purchase-requests']);
+    }
   }
 }

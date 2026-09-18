@@ -1,0 +1,114 @@
+<div class="auth-screen">
+
+  <div class="auth-card">
+
+    <div class="brand">
+      <div class="logo">RB</div>
+
+      <div>
+        <strong>RB ABC</strong>
+        <span>Supply Chain Office</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+
+      <button
+        type="button"
+        class="tab"
+        [class.active]="mode === 'signIn'"
+        (click)="setMode('signIn')">
+
+        Sign In
+
+      </button>
+
+      <button
+        type="button"
+        class="tab"
+        [class.active]="mode === 'signUp'"
+        (click)="setMode('signUp')">
+
+        Create Account
+
+      </button>
+
+    </div>
+
+    <h1 *ngIf="mode === 'signIn'">Welcome back</h1>
+    <h1 *ngIf="mode === 'signUp'">Create your account</h1>
+
+    <p class="subtitle" *ngIf="mode === 'signIn'">
+      Sign in to access the Supply Chain Management System.
+    </p>
+
+    <p class="subtitle" *ngIf="mode === 'signUp'">
+      Register a new account to get started.
+    </p>
+
+    <div class="message error" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+
+    <form (ngSubmit)="submit()">
+
+      <div class="form-group" *ngIf="mode === 'signUp'">
+        <label>Full Name</label>
+
+        <input
+          type="text"
+          name="fullName"
+          [(ngModel)]="fullName"
+          placeholder="Juan Dela Cruz"
+          autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="you@rbabc.com"
+          autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="••••••••"
+          [autocomplete]="mode === 'signUp' ? 'new-password' : 'current-password'">
+      </div>
+
+      <div class="form-group" *ngIf="mode === 'signUp'">
+        <label>Confirm Password</label>
+
+        <input
+          type="password"
+          name="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          placeholder="••••••••"
+          autocomplete="new-password">
+      </div>
+
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="submitting()">
+
+        <span *ngIf="!submitting() && mode === 'signIn'">Sign In</span>
+        <span *ngIf="!submitting() && mode === 'signUp'">Create Account</span>
+        <span *ngIf="submitting()">Please wait...</span>
+
+      </button>
+
+    </form>
+
+  </div>
+
+</div>

@@ -14,34 +14,82 @@
   </div>
 
 
-  <a routerLink="/purchase-requests/new" class="primary">
+  <div class="header-actions no-print">
 
-    + New Purchase Request
+    <button type="button" class="export-button" (click)="exportCsv()">Export Excel</button>
+    <button type="button" class="export-button" (click)="exportPdf()">Export PDF</button>
 
-  </a>
+    <a
+      *ngIf="canCreate"
+      routerLink="/purchase-requests/new"
+      class="primary">
+
+      + New Purchase Request
+
+    </a>
+
+  </div>
 
 </div>
 
 
-<div class="table-card">
+<div class="filters no-print" *ngIf="requests().length > 0">
 
-  <app-loading-skeleton *ngIf="loading" [rows]="6" label="Loading purchase requests…"></app-loading-skeleton>
-
-
-  <div *ngIf="
-      !loading &&
-      requests.length === 0
-    " class="empty">
-
-    No purchase requests found.
-
+  <div class="filter-group">
+    <label>Headquarters</label>
+    <select [ngModel]="filterHq()" (ngModelChange)="filterHq.set($event)">
+      <option value="">All Headquarters</option>
+      <option *ngFor="let hq of hqOptions()" [value]="hq">{{ hq }}</option>
+    </select>
   </div>
 
+  <div class="filter-group">
+    <label>Branch</label>
+    <select [ngModel]="filterBranch()" (ngModelChange)="filterBranch.set($event)">
+      <option value="">All Branches</option>
+      <option *ngFor="let branch of branchOptions()" [value]="branch">{{ branch }}</option>
+    </select>
+  </div>
 
-  <table *ngIf="
-      !loading &&
-      requests.length > 0
-    ">
+  <div class="filter-group">
+    <label>Regional Nurse Supervisor</label>
+    <select [ngModel]="filterRns()" (ngModelChange)="filterRns.set($event)">
+      <option value="">All RNS</option>
+      <option *ngFor="let rns of rnsOptions()" [value]="rns">{{ rns }}</option>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <label>District Manager</label>
+    <select [ngModel]="filterDm()" (ngModelChange)="filterDm.set($event)">
+      <option value="">All District Managers</option>
+      <option *ngFor="let dm of dmOptions()" [value]="dm">{{ dm }}</option>
+    </select>
+  </div>
+
+  <button
+    type="button"
+    class="clear-filters"
+    *ngIf="hasActiveFilters()"
+    (click)="clearFilters()">
+
+    Clear Filters
+
+  </button>
+
+</div>
+
+<div class="table-card">
+
+  <app-data-state
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="filteredRequests().length === 0"
+    loadingMessage="Loading purchase requests..."
+    [emptyMessage]="requests().length === 0 ? 'No purchase requests found.' : 'No requests match the selected filters.'"
+    (retry)="loadRequests()">
+
+  <table>
 
     <thead>
 
@@ -64,7 +112,7 @@
 
     <tbody>
 
-      <tr *ngFor="let request of requests">
+      <tr *ngFor="let request of filteredRequests()">
 
         <td>
           <strong>
@@ -112,7 +160,7 @@
           <app-last-updated [date]="request.updatedAt || request.createdAt"></app-last-updated>
         </td>
 
-        <td>
+        <td class="row-actions">
 
           <a [routerLink]="[
               '/purchase-requests',
@@ -123,6 +171,19 @@
 
           </a>
 
+          <a
+            *ngIf="canEditReturned(request)"
+            [routerLink]="[
+              '/purchase-requests',
+              request.id,
+              'edit'
+            ]"
+            class="edit-link">
+
+            Edit &amp; Resubmit
+
+          </a>
+
         </td>
 
       </tr>
@@ -130,5 +191,7 @@
     </tbody>
 
   </table>
+
+  </app-data-state>
 
 </div>

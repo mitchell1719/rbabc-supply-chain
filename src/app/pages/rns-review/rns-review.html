@@ -1,29 +1,26 @@
 <div class="page-header">
 
   <div>
-    <h1>DM Approvals</h1>
+    <h1>RNS Review</h1>
     <p>
-      Review purchase requests submitted
-      by assigned branches.
+      Validate branch purchase requests
+      before forwarding them to the assigned Headquarters.
     </p>
   </div>
 
 </div>
 
-<app-loading-skeleton *ngIf="loading" [rows]="3" label="Loading pending approvals…"></app-loading-skeleton>
-
-<div
-  class="empty"
-  *ngIf="!loading && requests.length === 0">
-
-  No purchase requests are currently
-  pending DM approval.
-
-</div>
+<app-data-state
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [isEmpty]="requests().length === 0"
+  loadingMessage="Loading requests pending review..."
+  emptyMessage="No purchase requests are currently pending RNS review."
+  (retry)="load()">
 
 <div
   class="approval-card"
-  *ngFor="let request of requests">
+  *ngFor="let request of requests()">
 
   <div class="approval-header">
 
@@ -53,16 +50,16 @@
   <div class="request-info">
 
     <div>
-      <span>Assigned DM</span>
+      <span>Assigned HQ</span>
       <strong>
-        {{ request.districtManagerName }}
+        {{ request.headquartersName }}
       </strong>
     </div>
 
     <div>
-      <span>Assigned HQ</span>
+      <span>Assigned DM</span>
       <strong>
-        {{ request.headquartersName }}
+        {{ request.districtManagerName }}
       </strong>
     </div>
 
@@ -128,7 +125,7 @@
     <textarea
       [(ngModel)]="comments[request.id!]"
       rows="3"
-      placeholder="Optional for approval; required when returning">
+      placeholder="Optional when endorsing; required when returning">
     </textarea>
 
   </div>
@@ -137,6 +134,7 @@
 
     <button
       class="return"
+      [disabled]="processingId() === request.id"
       (click)="returnRequest(request)">
 
       Return for Revision
@@ -145,12 +143,15 @@
 
     <button
       class="approve"
-      (click)="approve(request)">
+      [disabled]="processingId() === request.id"
+      (click)="endorse(request)">
 
-      ✓ Approve Request
+      {{ processingId() === request.id ? 'Processing...' : '✓ Endorse to HQ' }}
 
     </button>
 
   </div>
 
 </div>
+
+</app-data-state>

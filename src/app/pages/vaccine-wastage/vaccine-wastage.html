@@ -1,0 +1,211 @@
+<div class="page-header">
+
+  <div>
+    <h1>Vaccine Wastage Monitoring</h1>
+
+    <p>
+      Track vial usage for Abhayrab, Speeda, RIG, Tetanus Toxoid and TIG,
+      and flag wastage that needs a reason on record.
+    </p>
+  </div>
+
+</div>
+
+<div class="layout">
+
+  <div class="card form-card" *ngIf="canSubmit">
+
+    <h3>Record Vial Usage</h3>
+
+    <div class="form-group">
+      <label>Branch *</label>
+
+      <select
+        [(ngModel)]="form.branchId"
+        [disabled]="branchLocked">
+
+        <option value="">Select Branch</option>
+
+        <option
+          *ngFor="let branch of branches()"
+          [value]="branch.id">
+
+          {{ branch.name }}
+
+        </option>
+
+      </select>
+
+      <p class="field-note" *ngIf="branchLocked">
+        You can only record wastage for your assigned branch.
+      </p>
+
+    </div>
+
+    <div class="form-group">
+      <label>Vaccine *</label>
+
+      <select [(ngModel)]="form.vaccineName">
+        <option *ngFor="let vaccine of vaccines" [value]="vaccine">{{ vaccine }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Date *</label>
+
+      <input type="date" [(ngModel)]="form.date">
+    </div>
+
+    <div class="form-row">
+
+      <div class="form-group">
+        <label>Patients Served *</label>
+        <input
+          type="number"
+          min="0"
+          [ngModel]="patientsServed()"
+          (ngModelChange)="patientsServed.set($event)">
+      </div>
+
+      <div class="form-group">
+        <label>Vaccine Capacity (doses/vial) *</label>
+        <input
+          type="number"
+          min="1"
+          [ngModel]="vaccineCapacity()"
+          (ngModelChange)="vaccineCapacity.set($event)">
+      </div>
+
+    </div>
+
+    <div class="form-row">
+
+      <div class="form-group">
+        <label>Available Vials *</label>
+        <input
+          type="number"
+          min="0"
+          [ngModel]="availableVials()"
+          (ngModelChange)="availableVials.set($event)">
+      </div>
+
+      <div class="form-group">
+        <label>Used Vials *</label>
+        <input
+          type="number"
+          min="0"
+          [ngModel]="usedVials()"
+          (ngModelChange)="usedVials.set($event)">
+      </div>
+
+    </div>
+
+    <div class="preview">
+
+      <div>
+        <span>Expected Usage</span>
+        <strong>{{ preview().expectedUsage }} vial(s)</strong>
+      </div>
+
+      <div [class.wasted]="preview().wastage > 0">
+        <span>Wastage</span>
+        <strong>{{ preview().wastage }} vial(s)</strong>
+      </div>
+
+    </div>
+
+    <div class="form-group" *ngIf="preview().wastage > 0">
+      <label>Reason for Wastage *</label>
+      <textarea [(ngModel)]="form.reason" rows="3" placeholder="e.g. broken vial, spoiled during transport"></textarea>
+    </div>
+
+    <button
+      type="button"
+      class="save-button"
+      [disabled]="saving()"
+      (click)="submit()">
+
+      {{ saving() ? 'Saving...' : 'Save Entry' }}
+
+    </button>
+
+  </div>
+
+  <div class="card list-card">
+
+    <div class="table-header">
+      <h3>Entries</h3>
+      <p>{{ entries().length }} record(s)</p>
+    </div>
+
+    <div class="summary" *ngIf="summaryByVaccine().length > 0">
+
+      <div class="summary-item" *ngFor="let row of summaryByVaccine()">
+        <span>{{ row.vaccineName }}</span>
+        <strong [class.wasted]="row.totalWastage > 0">{{ row.totalWastage }} vial(s) wasted</strong>
+        <small>{{ row.entries }} entr{{ row.entries === 1 ? 'y' : 'ies' }}</small>
+      </div>
+
+    </div>
+
+    <app-data-state
+      [loading]="loading()"
+      [error]="errorMessage()"
+      [isEmpty]="entries().length === 0"
+      loadingMessage="Loading vaccine wastage entries..."
+      emptyMessage="No vaccine wastage entries recorded yet."
+      (retry)="load()">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Branch</th>
+              <th>Vaccine</th>
+              <th>Patients</th>
+              <th>Expected Usage</th>
+              <th>Available</th>
+              <th>Used</th>
+              <th>Wastage</th>
+              <th>Reason</th>
+              <th>Recorded By</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let entry of entries()">
+
+              <td>{{ entry.date }}</td>
+              <td>{{ entry.branchName }}</td>
+              <td>{{ entry.vaccineName }}</td>
+              <td>{{ entry.patientsServed }}</td>
+              <td>{{ entry.expectedUsage }}</td>
+              <td>{{ entry.availableVials }}</td>
+              <td>{{ entry.usedVials }}</td>
+
+              <td>
+                <span class="wastage-tag" [class.wasted]="entry.wastage > 0">
+                  {{ entry.wastage }}
+                </span>
+              </td>
+
+              <td>{{ entry.reason || '—' }}</td>
+              <td>{{ entry.recordedBy }}</td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </app-data-state>
+
+  </div>
+
+</div>

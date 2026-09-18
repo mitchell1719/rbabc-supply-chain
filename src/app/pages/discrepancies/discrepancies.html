@@ -4,46 +4,59 @@
   Receiving reports requiring resolution.
 </p>
 
-<app-loading-skeleton *ngIf="loading" [rows]="3" label="Loading discrepancies…"></app-loading-skeleton>
+<app-data-state
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [isEmpty]="records().length === 0"
+  loadingMessage="Loading discrepancies..."
+  emptyMessage="No open discrepancies. Great work!"
+  (retry)="load()">
 
-<p class="empty" *ngIf="!loading && records.length === 0">
-  No open discrepancies. Great work!
-</p>
+  <div
+    class="card"
+    *ngFor="let record of records()">
 
-<div
-  class="card"
-  *ngFor="let record of records">
+    <h3>
+      {{ record.receivingNumber }}
+      <app-copy-button [value]="record.receivingNumber"></app-copy-button>
+    </h3>
 
-  <h3>
-    {{ record.receivingNumber }}
-    <app-copy-button [value]="record.receivingNumber"></app-copy-button>
-  </h3>
+    <p>
+      Branch:
+      <strong>
+        {{ record.branchName }}
+      </strong>
+      •
+      <app-last-updated [date]="record.updatedAt || record.createdAt"></app-last-updated>
+    </p>
 
-  <p>
-    Branch:
-    <strong>
-      {{ record.branchName }}
-    </strong>
-    •
-    <app-last-updated [date]="record.updatedAt || record.createdAt"></app-last-updated>
-  </p>
+    <div class="issue">
 
-  <div class="issue">
+      {{ record.discrepancyRemarks }}
 
-    {{ record.discrepancyRemarks }}
+    </div>
+
+    <ng-container *ngIf="canResolve">
+
+      <textarea
+        [(ngModel)]="resolution[record.id!]"
+        placeholder="Enter corrective action / resolution">
+      </textarea>
+
+      <button
+        [disabled]="resolvingId() === record.id"
+        (click)="resolve(record)">
+
+        {{ resolvingId() === record.id ? 'Resolving...' : 'Resolve Discrepancy' }}
+
+      </button>
+
+    </ng-container>
+
+    <p class="pending-note" *ngIf="!canResolve">
+      Pending resolution by the Supply Office.
+    </p>
 
   </div>
 
-  <textarea
-    [(ngModel)]="resolution[record.id]"
-    placeholder="Enter corrective action / resolution">
-  </textarea>
-
-  <button
-    (click)="resolve(record)">
-
-    Resolve Discrepancy
-
-  </button>
-
-</div>
+</app-data-state>

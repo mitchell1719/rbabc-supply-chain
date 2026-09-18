@@ -11,9 +11,15 @@
 
 <div class="card">
 
-  <app-loading-skeleton *ngIf="loading" [rows]="4" label="Loading deliveries…"></app-loading-skeleton>
+  <app-data-state
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="deliveries().length === 0"
+    loadingMessage="Loading deliveries..."
+    emptyMessage="No deliveries recorded yet."
+    (retry)="load()">
 
-  <table *ngIf="!loading">
+  <table>
 
     <thead>
 
@@ -33,7 +39,7 @@
     <tbody>
 
       <tr
-        *ngFor="let delivery of deliveries">
+        *ngFor="let delivery of deliveries()">
 
         <td>
           {{ delivery.deliveryNumber }}
@@ -64,18 +70,21 @@
           <app-last-updated [date]="delivery.updatedAt || delivery.createdAt"></app-last-updated>
         </td>
 
-        <td>
+        <td class="row-actions">
 
           <button
             *ngIf="
-              delivery.status ===
-              'PREPARING'
+              delivery.status === 'PREPARING' &&
+              canDispatch
             "
+            [disabled]="dispatchingId() === delivery.id"
             (click)="dispatch(delivery)">
 
-            Dispatch
+            {{ dispatchingId() === delivery.id ? 'Dispatching...' : 'Dispatch' }}
 
           </button>
+
+          <a [routerLink]="['/deliveries', delivery.id, 'print']">Print</a>
 
         </td>
 
@@ -85,8 +94,6 @@
 
   </table>
 
-  <p class="empty" *ngIf="!loading && deliveries.length === 0">
-    No deliveries recorded yet.
-  </p>
+  </app-data-state>
 
 </div>

@@ -1,129 +1,153 @@
 <h1>Settings</h1>
 
-<div class="card">
+<app-data-state
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [isEmpty]="false"
+  loadingMessage="Loading settings..."
+  (retry)="load()">
 
-  <h3>System Information</h3>
+  <div class="card">
 
-  <label>
-    Company Name
-  </label>
+    <h3>System Information</h3>
 
-  <input
-    [(ngModel)]="companyName">
-
-  <label>
-    Department
-  </label>
-
-  <input
-    [(ngModel)]="department">
-
-  <label>
-    System Name
-  </label>
-
-  <input
-    [(ngModel)]="systemName">
-
-  <button
-    (click)="save()">
-
-    Save Settings
-
-  </button>
-
-</div>
-
-<div class="card">
-
-  <h3>Appearance</h3>
-
-  <div class="theme-row">
-
-    <div>
-      <strong>Dark Mode</strong>
-      <p>Switch between light and dark themes for this device.</p>
+    <div class="message success" *ngIf="successMessage()">
+      {{ successMessage() }}
     </div>
 
-    <button
-      type="button"
-      class="theme-switch"
-      [class.on]="theme.isDark()"
-      role="switch"
-      [attr.aria-checked]="theme.isDark()"
-      (click)="theme.toggle()">
+    <p class="field-note" *ngIf="!canEditCompanyInfo">
+      Only a Supply Officer or Supply Chain Director can change system information.
+    </p>
 
-      <span class="knob"></span>
+    <label>
+      Company Name
+    </label>
 
-    </button>
-
-  </div>
-
-</div>
-
-<div class="card">
-
-  <h3>Account Security</h3>
-
-  <label>Current Password</label>
-
-  <div class="password-field">
     <input
-      [type]="showCurrentPassword ? 'text' : 'password'"
-      [(ngModel)]="currentPassword"
-      placeholder="Enter current password"
-      autocomplete="current-password">
+      [ngModel]="companyName()"
+      (ngModelChange)="companyName.set($event)"
+      [disabled]="!canEditCompanyInfo">
 
-    <button
-      type="button"
-      class="visibility-toggle"
-      [attr.aria-label]="showCurrentPassword ? 'Hide password' : 'Show password'"
-      (click)="showCurrentPassword = !showCurrentPassword">
-      {{ showCurrentPassword ? '🙈' : '👁' }}
-    </button>
-  </div>
+    <label>
+      Department
+    </label>
 
-  <label>New Password</label>
-
-  <div class="password-field">
     <input
-      [type]="showNewPassword ? 'text' : 'password'"
-      [(ngModel)]="newPassword"
-      placeholder="At least 8 characters"
-      autocomplete="new-password">
+      [ngModel]="department()"
+      (ngModelChange)="department.set($event)"
+      [disabled]="!canEditCompanyInfo">
 
-    <button
-      type="button"
-      class="visibility-toggle"
-      [attr.aria-label]="showNewPassword ? 'Hide password' : 'Show password'"
-      (click)="showNewPassword = !showNewPassword">
-      {{ showNewPassword ? '🙈' : '👁' }}
-    </button>
-  </div>
+    <label>
+      System Name
+    </label>
 
-  <label>Confirm New Password</label>
-
-  <div class="password-field">
     <input
-      [type]="showConfirmPassword ? 'text' : 'password'"
-      [(ngModel)]="confirmPassword"
-      placeholder="Re-enter new password"
-      autocomplete="new-password">
+      [ngModel]="systemName()"
+      (ngModelChange)="systemName.set($event)"
+      [disabled]="!canEditCompanyInfo">
 
     <button
-      type="button"
-      class="visibility-toggle"
-      [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
-      (click)="showConfirmPassword = !showConfirmPassword">
-      {{ showConfirmPassword ? '🙈' : '👁' }}
+      [disabled]="saving() || !canEditCompanyInfo"
+      (click)="save()">
+
+      {{ saving() ? 'Saving...' : 'Save Settings' }}
+
     </button>
+
   </div>
 
-  <p class="field-message error" *ngIf="passwordError">{{ passwordError }}</p>
-  <p class="field-message success" *ngIf="passwordMessage">{{ passwordMessage }}</p>
+  <div class="card">
 
-  <button (click)="updatePassword()">
-    Change Password
-  </button>
+    <h3>Appearance</h3>
 
-</div>
+    <div class="theme-row">
+
+      <div>
+        <strong>Dark Mode</strong>
+        <p>Switch between light and dark themes for this device.</p>
+      </div>
+
+      <button
+        type="button"
+        class="theme-switch"
+        [class.on]="theme.isDark()"
+        role="switch"
+        [attr.aria-checked]="theme.isDark()"
+        (click)="theme.toggle()">
+
+        <span class="knob"></span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Account Security</h3>
+
+    <label>Current Password</label>
+
+    <div class="password-field">
+      <input
+        [type]="showCurrentPassword ? 'text' : 'password'"
+        [(ngModel)]="currentPassword"
+        placeholder="Enter current password"
+        autocomplete="current-password">
+
+      <button
+        type="button"
+        class="visibility-toggle"
+        [attr.aria-label]="showCurrentPassword ? 'Hide password' : 'Show password'"
+        (click)="showCurrentPassword = !showCurrentPassword">
+        {{ showCurrentPassword ? '🙈' : '👁' }}
+      </button>
+    </div>
+
+    <label>New Password</label>
+
+    <div class="password-field">
+      <input
+        [type]="showNewPassword ? 'text' : 'password'"
+        [(ngModel)]="newPassword"
+        placeholder="At least 8 characters"
+        autocomplete="new-password">
+
+      <button
+        type="button"
+        class="visibility-toggle"
+        [attr.aria-label]="showNewPassword ? 'Hide password' : 'Show password'"
+        (click)="showNewPassword = !showNewPassword">
+        {{ showNewPassword ? '🙈' : '👁' }}
+      </button>
+    </div>
+
+    <label>Confirm New Password</label>
+
+    <div class="password-field">
+      <input
+        [type]="showConfirmPassword ? 'text' : 'password'"
+        [(ngModel)]="confirmPassword"
+        placeholder="Re-enter new password"
+        autocomplete="new-password">
+
+      <button
+        type="button"
+        class="visibility-toggle"
+        [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+        (click)="showConfirmPassword = !showConfirmPassword">
+        {{ showConfirmPassword ? '🙈' : '👁' }}
+      </button>
+    </div>
+
+    <p class="field-message error" *ngIf="passwordError()">{{ passwordError() }}</p>
+    <p class="field-message success" *ngIf="passwordMessage()">{{ passwordMessage() }}</p>
+
+    <button [disabled]="changingPassword()" (click)="updatePassword()">
+      {{ changingPassword() ? 'Changing...' : 'Change Password' }}
+    </button>
+
+  </div>
+
+</app-data-state>

@@ -1,11 +1,10 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
-import {
-  CommonModule
-} from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 import {
   PurchaseRequest
@@ -20,8 +19,8 @@ import {
 } from '../../services/confirm.service';
 
 import {
-  LoadingSkeleton
-} from '../../components/loading-skeleton/loading-skeleton';
+  DataState
+} from '../../components/data-state/data-state';
 
 import {
   LastUpdated
@@ -31,25 +30,34 @@ import {
   CopyButton
 } from '../../components/copy-button/copy-button';
 
+import { AuthService } from '../../services/auth.service';
+
 @Component({
   selector: 'app-procurement',
   standalone: true,
-  imports: [CommonModule, LoadingSkeleton, LastUpdated, CopyButton],
+  imports: [CommonModule, DataState, LastUpdated, CopyButton],
   templateUrl: './procurement.html',
   styleUrl: './procurement.css'
 })
 export class Procurement
 implements OnInit {
 
-  records: PurchaseRequest[] = [];
+  readonly records = signal<PurchaseRequest[]>([]);
 
-  loading = true;
+  readonly loading = signal(false);
+
+  readonly errorMessage = signal('');
+
+  readonly processingId = signal<string | null>(null);
 
   constructor(
     private service:
       SupplyChainService,
+
     private confirmService:
-      ConfirmService
+      ConfirmService,
+
+    private auth: AuthService
   ) {}
 
   async ngOnInit() {
@@ -58,39 +66,33 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
+
+    this.errorMessage.set('');
 
     try {
 
-      const all =
+      this.records.set(
         await this.service
-          .getPurchaseRequests();
-
-      this.records =
-        all.filter(
-          x =>
-            x.status ===
-            'PRS_CREATED'
-
-            ||
-
-            x.status ===
-            'WAREHOUSE_CHECK'
-
-            ||
-
-            x.status ===
-            'FOR_PROCUREMENT'
-
-            ||
-
-            x.status ===
+          .getRequestsByStatuses([
+            'PRS_CREATED',
+            'WAREHOUSE_CHECK',
+            'FOR_PROCUREMENT',
             'PROCUREMENT_COMPLETED'
-        );
+          ])
+      );
+
+    } catch (error) {
+
+      this.errorMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load procurement records.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -99,6 +101,10 @@ implements OnInit {
   async procure(
     request: PurchaseRequest
   ) {
+
+    if (!request.id) {
+      return;
+    }
 
     const confirmed =
       await this.confirmService.confirm({
@@ -111,19 +117,41 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .sendForProcurement(
-        request.id!,
-        'Supply Officer'
+    this.processingId.set(request.id);
+
+    try {
+
+      await this.service
+        .sendForProcurement(
+          request.id,
+          this.auth.displayName()
+        );
+
+      await this.load();
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to send for procurement.'
       );
 
-    await this.load();
+    } finally {
+
+      this.processingId.set(null);
+
+    }
 
   }
 
   async complete(
     request: PurchaseRequest
   ) {
+
+    if (!request.id) {
+      return;
+    }
 
     const confirmed =
       await this.confirmService.confirm({
@@ -136,13 +164,31 @@ implements OnInit {
       return;
     }
 
-    await this.service
-      .completeProcurement(
-        request.id!,
-        'Supply Officer'
+    this.processingId.set(request.id);
+
+    try {
+
+      await this.service
+        .completeProcurement(
+          request.id,
+          this.auth.displayName()
+        );
+
+      await this.load();
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to complete procurement.'
       );
 
-    await this.load();
+    } finally {
+
+      this.processingId.set(null);
+
+    }
 
   }
 

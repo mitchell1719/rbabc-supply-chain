@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 
 import {
@@ -16,8 +17,12 @@ import {
 } from '../../services/supply-chain.service';
 
 import {
-  LoadingSkeleton
-} from '../../components/loading-skeleton/loading-skeleton';
+  Supplier
+} from '../../models/supply-chain.model';
+
+import {
+  DataState
+} from '../../components/data-state/data-state';
 
 import {
   LastUpdated
@@ -29,7 +34,7 @@ import {
   imports: [
     CommonModule,
     FormsModule,
-    LoadingSkeleton,
+    DataState,
     LastUpdated
   ],
   templateUrl: './suppliers.html',
@@ -38,11 +43,7 @@ import {
 export class Suppliers
 implements OnInit {
 
-  suppliers: any[] = [];
-
-  loading = true;
-
-  saving = false;
+  readonly suppliers = signal<Supplier[]>([]);
 
   supplier = {
 
@@ -53,6 +54,12 @@ implements OnInit {
     address: ''
 
   };
+
+  readonly loading = signal(false);
+
+  readonly errorMessage = signal('');
+
+  readonly saving = signal(false);
 
   constructor(
     private service:
@@ -65,17 +72,28 @@ implements OnInit {
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
+
+    this.errorMessage.set('');
 
     try {
 
-      this.suppliers =
+      this.suppliers.set(
         await this.service
-          .getSuppliers();
+          .getSuppliers()
+      );
+
+    } catch (error) {
+
+      this.errorMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load suppliers.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -94,7 +112,7 @@ implements OnInit {
       return;
     }
 
-    this.saving = true;
+    this.saving.set(true);
 
     try {
 
@@ -113,9 +131,17 @@ implements OnInit {
 
       await this.load();
 
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to save supplier.'
+      );
+
     } finally {
 
-      this.saving = false;
+      this.saving.set(false);
 
     }
 

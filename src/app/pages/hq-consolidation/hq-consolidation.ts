@@ -1,6 +1,8 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  computed,
+  signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -18,8 +20,8 @@ import {
 } from '../../services/confirm.service';
 
 import {
-  LoadingSkeleton
-} from '../../components/loading-skeleton/loading-skeleton';
+  DataState
+} from '../../components/data-state/data-state';
 
 import {
   LastUpdated
@@ -29,22 +31,72 @@ import {
   CopyButton
 } from '../../components/copy-button/copy-button';
 
+import { AuthService } from '../../services/auth.service';
+
 @Component({
   selector: 'app-hq-consolidation',
   standalone: true,
-  imports: [CommonModule, LoadingSkeleton, LastUpdated, CopyButton],
+  imports: [CommonModule, DataState, LastUpdated, CopyButton],
   templateUrl: './hq-consolidation.html',
   styleUrl: './hq-consolidation.css'
 })
 export class HqConsolidation
 implements OnInit {
 
-  requests: PurchaseRequest[] = [];
+  readonly requests = signal<PurchaseRequest[]>([]);
 
-  selected =
-    new Set<string>();
+  readonly selected = signal(new Set<string>());
 
-  loading = true;
+  readonly loading = signal(false);
+
+  readonly errorMessage = signal('');
+
+  readonly consolidating = signal(false);
+
+  /**
+   * Item-description breakdown for the consolidation batch: total quantity
+   * and number of distinct requests ("orders") referencing each description.
+   * Scoped to the checked requests once something is selected (since a
+   * consolidation batch must share one HQ), otherwise covers every request
+   * currently awaiting consolidation, so the admin always has a summary to
+   * work from before generating the PRS.
+   */
+  readonly itemSummary = computed(() => {
+    const selectedIds = this.selected();
+
+    const scope = selectedIds.size > 0
+      ? this.requests().filter((r) => r.id && selectedIds.has(r.id))
+      : this.requests();
+
+    const byDescription = new Map<
+      string,
+      { description: string; unit: string; totalQuantity: number; totalCost: number; orderCount: number }
+    >();
+
+    for (const request of scope) {
+      for (const item of request.items) {
+        const key = item.description.trim().toLowerCase();
+
+        const existing = byDescription.get(key);
+
+        if (existing) {
+          existing.totalQuantity += Number(item.quantity) || 0;
+          existing.totalCost += Number(item.totalCost) || 0;
+          existing.orderCount += 1;
+        } else {
+          byDescription.set(key, {
+            description: item.description,
+            unit: item.unit,
+            totalQuantity: Number(item.quantity) || 0,
+            totalCost: Number(item.totalCost) || 0,
+            orderCount: 1,
+          });
+        }
+      }
+    }
+
+    return Array.from(byDescription.values()).sort((a, b) => b.totalQuantity - a.totalQuantity);
+  });
 
   async ngOnInit() {
     await this.load();
@@ -53,25 +105,40 @@ implements OnInit {
   constructor(
     private service:
       SupplyChainService,
+
     private confirmService:
-      ConfirmService
+      ConfirmService,
+
+    private auth: AuthService
   ) {}
 
   async load() {
 
-    this.loading = true;
+    this.loading.set(true);
+
+    this.errorMessage.set('');
 
     try {
 
-      this.requests =
+      this.requests.set(
         await this.service
-          .getRequestsByStatus(
+          .getRequestsByStatuses([
+            'RECEIVED_BY_HQ',
             'DM_APPROVED'
-          );
+          ])
+      );
+
+    } catch (error) {
+
+      this.errorMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load requests awaiting HQ consolidation.'
+      );
 
     } finally {
 
-      this.loading = false;
+      this.loading.set(false);
 
     }
 
@@ -85,28 +152,28 @@ implements OnInit {
       return;
     }
 
-    if (
-      this.selected.has(request.id)
-    ) {
+    const next = new Set(this.selected());
 
-      this.selected.delete(
-        request.id
-      );
-
+    if (next.has(request.id)) {
+      next.delete(request.id);
     } else {
-
-      this.selected.add(
-        request.id
-      );
-
+      next.add(request.id);
     }
 
+    this.selected.set(next);
+
+  }
+
+  isSelected(request: PurchaseRequest): boolean {
+    return !!request.id && this.selected().has(request.id);
   }
 
   async consolidate() {
 
+    const selectedIds = this.selected();
+
     if (
-      this.selected.size === 0
+      selectedIds.size === 0
     ) {
 
       alert(
@@ -117,10 +184,10 @@ implements OnInit {
     }
 
     const selectedRequests =
-      this.requests.filter(
+      this.requests().filter(
         r =>
           r.id &&
-          this.selected.has(r.id)
+          selectedIds.has(r.id)
       );
 
     const hqs =
@@ -150,7 +217,12 @@ implements OnInit {
       return;
     }
 
+    this.consolidating.set(true);
+
     try {
+
+      const performedBy =
+        this.auth.displayName();
 
       for (
         const request
@@ -160,12 +232,12 @@ implements OnInit {
         await this.service
           .markHQConsolidated(
             request.id!,
-            'HQ Supply Officer'
+            performedBy
           );
 
       }
 
-      this.selected.clear();
+      this.selected.set(new Set());
 
       await this.load();
 
@@ -179,6 +251,10 @@ implements OnInit {
         error?.message ||
         'Unable to consolidate requests.'
       );
+
+    } finally {
+
+      this.consolidating.set(false);
 
     }
 
