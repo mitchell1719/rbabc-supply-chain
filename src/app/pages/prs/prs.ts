@@ -7,6 +7,7 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import {
   Branch,
@@ -39,7 +40,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-prs',
   standalone: true,
-  imports: [CommonModule, FormsModule, DataState, LastUpdated, CopyButton],
+  imports: [CommonModule, FormsModule, RouterLink, DataState, LastUpdated, CopyButton],
   templateUrl: './prs.html',
   styleUrl: './prs.css'
 })

@@ -628,16 +628,25 @@ export class SupplyChainService {
 
       const prsNumber = this.createTemporaryControlNumber('PRS');
 
+      // The RNS who endorsed this request is recorded in its workflow
+      // history, not on the request itself - pull it forward onto the PRS
+      // record so the printed form's "Reviewed by" line is filled in.
+      const history = await this.getWorkflowHistory(request.id);
+
+      const endorsement = history.find((entry) => entry.toStatus === 'RECEIVED_BY_HQ');
+
       const result = await addDoc(collection(db, 'prs'), {
         prsNumber,
         headquartersId: request.headquartersId,
         headquartersName: request.headquartersName,
+        branchName: request.branchName,
+        department: request.department,
         purchaseRequestIds: [request.id],
         date: new Date().toISOString().substring(0, 10),
         items: request.items,
         totalAmount: request.totalAmount,
         preparedBy,
-        reviewedBy: '',
+        reviewedBy: endorsement?.performedBy || '',
         approvedBy: '',
         status: 'DRAFT',
         createdAt: serverTimestamp(),
@@ -657,6 +666,18 @@ export class SupplyChainService {
       const snapshot = await getDocs(collection(db, 'prs'));
 
       return snapshot.docs.map((document) => toRecord<PRS>(document));
+    });
+  }
+
+  async getPRSById(id: string): Promise<PRS | null> {
+    return this.withErrorHandling('Load PRS record', async () => {
+      const snapshot = await getDoc(doc(db, 'prs', id));
+
+      if (!snapshot.exists()) {
+        return null;
+      }
+
+      return toRecord<PRS>(snapshot);
     });
   }
 
@@ -799,6 +820,18 @@ export class SupplyChainService {
       const snapshot = await getDocs(collection(db, 'deliveryNotes'));
 
       return snapshot.docs.map((document) => toRecord<DeliveryNote>(document));
+    });
+  }
+
+  async getDeliveryById(id: string): Promise<DeliveryNote | null> {
+    return this.withErrorHandling('Load delivery note', async () => {
+      const snapshot = await getDoc(doc(db, 'deliveryNotes', id));
+
+      if (!snapshot.exists()) {
+        return null;
+      }
+
+      return toRecord<DeliveryNote>(snapshot);
     });
   }
 

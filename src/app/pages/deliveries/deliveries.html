@@ -70,7 +70,7 @@
           <app-last-updated [date]="delivery.updatedAt || delivery.createdAt"></app-last-updated>
         </td>
 
-        <td>
+        <td class="row-actions">
 
           <button
             *ngIf="
@@ -83,6 +83,8 @@
             {{ dispatchingId() === delivery.id ? 'Dispatching...' : 'Dispatch' }}
 
           </button>
+
+          <a [routerLink]="['/deliveries', delivery.id, 'print']">Print</a>
 
         </td>
 

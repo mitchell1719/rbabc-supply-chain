@@ -8,6 +8,8 @@ import {
   CommonModule
 } from '@angular/common';
 
+import { RouterLink } from '@angular/router';
+
 import {
   SupplyChainService
 } from '../../services/supply-chain.service';
@@ -39,7 +41,7 @@ import { PROCUREMENT_ROLES } from '../../config/roles.config';
 @Component({
   selector: 'app-deliveries',
   standalone: true,
-  imports: [CommonModule, DataState, LastUpdated, CopyButton],
+  imports: [CommonModule, RouterLink, DataState, LastUpdated, CopyButton],
   templateUrl: './deliveries.html',
   styleUrl: './deliveries.css'
 })

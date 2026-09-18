@@ -50,7 +50,7 @@
             <th>User</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Assigned Branch</th>
+            <th>Assigned Branch / Headquarters</th>
             <th>Active</th>
             <th></th>
           </tr>
@@ -100,7 +100,22 @@
 
               </select>
 
-              <span *ngIf="!branchRequired(user.uid)">—</span>
+              <select
+                *ngIf="hqRequired(user.uid)"
+                [(ngModel)]="drafts[user.uid].headquartersId"
+                [disabled]="!canEditRow(user)">
+
+                <option value="">Select headquarters</option>
+
+                <option
+                  *ngFor="let hq of headquartersOptions()"
+                  [value]="hq.id">
+                  {{ hq.name }}
+                </option>
+
+              </select>
+
+              <span *ngIf="!branchRequired(user.uid) && !hqRequired(user.uid)">—</span>
 
             </td>
 

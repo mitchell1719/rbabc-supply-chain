@@ -18,7 +18,14 @@ import { DataState } from '../../components/data-state/data-state';
 interface UserDraft {
   role: UserRole;
   branchId: string;
+  headquartersId: string;
   active: boolean;
+}
+
+/** A distinct Headquarters, derived from the Branches list (there's no separate HQ collection). */
+interface HeadquartersOption {
+  id: string;
+  name: string;
 }
 
 const OFFICER_ASSIGNABLE_ROLES: UserRole[] = ['NURSE', 'RNS', 'DISTRICT_MANAGER'];
@@ -52,6 +59,21 @@ export class UserAccess implements OnInit {
   /** True for a Supply Chain Director, who has unrestricted user-management rights ("Full" in the access matrix). */
   readonly isDirector = computed(() => this.auth.profile()?.role === 'SUPPLY_DIRECTOR');
 
+  /** Distinct Headquarters, for the RNS "Assigned Headquarters" dropdown. */
+  readonly headquartersOptions = computed<HeadquartersOption[]>(() => {
+    const seen = new Map<string, string>();
+
+    for (const branch of this.branches()) {
+      if (branch.headquartersId && !seen.has(branch.headquartersId)) {
+        seen.set(branch.headquartersId, branch.headquartersName);
+      }
+    }
+
+    return Array.from(seen.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  });
+
   constructor(
     private userService: UserService,
     private service: SupplyChainService,
@@ -82,6 +104,7 @@ export class UserAccess implements OnInit {
         this.drafts[user.uid] = {
           role: user.role,
           branchId: user.branchId || '',
+          headquartersId: user.headquartersId || '',
           active: user.active,
         };
       }
@@ -120,6 +143,10 @@ export class UserAccess implements OnInit {
     return this.drafts[uid]?.role === 'NURSE';
   }
 
+  hqRequired(uid: string): boolean {
+    return this.drafts[uid]?.role === 'RNS';
+  }
+
   isDirty(user: UserProfile): boolean {
     const draft = this.drafts[user.uid];
 
@@ -130,6 +157,7 @@ export class UserAccess implements OnInit {
     return (
       draft.role !== user.role ||
       draft.branchId !== (user.branchId || '') ||
+      draft.headquartersId !== (user.headquartersId || '') ||
       draft.active !== user.active
     );
   }
@@ -146,7 +174,13 @@ export class UserAccess implements OnInit {
       return;
     }
 
+    if (draft.role === 'RNS' && !draft.headquartersId) {
+      alert('Select the headquarters this RNS account is assigned to.');
+      return;
+    }
+
     const branch = this.branches().find((b) => b.id === draft.branchId);
+    const hq = this.headquartersOptions().find((h) => h.id === draft.headquartersId);
 
     const confirmed = await this.confirmService.confirm({
       title: 'Update User Access',
@@ -170,8 +204,12 @@ export class UserAccess implements OnInit {
       await this.userService.updateUserRole(
         user.uid,
         draft.role,
-        draft.role === 'NURSE' ? draft.branchId : '',
-        draft.role === 'NURSE' ? branch?.name || '' : '',
+        {
+          branchId: draft.role === 'NURSE' ? draft.branchId : '',
+          branchName: draft.role === 'NURSE' ? branch?.name || '' : '',
+          headquartersId: draft.role === 'RNS' ? draft.headquartersId : '',
+          headquartersName: draft.role === 'RNS' ? hq?.name || '' : '',
+        },
         actor,
       );
 

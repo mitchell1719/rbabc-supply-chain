@@ -149,6 +149,7 @@
         <th>Total</th>
         <th>Status</th>
         <th>Last Updated</th>
+        <th></th>
       </tr>
     </thead>
 
@@ -179,6 +180,10 @@
 
         <td>
           <app-last-updated [date]="prs.updatedAt || prs.createdAt"></app-last-updated>
+        </td>
+
+        <td>
+          <a [routerLink]="['/prs', prs.id, 'print']">Print</a>
         </td>
 
       </tr>

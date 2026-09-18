@@ -90,6 +90,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'prs/:id/print',
+    loadComponent: () => import('./pages/prs-print/prs-print').then((m) => m.PrsPrint),
+    canActivate: [authGuard, roleGuard(PROCUREMENT_ROLES)]
+  },
+
+  {
     path: 'procurement',
     loadComponent: () => import('./pages/procurement/procurement').then((m) => m.Procurement),
     canActivate: [authGuard, roleGuard(PROCUREMENT_ROLES)]
@@ -105,6 +111,13 @@ export const routes: Routes = [
   {
     path: 'deliveries',
     loadComponent: () => import('./pages/deliveries/deliveries').then((m) => m.Deliveries),
+    canActivate: [authGuard]
+  },
+
+  {
+    path: 'deliveries/:id/print',
+    loadComponent: () =>
+      import('./pages/delivery-print/delivery-print').then((m) => m.DeliveryPrint),
     canActivate: [authGuard]
   },
 

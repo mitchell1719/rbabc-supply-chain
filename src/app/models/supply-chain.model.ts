@@ -140,9 +140,15 @@ export interface PRS {
 
   headquartersName: string;
 
+  /** The originating branch/department - printed on the PRS form. */
+  branchName: string;
+  department: string;
+
   purchaseRequestIds: string[];
 
   date: string;
+
+  items: PurchaseRequestItem[];
 
   totalAmount: number;
 
@@ -368,6 +374,10 @@ export interface UserProfile {
   /** Assigned branch (Nurse role only); the branch this user prepares requests for. */
   branchId: string;
   branchName: string;
+
+  /** Assigned headquarters/region (RNS role only); scopes their RNS Review queue. */
+  headquartersId: string;
+  headquartersName: string;
 
   active: boolean;
 

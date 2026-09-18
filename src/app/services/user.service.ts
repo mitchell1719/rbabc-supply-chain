@@ -74,6 +74,8 @@ export class UserService {
         role: defaultRole,
         branchId: '',
         branchName: '',
+        headquartersId: '',
+        headquartersName: '',
         active: true,
       };
 
@@ -115,25 +117,23 @@ export class UserService {
   async updateUserRole(
     uid: string,
     role: UserRole,
-    branchId: string,
-    branchName: string,
+    assignment: { branchId: string; branchName: string; headquartersId: string; headquartersName: string },
     actor: AuditActor,
   ): Promise<void> {
     return this.withErrorHandling('Update user role', async () => {
       await updateDoc(doc(db, 'users', uid), {
         role,
-        branchId,
-        branchName,
+        ...assignment,
         updatedAt: serverTimestamp(),
       });
 
-      await this.audit.log(
-        actor,
-        'UPDATE',
-        'user',
-        uid,
-        `Role changed to ${role}${branchName ? ` (branch: ${branchName})` : ''}`,
-      );
+      const scope = assignment.branchName
+        ? ` (branch: ${assignment.branchName})`
+        : assignment.headquartersName
+          ? ` (HQ: ${assignment.headquartersName})`
+          : '';
+
+      await this.audit.log(actor, 'UPDATE', 'user', uid, `Role changed to ${role}${scope}`);
     });
   }
 

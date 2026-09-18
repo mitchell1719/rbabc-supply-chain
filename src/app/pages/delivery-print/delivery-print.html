@@ -1,0 +1,125 @@
+<div class="page-actions no-print">
+
+  <a routerLink="/deliveries" class="back-link">← Back to Deliveries</a>
+
+  <button type="button" class="print-button" (click)="print()">Print / Save as PDF</button>
+
+</div>
+
+<app-data-state
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [isEmpty]="false"
+  loadingMessage="Loading delivery note..."
+  (retry)="retry()">
+
+  <div class="document" *ngIf="delivery() as delivery">
+
+    <app-document-letterhead
+      title="Delivery Note"
+      subtitle="[Central Warehouse]">
+    </app-document-letterhead>
+
+    <div class="fields">
+
+      <div class="field">
+        <span>CWDR Control No.</span>
+        <strong>{{ delivery.deliveryNumber }}</strong>
+      </div>
+
+      <div class="field"></div>
+
+      <div class="field">
+        <span>Delivery Date</span>
+        <strong>{{ delivery.deliveryDate }}</strong>
+      </div>
+
+      <div class="field">
+        <span>Destination Branch</span>
+        <strong>{{ delivery.branchName }}</strong>
+      </div>
+
+      <div class="field">
+        <span>PRS Date</span>
+        <strong>{{ prsDate() || '—' }}</strong>
+      </div>
+
+      <div class="field">
+        <span>PRS No.</span>
+        <strong>{{ delivery.prsNumber }}</strong>
+      </div>
+
+    </div>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th colspan="5" class="section-heading">Items for Delivery</th>
+        </tr>
+        <tr>
+          <th class="col-qty">Quantity</th>
+          <th class="col-unit">Unit</th>
+          <th>Description</th>
+          <th class="col-batch">Batch No.</th>
+          <th class="col-expiry">Expiry Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let item of delivery.items">
+          <td class="col-qty">{{ item.quantity }}</td>
+          <td class="col-unit">{{ item.unit }}</td>
+          <td>{{ item.description }}</td>
+          <td class="col-batch">{{ item.batchNumber }}</td>
+          <td class="col-expiry">{{ item.expiryDate }}</td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+    <div class="signatures">
+
+      <div class="signature-block">
+        <p class="signee-name">{{ delivery.preparedBy || ' ' }}</p>
+        <div class="signature-line"></div>
+        <span>Prepared by:</span>
+        <small>Supply Chain Director</small>
+      </div>
+
+      <div class="signature-block">
+        <p class="signee-name">{{ delivery.approvedBy || ' ' }}</p>
+        <div class="signature-line"></div>
+        <span>Approved by:</span>
+        <small>Pharmacist</small>
+      </div>
+
+      <div class="signature-block">
+        <p class="signee-name">{{ delivery.receivedBy || ' ' }}</p>
+        <div class="signature-line"></div>
+        <span>Received by:</span>
+        <small>Branch Receiving Officer</small>
+      </div>
+
+    </div>
+
+    <div class="confirmation-note">
+      Note: If no confirmation of receipt is provided after receiving the Delivery Note,
+      it will be understood that all items listed above have been received in good order
+      and condition.
+    </div>
+
+    <div class="remarks">
+      <strong>Remarks:</strong>
+      <div class="remarks-box"></div>
+    </div>
+
+    <p class="footnote">
+      HQ Instance of Request – Year e.g.(HQ 001-2025)
+    </p>
+
+  </div>
+
+</app-data-state>

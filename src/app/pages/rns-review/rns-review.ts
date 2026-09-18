@@ -88,10 +88,17 @@ export class RnsReview implements OnInit {
 
     try {
 
+      const pending = await this.service.getRequestsByStatus(
+        'PENDING_RNS_REVIEW'
+      );
+
+      const profile = this.auth.profile();
+
+      // An RNS only reviews requests from their own assigned headquarters/region.
       this.requests.set(
-        await this.service.getRequestsByStatus(
-          'PENDING_RNS_REVIEW'
-        )
+        profile?.role === 'RNS' && profile.headquartersId
+          ? pending.filter((r) => r.headquartersId === profile.headquartersId)
+          : pending
       );
 
     } catch (error) {
@@ -115,6 +122,11 @@ export class RnsReview implements OnInit {
   ) {
 
     if (!request.id) {
+      return;
+    }
+
+    if (!this.auth.canAccessHeadquarters(request.headquartersId)) {
+      alert('You can only review requests for your assigned headquarters.');
       return;
     }
 
@@ -161,6 +173,11 @@ export class RnsReview implements OnInit {
   ) {
 
     if (!request.id) {
+      return;
+    }
+
+    if (!this.auth.canAccessHeadquarters(request.headquartersId)) {
+      alert('You can only review requests for your assigned headquarters.');
       return;
     }
 

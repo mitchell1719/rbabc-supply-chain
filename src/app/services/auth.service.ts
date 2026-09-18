@@ -183,6 +183,25 @@ export class AuthService {
     return !!profile.branchId && profile.branchId === branchId;
   }
 
+  /**
+   * Whether the signed-in user may view/act on data scoped to `hqId`.
+   * An RNS is limited to their own assigned headquarters/region (the RNS
+   * Review queue); every other role works across headquarters.
+   */
+  canAccessHeadquarters(hqId: string): boolean {
+    const profile = this.profileSignal();
+
+    if (!profile) {
+      return false;
+    }
+
+    if (profile.role !== 'RNS') {
+      return true;
+    }
+
+    return !!profile.headquartersId && profile.headquartersId === hqId;
+  }
+
   /* =====================================
      SIGN IN / SIGN UP / SIGN OUT
   ===================================== */

@@ -193,3 +193,53 @@ td {
   color: #b74d00;
   font-weight: 700;
 }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 15px;
+
+  padding: 15px;
+  margin-bottom: 15px;
+
+  background: #f8fafc;
+  border: 1px solid #e5e9ef;
+  border-radius: 8px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 160px;
+}
+
+.filter-group label {
+  font-size: 8px;
+  font-weight: 700;
+  color: #667386;
+}
+
+.filter-group select {
+  padding: 8px 9px;
+  border: 1px solid #dce2e8;
+  border-radius: 6px;
+  outline: none;
+  background: white;
+  font-size: 9px;
+}
+
+.filter-group select:focus {
+  border-color: #0a5a9c;
+}
+
+.clear-filters {
+  background: white;
+  color: #0a5a9c;
+  border: 1px solid #d9e1e8;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 9px;
+  cursor: pointer;
+}

@@ -33,14 +33,60 @@
 </div>
 
 
+<div class="filters no-print" *ngIf="requests().length > 0">
+
+  <div class="filter-group">
+    <label>Headquarters</label>
+    <select [ngModel]="filterHq()" (ngModelChange)="filterHq.set($event)">
+      <option value="">All Headquarters</option>
+      <option *ngFor="let hq of hqOptions()" [value]="hq">{{ hq }}</option>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <label>Branch</label>
+    <select [ngModel]="filterBranch()" (ngModelChange)="filterBranch.set($event)">
+      <option value="">All Branches</option>
+      <option *ngFor="let branch of branchOptions()" [value]="branch">{{ branch }}</option>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <label>Regional Nurse Supervisor</label>
+    <select [ngModel]="filterRns()" (ngModelChange)="filterRns.set($event)">
+      <option value="">All RNS</option>
+      <option *ngFor="let rns of rnsOptions()" [value]="rns">{{ rns }}</option>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <label>District Manager</label>
+    <select [ngModel]="filterDm()" (ngModelChange)="filterDm.set($event)">
+      <option value="">All District Managers</option>
+      <option *ngFor="let dm of dmOptions()" [value]="dm">{{ dm }}</option>
+    </select>
+  </div>
+
+  <button
+    type="button"
+    class="clear-filters"
+    *ngIf="hasActiveFilters()"
+    (click)="clearFilters()">
+
+    Clear Filters
+
+  </button>
+
+</div>
+
 <div class="table-card">
 
   <app-data-state
     [loading]="loading()"
     [error]="errorMessage()"
-    [isEmpty]="requests().length === 0"
+    [isEmpty]="filteredRequests().length === 0"
     loadingMessage="Loading purchase requests..."
-    emptyMessage="No purchase requests found."
+    [emptyMessage]="requests().length === 0 ? 'No purchase requests found.' : 'No requests match the selected filters.'"
     (retry)="loadRequests()">
 
   <table>
@@ -66,7 +112,7 @@
 
     <tbody>
 
-      <tr *ngFor="let request of requests()">
+      <tr *ngFor="let request of filteredRequests()">
 
         <td>
           <strong>
