@@ -43,6 +43,7 @@ service cloud.firestore {
           'prs',
           'inventory',
           'inventoryTransactions',
+          'vaccineWastageLogs',
           'deliveryNotes',
           'receivingReports',
           'suppliers',
@@ -52,6 +53,16 @@ service cloud.firestore {
           'contactMessages',
           'newsletterSubscribers'
         ];
+    }
+
+    // Audit trail: any signed-in account may append an entry (every
+    // mutation logs one, regardless of the actor's role), but entries are
+    // immutable and only readable by a Supply Officer/Director (the Audit
+    // Log page).
+    match /auditLogs/{logId} {
+      allow get, list: if isUserManager();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
     }
   }
 }

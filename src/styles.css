@@ -346,7 +346,8 @@ textarea:focus-visible {
   }
 
   .copy-button,
-  .last-updated .dot {
+  .last-updated .dot,
+  .no-print {
     display: none !important;
   }
 }

@@ -1,8 +1,17 @@
-<h1>Supply Chain Reports</h1>
+<div class="page-header">
 
-<p class="subtitle">
-  Current system-level operational summary.
-</p>
+  <h1>Supply Chain Reports</h1>
+
+  <p class="subtitle">
+    Current system-level operational summary.
+  </p>
+
+  <div class="export-actions no-print">
+    <button type="button" (click)="exportCsv()">Export Excel</button>
+    <button type="button" (click)="exportPdf()">Export PDF</button>
+  </div>
+
+</div>
 
 <app-data-state
   [loading]="loading()"
@@ -38,6 +47,13 @@
       <span>Low Stock Records</span>
       <strong>
         {{ lowStock() }}
+      </strong>
+    </div>
+
+    <div class="report">
+      <span>Expiring Within 90 Days</span>
+      <strong>
+        {{ expiringSoon() }}
       </strong>
     </div>
 

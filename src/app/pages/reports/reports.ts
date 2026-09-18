@@ -24,6 +24,7 @@ import {
 } from '../../components/data-state/data-state';
 
 import { AuthService } from '../../services/auth.service';
+import { ExportService } from '../../services/export.service';
 
 @Component({
   selector: 'app-reports',
@@ -51,11 +52,19 @@ implements OnInit {
     () => this.inventory().filter(x => Number(x.quantity) <= Number(x.reorderLevel)).length
   );
 
+  readonly expiringSoon = computed(
+    () => this.inventory().filter(
+      (item) => this.service.isExpiringSoon(item) && !this.service.isExpired(item),
+    ).length
+  );
+
   constructor(
     private service:
       SupplyChainService,
 
     private auth: AuthService,
+
+    private exportService: ExportService,
   ) {}
 
   async ngOnInit() {
@@ -110,6 +119,25 @@ implements OnInit {
 
     }
 
+  }
+
+  exportCsv() {
+    this.exportService.exportToCsv(
+      'supply-chain-report',
+      ['Metric', 'Value'],
+      [
+        ['Total Purchase Requests', this.requests().length],
+        ['Completed Requests', this.completed()],
+        ['Inventory Records', this.inventory().length],
+        ['Low Stock Records', this.lowStock()],
+        ['Expiring Within 90 Days', this.expiringSoon()],
+        ['Deliveries', this.deliveries().length],
+      ],
+    );
+  }
+
+  exportPdf() {
+    this.exportService.exportToPdf();
   }
 
 }

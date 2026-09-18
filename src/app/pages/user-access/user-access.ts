@@ -160,16 +160,23 @@ export class UserAccess implements OnInit {
 
     this.savingUid.set(user.uid);
 
+    const actor = {
+      uid: this.auth.user()?.uid || '',
+      displayName: this.auth.displayName(),
+      role: this.auth.profile()?.role || '',
+    };
+
     try {
       await this.userService.updateUserRole(
         user.uid,
         draft.role,
         draft.role === 'NURSE' ? draft.branchId : '',
         draft.role === 'NURSE' ? branch?.name || '' : '',
+        actor,
       );
 
       if (draft.active !== user.active) {
-        await this.userService.setUserActive(user.uid, draft.active);
+        await this.userService.setUserActive(user.uid, draft.active, actor);
       }
 
       await this.load();

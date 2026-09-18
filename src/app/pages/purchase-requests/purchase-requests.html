@@ -14,14 +14,21 @@
   </div>
 
 
-  <a
-    *ngIf="canCreate"
-    routerLink="/purchase-requests/new"
-    class="primary">
+  <div class="header-actions no-print">
 
-    + New Purchase Request
+    <button type="button" class="export-button" (click)="exportCsv()">Export Excel</button>
+    <button type="button" class="export-button" (click)="exportPdf()">Export PDF</button>
 
-  </a>
+    <a
+      *ngIf="canCreate"
+      routerLink="/purchase-requests/new"
+      class="primary">
+
+      + New Purchase Request
+
+    </a>
+
+  </div>
 
 </div>
 

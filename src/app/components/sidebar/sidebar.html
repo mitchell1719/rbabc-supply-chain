@@ -186,6 +186,16 @@
     </a>
 
 
+    <a
+      routerLink="/vaccine-wastage"
+      routerLinkActive="active">
+
+      <span>💉</span>
+      <label>Vaccine Wastage</label>
+
+    </a>
+
+
     <p class="menu-title">
       FINANCE
     </p>
@@ -224,6 +234,17 @@
 
       <span>🔐</span>
       <label>User Access</label>
+
+    </a>
+
+
+    <a
+      *ngIf="canManageUsers"
+      routerLink="/audit-log"
+      routerLinkActive="active">
+
+      <span>🧾</span>
+      <label>Audit Log</label>
 
     </a>
 

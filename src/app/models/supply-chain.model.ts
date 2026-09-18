@@ -385,3 +385,58 @@ export interface SystemSettings {
 
   updatedAt?: any;
 }
+
+/** A single recorded action, written to the `auditLogs` collection by AuditService. */
+export interface AuditLogEntry {
+  id?: string;
+
+  uid: string;
+  userDisplayName: string;
+  role: string;
+
+  action: string;
+
+  entityType: string;
+  entityId: string;
+
+  details: string;
+
+  createdAt?: any;
+}
+
+/** Vaccines needing dedicated wastage monitoring, per the RB ABC workflow. */
+export type MonitoredVaccine = 'Abhayrab' | 'Speeda' | 'RIG' | 'Tetanus Toxoid' | 'TIG';
+
+/**
+ * A monthly vial-usage/wastage entry for one branch and vaccine.
+ * expectedUsage and wastage follow the workflow's formulas:
+ *   Expected Usage = Patients Served ÷ Vaccine Capacity
+ *   Wastage = Available Vials - Used Vials
+ */
+export interface VaccineWastageEntry {
+  id?: string;
+
+  branchId: string;
+  branchName: string;
+
+  vaccineName: MonitoredVaccine;
+
+  date: string;
+
+  patientsServed: number;
+
+  /** Doses obtainable from one vial (e.g. 5 for a shared-vial ID regimen). */
+  vaccineCapacity: number;
+
+  availableVials: number;
+  usedVials: number;
+
+  expectedUsage: number;
+  wastage: number;
+
+  reason: string;
+
+  recordedBy: string;
+
+  createdAt?: any;
+}

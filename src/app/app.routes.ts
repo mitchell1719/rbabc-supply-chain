@@ -128,6 +128,13 @@ export const routes: Routes = [
   },
 
   {
+    path: 'vaccine-wastage',
+    loadComponent: () =>
+      import('./pages/vaccine-wastage/vaccine-wastage').then((m) => m.VaccineWastage),
+    canActivate: [authGuard]
+  },
+
+  {
     path: 'suppliers',
     loadComponent: () => import('./pages/suppliers/suppliers').then((m) => m.Suppliers),
     canActivate: [authGuard, roleGuard(PROCUREMENT_ROLES)]
@@ -142,6 +149,12 @@ export const routes: Routes = [
   {
     path: 'user-access',
     loadComponent: () => import('./pages/user-access/user-access').then((m) => m.UserAccess),
+    canActivate: [authGuard, roleGuard(USER_MANAGEMENT_ROLES)]
+  },
+
+  {
+    path: 'audit-log',
+    loadComponent: () => import('./pages/audit-log/audit-log').then((m) => m.AuditLog),
     canActivate: [authGuard, roleGuard(USER_MANAGEMENT_ROLES)]
   },
 

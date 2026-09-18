@@ -28,9 +28,13 @@ import {
   Supplier,
   PurchaseOrder,
   SystemSettings,
+  VaccineWastageEntry,
 } from '../models/supply-chain.model';
 
 import { REQUEST_TRANSITIONS } from '../config/workflow.config';
+
+import { AuditService, AuditActor } from './audit.service';
+import { AuthService } from './auth.service';
 
 function toRecord<T>(document: { id: string; data: () => Record<string, unknown> }): T {
   return { id: document.id, ...document.data() } as T;
@@ -38,6 +42,9 @@ function toRecord<T>(document: { id: string; data: () => Record<string, unknown>
 
 /** How long the branches cache stays fresh; branches are admin-managed reference data that rarely changes. */
 const BRANCHES_TTL_MS = 60_000;
+
+/** Items are flagged as expiring soon within this many days, for FEFO alerts. */
+const EXPIRY_ALERT_DAYS = 90;
 
 @Injectable({
   providedIn: 'root',
@@ -48,6 +55,20 @@ export class SupplyChainService {
   private branchesCachedAt = 0;
 
   private branchesPromise: Promise<Branch[]> | null = null;
+
+  constructor(
+    private audit: AuditService,
+    private auth: AuthService,
+  ) {}
+
+  /** The signed-in user, as an AuditActor, for logging who performed a mutation. */
+  private actor(): AuditActor {
+    return {
+      uid: this.auth.user()?.uid || '',
+      displayName: this.auth.displayName(),
+      role: this.auth.profile()?.role || '',
+    };
+  }
 
   /** Wraps a Firestore call so every failure surfaces a consistent, readable error. */
   private async withErrorHandling<T>(action: string, task: () => Promise<T>): Promise<T> {
@@ -197,6 +218,8 @@ export class SupplyChainService {
 
       this.branchesCache = null;
 
+      await this.audit.log(this.actor(), 'CREATE', 'branch', reference.id, `Created branch ${branch.name}`);
+
       return reference.id;
     });
   }
@@ -225,6 +248,14 @@ export class SupplyChainService {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(
+        this.actor(),
+        'CREATE',
+        'purchaseRequest',
+        docRef.id,
+        `Created ${request.controlNumber} for ${request.branchName}`,
+      );
 
       return docRef.id;
     });
@@ -364,6 +395,14 @@ export class SupplyChainService {
         comments,
         performedBy,
       });
+
+      await this.audit.log(
+        this.actor(),
+        'STATUS_CHANGE',
+        'purchaseRequest',
+        requestId,
+        `${action} (${currentStatus} → ${newStatus})`,
+      );
     });
   }
 
@@ -420,6 +459,8 @@ export class SupplyChainService {
         ...updates,
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(this.actor(), 'UPDATE', 'purchaseRequest', id, 'Edited after revision');
     });
   }
 
@@ -555,13 +596,19 @@ export class SupplyChainService {
 
   async createPurchaseOrder(data: Omit<PurchaseOrder, 'id' | 'poNumber' | 'status' | 'createdAt'>) {
     return this.withErrorHandling('Create purchase order', async () => {
-      return addDoc(collection(db, 'purchaseOrders'), {
+      const poNumber = this.createTemporaryControlNumber('PO');
+
+      const result = await addDoc(collection(db, 'purchaseOrders'), {
         ...data,
-        poNumber: this.createTemporaryControlNumber('PO'),
+        poNumber,
         status: 'DRAFT',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(this.actor(), 'CREATE', 'purchaseOrder', result.id, `Created ${poNumber}`);
+
+      return result;
     });
   }
 
@@ -599,6 +646,8 @@ export class SupplyChainService {
 
       await this.changeStatus(request.id, 'PRS_CREATED', `PRS ${prsNumber} Created`, preparedBy);
 
+      await this.audit.log(this.actor(), 'CREATE', 'prs', result.id, `Generated ${prsNumber}`);
+
       return result.id;
     });
   }
@@ -625,11 +674,49 @@ export class SupplyChainService {
 
   async addInventory(data: Omit<Inventory, 'id' | 'updatedAt'>) {
     return this.withErrorHandling('Save inventory record', async () => {
-      return addDoc(collection(db, 'inventory'), {
+      const result = await addDoc(collection(db, 'inventory'), {
         ...data,
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(
+        this.actor(),
+        'CREATE',
+        'inventory',
+        result.id,
+        `Added ${data.quantity} ${data.productName} at ${data.locationName}`,
+      );
+
+      return result;
     });
+  }
+
+  /**
+   * True when an inventory item's expiry falls within EXPIRY_ALERT_DAYS -
+   * the FEFO ("first expiry, first out") early-warning window.
+   */
+  isExpiringSoon(item: Inventory): boolean {
+    if (!item.expiryDate) {
+      return false;
+    }
+
+    const expiry = new Date(item.expiryDate).getTime();
+
+    if (Number.isNaN(expiry)) {
+      return false;
+    }
+
+    const daysUntilExpiry = (expiry - Date.now()) / (1000 * 60 * 60 * 24);
+
+    return daysUntilExpiry <= EXPIRY_ALERT_DAYS;
+  }
+
+  isExpired(item: Inventory): boolean {
+    if (!item.expiryDate) {
+      return false;
+    }
+
+    return new Date(item.expiryDate).getTime() < Date.now();
   }
 
   async createInventoryTransaction(data: Record<string, unknown>) {
@@ -638,6 +725,68 @@ export class SupplyChainService {
         ...data,
         createdAt: serverTimestamp(),
       });
+    });
+  }
+
+  /* =====================================
+     VACCINE WASTAGE
+  ===================================== */
+
+  async getVaccineWastageEntries(): Promise<VaccineWastageEntry[]> {
+    return this.withErrorHandling('Load vaccine wastage entries', async () => {
+      const snapshot = await getDocs(collection(db, 'vaccineWastageLogs'));
+
+      return snapshot.docs.map((document) => toRecord<VaccineWastageEntry>(document));
+    });
+  }
+
+  async getVaccineWastageEntriesForBranch(branchId: string): Promise<VaccineWastageEntry[]> {
+    return this.withErrorHandling('Load vaccine wastage entries', async () => {
+      const q = query(collection(db, 'vaccineWastageLogs'), where('branchId', '==', branchId));
+
+      const snapshot = await getDocs(q);
+
+      return snapshot.docs.map((document) => toRecord<VaccineWastageEntry>(document));
+    });
+  }
+
+  /**
+   * Records one vial-usage entry, computing expectedUsage and wastage per
+   * the workflow's formulas: Expected Usage = Patients Served ÷ Vaccine
+   * Capacity, Wastage = Available Vials - Used Vials.
+   */
+  async createVaccineWastageEntry(
+    entry: Omit<VaccineWastageEntry, 'id' | 'expectedUsage' | 'wastage' | 'createdAt'>,
+  ): Promise<string> {
+    return this.withErrorHandling('Save vaccine wastage entry', async () => {
+      if (entry.vaccineCapacity <= 0) {
+        throw new Error('Vaccine capacity must be greater than zero.');
+      }
+
+      const expectedUsage = Math.ceil(entry.patientsServed / entry.vaccineCapacity);
+
+      const wastage = entry.availableVials - entry.usedVials;
+
+      if (wastage > 0 && !entry.reason.trim()) {
+        throw new Error('A reason is required when vials are wasted.');
+      }
+
+      const result = await addDoc(collection(db, 'vaccineWastageLogs'), {
+        ...entry,
+        expectedUsage,
+        wastage,
+        createdAt: serverTimestamp(),
+      });
+
+      await this.audit.log(
+        this.actor(),
+        'CREATE',
+        'vaccineWastage',
+        result.id,
+        `${entry.vaccineName} at ${entry.branchName}: ${wastage} vial(s) wasted`,
+      );
+
+      return result.id;
     });
   }
 
@@ -655,12 +804,22 @@ export class SupplyChainService {
 
   async createDelivery(delivery: Omit<DeliveryNote, 'id' | 'status' | 'createdAt'>) {
     return this.withErrorHandling('Create delivery', async () => {
-      return addDoc(collection(db, 'deliveryNotes'), {
+      const result = await addDoc(collection(db, 'deliveryNotes'), {
         ...delivery,
         status: 'PREPARING',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(
+        this.actor(),
+        'CREATE',
+        'delivery',
+        result.id,
+        `Created ${delivery.deliveryNumber} for ${delivery.branchName}`,
+      );
+
+      return result;
     });
   }
 
@@ -671,6 +830,8 @@ export class SupplyChainService {
         dispatchedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(this.actor(), 'UPDATE', 'delivery', id, 'Dispatched');
     });
   }
 
@@ -732,6 +893,14 @@ export class SupplyChainService {
         updatedAt: serverTimestamp(),
       });
 
+      await this.audit.log(
+        this.actor(),
+        'CREATE',
+        'receivingReport',
+        result.id,
+        `Created ${receivingNumber}${hasDiscrepancy ? ' (discrepancy flagged)' : ''}`,
+      );
+
       return result.id;
     });
   }
@@ -762,6 +931,8 @@ export class SupplyChainService {
         resolvedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(this.actor(), 'UPDATE', 'receivingReport', id, `Resolved: ${resolution}`);
     });
   }
 
@@ -779,12 +950,16 @@ export class SupplyChainService {
 
   async createSupplier(supplier: Omit<Supplier, 'id' | 'active' | 'createdAt'>) {
     return this.withErrorHandling('Save supplier', async () => {
-      return addDoc(collection(db, 'suppliers'), {
+      const result = await addDoc(collection(db, 'suppliers'), {
         ...supplier,
         active: true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(this.actor(), 'CREATE', 'supplier', result.id, `Added supplier ${supplier.name}`);
+
+      return result;
     });
   }
 
@@ -802,13 +977,19 @@ export class SupplyChainService {
 
   async createSOA(data: Omit<StatementOfAccount, 'id' | 'soaNumber' | 'status' | 'createdAt'>) {
     return this.withErrorHandling('Create statement of account', async () => {
-      return addDoc(collection(db, 'statementsOfAccount'), {
+      const soaNumber = this.createTemporaryControlNumber('SOA');
+
+      const result = await addDoc(collection(db, 'statementsOfAccount'), {
         ...data,
-        soaNumber: this.createTemporaryControlNumber('SOA'),
+        soaNumber,
         status: 'DRAFT',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(this.actor(), 'CREATE', 'statementOfAccount', result.id, `Created ${soaNumber}`);
+
+      return result;
     });
   }
 
@@ -834,6 +1015,8 @@ export class SupplyChainService {
         ...settings,
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(this.actor(), 'UPDATE', 'systemSettings', 'general', 'Updated system settings');
     });
   }
 

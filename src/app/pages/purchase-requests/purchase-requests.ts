@@ -13,6 +13,7 @@ import { LastUpdated } from '../../components/last-updated/last-updated';
 import { CopyButton } from '../../components/copy-button/copy-button';
 
 import { AuthService } from '../../services/auth.service';
+import { ExportService } from '../../services/export.service';
 
 import { REQUEST_CREATOR_ROLES } from '../../config/roles.config';
 
@@ -37,6 +38,7 @@ export class PurchaseRequests implements OnInit {
   constructor(
     private service: SupplyChainService,
     private auth: AuthService,
+    private exportService: ExportService,
   ) {}
 
   /** Whether the signed-in user may edit and resubmit a returned request. */
@@ -77,5 +79,25 @@ export class PurchaseRequests implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  exportCsv() {
+    this.exportService.exportToCsv(
+      'purchase-requests',
+      ['PR No.', 'Date', 'Branch', 'Assigned HQ', 'District Manager', 'Total', 'Status'],
+      this.requests().map((r) => [
+        r.controlNumber,
+        r.requestDate,
+        r.branchName,
+        r.headquartersName,
+        r.districtManagerName,
+        r.totalAmount,
+        r.status.replaceAll('_', ' '),
+      ]),
+    );
+  }
+
+  exportPdf() {
+    this.exportService.exportToPdf();
   }
 }

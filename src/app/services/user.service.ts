@@ -14,10 +14,14 @@ import { db } from '../config/firebase.config';
 
 import { UserProfile, UserRole } from '../models/supply-chain.model';
 
+import { AuditService, AuditActor } from './audit.service';
+
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
+  constructor(private audit: AuditService) {}
+
   /** Wraps a Firestore call so every failure surfaces a consistent, readable error. */
   private async withErrorHandling<T>(action: string, task: () => Promise<T>): Promise<T> {
     try {
@@ -79,6 +83,14 @@ export class UserService {
         updatedAt: serverTimestamp(),
       });
 
+      await this.audit.log(
+        { uid, displayName: displayName || email || uid, role: defaultRole },
+        'CREATE',
+        'user',
+        uid,
+        `Account provisioned with role ${defaultRole}`,
+      );
+
       return { uid, ...profile };
     });
   }
@@ -105,6 +117,7 @@ export class UserService {
     role: UserRole,
     branchId: string,
     branchName: string,
+    actor: AuditActor,
   ): Promise<void> {
     return this.withErrorHandling('Update user role', async () => {
       await updateDoc(doc(db, 'users', uid), {
@@ -113,15 +126,25 @@ export class UserService {
         branchName,
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(
+        actor,
+        'UPDATE',
+        'user',
+        uid,
+        `Role changed to ${role}${branchName ? ` (branch: ${branchName})` : ''}`,
+      );
     });
   }
 
-  async setUserActive(uid: string, active: boolean): Promise<void> {
+  async setUserActive(uid: string, active: boolean, actor: AuditActor): Promise<void> {
     return this.withErrorHandling('Update user status', async () => {
       await updateDoc(doc(db, 'users', uid), {
         active,
         updatedAt: serverTimestamp(),
       });
+
+      await this.audit.log(actor, 'UPDATE', 'user', uid, active ? 'Account activated' : 'Account disabled');
     });
   }
 }

@@ -1,0 +1,83 @@
+<div class="page-header">
+
+  <div>
+    <h1>Audit Log</h1>
+
+    <p>
+      Every recorded system action - who did what, and when.
+      Showing the most recent entries.
+    </p>
+  </div>
+
+</div>
+
+<div class="toolbar">
+
+  <input
+    [(ngModel)]="search"
+    placeholder="Search user, action, entity, details...">
+
+</div>
+
+<div class="table-card">
+
+  <app-data-state
+    [loading]="loading()"
+    [error]="errorMessage()"
+    [isEmpty]="filtered.length === 0"
+    loadingMessage="Loading audit log..."
+    [emptyMessage]="emptyMessage"
+    (retry)="load()">
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>When</th>
+        <th>User</th>
+        <th>Role</th>
+        <th>Action</th>
+        <th>Entity</th>
+        <th>Details</th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let entry of filtered">
+
+        <td>
+          <app-last-updated [date]="entry.createdAt"></app-last-updated>
+        </td>
+
+        <td>
+          {{ entry.userDisplayName }}
+        </td>
+
+        <td>
+          {{ entry.role?.replaceAll('_', ' ') || '—' }}
+        </td>
+
+        <td>
+          <span class="action-tag">{{ entry.action?.replaceAll('_', ' ') }}</span>
+        </td>
+
+        <td>
+          {{ entry.entityType }}
+        </td>
+
+        <td>
+          {{ entry.details }}
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+  </app-data-state>
+
+</div>
